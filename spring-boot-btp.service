@@ -1,0 +1,116 @@
+package com.btp.service;
+
+import com.btp.entity.Decompte;
+import com.btp.repository.DecompteRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class DecompteService {
+    @Autowired
+    private DecompteRepository decompteRepository;
+
+    public List<Decompte> findAll() {
+        return decompteRepository.findAll();
+    }
+
+    public Optional<Decompte> findById(Long id) {
+        return decompteRepository.findById(id);
+    }
+
+    public Decompte save(Decompte decompte) {
+        return decompteRepository.save(decompte);
+    }
+
+    public Optional<Decompte> update(Long id, Decompte decompte) {
+        return decompteRepository.findById(id).map(existing -> {
+            existing.setNumero(decompte.getNumero());
+            existing.setDateDecompte(decompte.getDateDecompte());
+            existing.setPeriodeDebut(decompte.getPeriodeDebut());
+            existing.setPeriodeFin(decomcompte.getPeriodeFin());
+            existing.setMontantTotal(decompte.getMontantTotal());
+            existing.setMontantPaye(decompte.getMontantPaye());
+            existing.setMontantRestant(decompte.getMontantRestant());
+            existing.setStatut(decompte.getStatut());
+            existing.setProjet(decompte.getProjet());
+            existing.setObservations(decompte.getObservations());
+            return decompteRepository.save(existing);
+        });
+
+    }
+
+    public boolean delete(Long id) {
+        return decompteRepository.findById(id).map(decompte -> {
+            decompteRepository.delete(decompte);
+            return true;
+        }).orElse(false);
+    }
+
+    public List<Decompte> findByStatut(Decompte.StatutDecompte statut) {
+        return decompteRepository.findByStatut(statut);
+    }
+
+    public List<Decompte> findByProjet(Decompte.StatutDecompte statut) {
+        return decompteRepository.findByProjet(statut);
+    }
+
+    public List<Decompte> findByProjet(De<create_file>
+<path>spring-boot-btp-backend/src/main/java/com/btp/controller/DecompteController.java</path>
+<content>
+package com.btp.controller;
+
+import com.btp.entity.Decompte;
+import com.btp.service.DecompteService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/decomptes")
+public class DecompteController {
+
+    @Autowired
+    private DecompteService decompteService;
+
+    @GetMapping
+    public List<Decompte> getAllDecomptes() {
+        return decompteService.findAll();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Decompte> getDecompteById(@PathVariable Long id) {
+        return decompteService.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping
+    public Decompte createDecompte(@RequestBody Decompte decompte) {
+        return decompteService.save(decompte);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Decompte> updateDecompte(@PathVariable Long id, @RequestBody Decompte decompte) {
+        return decompteService.update(id, decompte)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteDecompte(@PathVariable Long id) {
+        if (decompteService.delete(id)) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/statut/{statut}")
+    public List<Decompte> getDecomptesByStatut(@PathVariable Decompte.StatutDecompte statut) {
+        return decompteService.findByStatut(statut);
+    }
+}
