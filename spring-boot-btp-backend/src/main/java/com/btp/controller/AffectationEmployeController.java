@@ -1,56 +1,47 @@
 package com.btp.controller;
 
-import com.btp.entity.AffectationEmploye;
+import com.btp.dto.AffectationEmployeDTO;
 import com.btp.service.AffectationEmployeService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/api/affectations")
-@CrossOrigin(origins = "*")
 public class AffectationEmployeController {
 
     @Autowired
     private AffectationEmployeService affectationEmployeService;
 
     @GetMapping
-    public ResponseEntity<List<AffectationEmploye>> getAllAffectations() {
-        return ResponseEntity.ok(affectationEmployeService.findAll());
+    public ResponseEntity<Page<AffectationEmployeDTO>> getAllAffectations(Pageable pageable) {
+        return ResponseEntity.ok(affectationEmployeService.findAll(pageable));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<AffectationEmploye> getAffectationById(@PathVariable Long id) {
-        return affectationEmployeService.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<AffectationEmployeDTO> getAffectationById(@PathVariable Long id) {
+        return ResponseEntity.ok(affectationEmployeService.findById(id));
     }
 
     @PostMapping
-    public ResponseEntity<AffectationEmploye> createAffectation(@RequestBody AffectationEmploye affectation) {
-        AffectationEmploye savedAffectation = affectationEmployeService.save(affectation);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedAffectation);
+    public ResponseEntity<AffectationEmployeDTO> createAffectation(@Valid @RequestBody AffectationEmployeDTO affectationEmployeDTO) {
+        AffectationEmployeDTO created = affectationEmployeService.save(affectationEmployeDTO);
+        return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<AffectationEmploye> updateAffectation(@PathVariable Long id, @RequestBody AffectationEmploye affectation) {
-        return affectationEmployeService.findById(id)
-                .map(existing -> {
-                    affectation.setId(id);
-                    return ResponseEntity.ok(affectationEmployeService.save(affectation));
-                })
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<AffectationEmployeDTO> updateAffectation(@PathVariable Long id, @Valid @RequestBody AffectationEmployeDTO affectationEmployeDTO) {
+        return ResponseEntity.ok(affectationEmployeService.update(id, affectationEmployeDTO));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteAffectation(@PathVariable Long id) {
-        if (affectationEmployeService.findById(id).isPresent()) {
-            affectationEmployeService.deleteById(id);
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
+        affectationEmployeService.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 }

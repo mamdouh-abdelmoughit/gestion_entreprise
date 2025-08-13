@@ -19,6 +19,6 @@ public class ProjetDTO {
     private LocalDate dateFin;
     private BigDecimal budget;
     private String adresse;
-    private String client;
-    private String responsable;
+    private Long clientId;
+    private Long responsableId;
 }

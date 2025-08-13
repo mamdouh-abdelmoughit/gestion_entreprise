@@ -6,5 +6,4 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface AffectationEmployeRepository extends JpaRepository<AffectationEmploye, Long> {
-    // Custom query methods can be added here if needed
 }

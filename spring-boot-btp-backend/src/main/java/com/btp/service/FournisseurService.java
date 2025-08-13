@@ -2,16 +2,19 @@ package com.btp.service;
 
 import com.btp.dto.FournisseurDTO;
 import com.btp.entity.Fournisseur;
+import com.btp.exception.ResourceNotFoundException;
 import com.btp.mapper.EntityMapper;
 import com.btp.repository.FournisseurRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import javax.validation.Valid;
 
 @Service
+@Transactional
 public class FournisseurService {
 
     @Autowired
@@ -20,59 +23,88 @@ public class FournisseurService {
     @Autowired
     private EntityMapper entityMapper;
 
-    public List<FournisseurDTO> findAll() {
-        return fournisseurRepository.findAll().stream()
-                .map(entityMapper::toDTO)
-                .collect(Collectors.toList());
+    @Transactional(readOnly = true)
+    public Page<FournisseurDTO> findAll(Pageable pageable) {
+        return fournisseurRepository.findAll(pageable).map(entityMapper::toDTO);
     }
 
-    public Optional<FournisseurDTO> findById(Long id) {
+    @Transactional(readOnly = true)
+    public FournisseurDTO findById(Long id) {
         return fournisseurRepository.findById(id)
-                .map(entityMapper::toDTO);
+                .map(entityMapper::toDTO)
+                .orElseThrow(() -> new ResourceNotFoundException("Fournisseur not found with id: " + id));
     }
 
-    public FournisseurDTO save(FournisseurDTO fournisseurDTO) {
+    public FournisseurDTO save(@Valid FournisseurDTO fournisseurDTO) {
         Fournisseur fournisseur = entityMapper.toEntity(fournisseurDTO);
         Fournisseur savedFournisseur = fournisseurRepository.save(fournisseur);
         return entityMapper.toDTO(savedFournisseur);
     }
 
-    public Optional<FournisseurDTO> update(Long id, FournisseurDTO fournisseurDTO) {
+    public FournisseurDTO update(Long id, @Valid FournisseurDTO fournisseurDTO) {
         return fournisseurRepository.findById(id)
                 .map(existing -> {
                     existing.setNom(fournisseurDTO.getNom());
-                    existing.setType(fournisseurDTO.getType());
-                    existing.setContact(fournisseurDTO.getContact());
                     existing.setTelephone(fournisseurDTO.getTelephone());
                     existing.setEmail(fournisseurDTO.getEmail());
                     existing.setAdresse(fournisseurDTO.getAdresse());
-                    existing.setIce(fournisseurDTO.getIce());
-                    existing.setRc(fournisseurDTO.getRc());
                     existing.setSpecialites(fournisseurDTO.getSpecialites());
                     existing.setStatut(fournisseurDTO.getStatut());
                     Fournisseur updatedFournisseur = fournisseurRepository.save(existing);
                     return entityMapper.toDTO(updatedFournisseur);
-                });
+                }).orElseThrow(() -> new ResourceNotFoundException("Fournisseur not found with id: " + id));
     }
 
-    public boolean delete(Long id) {
-        return fournisseurRepository.findById(id)
-                .map(fournisseur -> {
-                    fournisseurRepository.delete(fournisseur);
-                    return true;
-                })
-                .orElse(false);
+    public void deleteById(Long id) {
+        fournisseurRepository.deleteById(id);
     }
 
-    public List<FournisseurDTO> findByType(Fournisseur.TypeFournisseur type) {
-        return fournisseurRepository.findByType(type).stream()
-                .map(entityMapper::toDTO)
-                .collect(Collectors.toList());
+    @Transactional(readOnly = true)
+    public Page<FournisseurDTO> findByType(String type, Pageable pageable) {
+        Fournisseur.TypeFournisseur typeEnum = Fournisseur.TypeFournisseur.valueOf(type.toUpperCase());
+        return fournisseurRepository.findByType(typeEnum, pageable).map(entityMapper::toDTO);
     }
 
-    public List<FournisseurDTO> findByStatut(Fournisseur.StatutFournisseur statut) {
-        return fournisseurRepository.findByStatut(statut).stream()
-                .map(entityMapper::toDTO)
-                .collect(Collectors.toList());
+    @Transactional(readOnly = true)
+    public Page<FournisseurDTO> findByStatut(String statut, Pageable pageable) {
+        Fournisseur.StatutFournisseur statutEnum = Fournisseur.StatutFournisseur.valueOf(statut.toUpperCase());
+        return fournisseurRepository.findByStatut(statutEnum, pageable).map(entityMapper::toDTO);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<FournisseurDTO> findByCreatedById(Long userId, Pageable pageable) {
+        return fournisseurRepository.findByCreatedById(userId, pageable)
+                .map(entityMapper::toDTO);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<FournisseurDTO> findByIce(String ice, Pageable pageable) {
+        return fournisseurRepository.findByIce(ice, pageable)
+                .map(entityMapper::toDTO);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<FournisseurDTO> findByRc(String rc, Pageable pageable) {
+        return fournisseurRepository.findByRc(rc, pageable)
+                .map(entityMapper::toDTO);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<FournisseurDTO> searchByName(String keyword, Pageable pageable) {
+        return fournisseurRepository.searchByName(keyword, pageable)
+                .map(entityMapper::toDTO);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<FournisseurDTO> findBySpecialite(String specialite, Pageable pageable) {
+        return fournisseurRepository.findBySpecialite(specialite, pageable)
+                .map(entityMapper::toDTO);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<FournisseurDTO> findByStatutAndCreatedBy(String statut, Long userId, Pageable pageable) {
+        Fournisseur.StatutFournisseur statutEnum = Fournisseur.StatutFournisseur.valueOf(statut.toUpperCase());
+        return fournisseurRepository.findByStatutAndCreatedBy(statutEnum, userId, pageable)
+                .map(entityMapper::toDTO);
     }
 }

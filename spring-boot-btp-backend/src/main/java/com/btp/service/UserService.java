@@ -1,46 +1,73 @@
 package com.btp.service;
 
+import com.btp.dto.RegisterRequest;
 import com.btp.dto.UserDTO;
 import com.btp.entity.User;
+import com.btp.exception.BadRequestException;
+import com.btp.exception.ResourceNotFoundException;
+import com.btp.entity.Role;
 import com.btp.mapper.EntityMapper;
+import com.btp.repository.RoleRepository;
 import com.btp.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Optional;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.stream.Collectors;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import javax.validation.Valid;
+import java.util.Optional;
 
 @Service
+@Transactional
 public class UserService {
 
     @Autowired
     private UserRepository userRepository;
 
     @Autowired
+    private RoleRepository roleRepository;
+
+    @Autowired
+    @Lazy
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
     private EntityMapper entityMapper;
 
-    public List<UserDTO> findAll() {
-        return userRepository.findAll().stream()
-                .map(entityMapper::toDTO)
-                .collect(Collectors.toList());
-    }
-
-    public Optional<UserDTO> findById(Long id) {
-        return userRepository.findById(id)
+    @Transactional(readOnly = true)
+    public Page<UserDTO> findAll(Pageable pageable) {
+        return userRepository.findAll(pageable)
                 .map(entityMapper::toDTO);
     }
 
-    public UserDTO save(UserDTO userDTO) {
+    @Transactional(readOnly = true)
+    public UserDTO findById(Long id) {
+        return userRepository.findById(id)
+                .map(entityMapper::toDTO)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+    }
+
+    @Transactional
+    public UserDTO save(@Valid UserDTO userDTO) {
         User user = entityMapper.toEntity(userDTO);
+        if (userDTO.getRoles() != null) {
+            List<Role> roles = roleRepository.findByNomIn(userDTO.getRoles());
+            user.setRoles(new HashSet<>(roles));
+        }
         User savedUser = userRepository.save(user);
         return entityMapper.toDTO(savedUser);
     }
 
-    public UserDTO update(Long id, UserDTO userDTO) {
+    @Transactional
+    public UserDTO update(Long id, @Valid UserDTO userDTO) {
         return userRepository.findById(id)
                 .map(existingUser -> {
-                    // Update fields
                     existingUser.setUsername(userDTO.getUsername());
                     existingUser.setEmail(userDTO.getEmail());
                     existingUser.setFirstName(userDTO.getFirstName());
@@ -48,18 +75,63 @@ public class UserService {
                     existingUser.setTelephone(userDTO.getTelephone());
                     existingUser.setEnabled(userDTO.isEnabled());
                     existingUser.setLastLogin(userDTO.getLastLogin());
+
+                    if (userDTO.getRoles() != null) {
+                        List<Role> roles = roleRepository.findByNomIn(userDTO.getRoles());
+                        existingUser.setRoles(new HashSet<>(roles));
+                    }
                     
                     User updatedUser = userRepository.save(existingUser);
                     return entityMapper.toDTO(updatedUser);
                 })
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
     }
 
+    @Transactional
     public void deleteById(Long id) {
         userRepository.deleteById(id);
     }
 
+    @Transactional
+    public UserDTO register(RegisterRequest registerRequest) {
+        if (userRepository.existsByUsername(registerRequest.getUsername())) {
+            throw new BadRequestException("Error: Username is already taken!");
+        }
+
+        if (userRepository.existsByEmail(registerRequest.getEmail())) {
+            throw new BadRequestException("Error: Email is already in use!");
+        }
+
+        User user = new User();
+        user.setUsername(registerRequest.getUsername());
+        user.setEmail(registerRequest.getEmail());
+        user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
+        user.setEnabled(true);
+
+        Set<String> strRoles = new HashSet<>();
+        String role = registerRequest.getRole();
+        if (role == null || role.isEmpty()) {
+            strRoles.add("ROLE_USER"); // Default role
+        } else {
+            strRoles.add(role);
+        }
+        List<Role> roles = roleRepository.findByNomIn(strRoles);
+        user.setRoles(new HashSet<>(roles));
+
+        return entityMapper.toDTO(userRepository.save(user));
+    }
+
+    @Transactional(readOnly = true)
     public boolean existsById(Long id) {
         return userRepository.existsById(id);
     }
+    @Transactional(readOnly = true)
+    public boolean existsByUsername(String username) {
+        return userRepository.existsByUsername(username);
+    }
+    @Transactional(readOnly = true)
+    public boolean existsByEmail(String email) {
+        return userRepository.existsByEmail(email);
+    }
+
 }

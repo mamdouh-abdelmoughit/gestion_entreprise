@@ -20,4 +20,5 @@ public class CautionDTO {
     private String statut;
     private Long projetId;
     private Long fournisseurId;
+    private Long appelOffreId;
 }

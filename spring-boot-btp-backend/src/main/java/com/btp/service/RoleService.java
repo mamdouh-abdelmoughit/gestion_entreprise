@@ -2,16 +2,20 @@ package com.btp.service;
 
 import com.btp.dto.RoleDTO;
 import com.btp.entity.Role;
+import com.btp.exception.ResourceNotFoundException;
 import com.btp.mapper.EntityMapper;
 import com.btp.repository.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import javax.validation.Valid;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class RoleService {
 
     @Autowired
@@ -20,40 +24,41 @@ public class RoleService {
     @Autowired
     private EntityMapper entityMapper;
 
-    public List<RoleDTO> findAll() {
-        return roleRepository.findAll().stream()
-                .map(entityMapper::toDTO)
-                .collect(Collectors.toList());
-    }
-
-    public Optional<RoleDTO> findById(Long id) {
-        return roleRepository.findById(id)
+    @Transactional(readOnly = true)
+    public Page<RoleDTO> findAll(Pageable pageable) {
+        return roleRepository.findAll(pageable)
                 .map(entityMapper::toDTO);
     }
 
-    public RoleDTO save(RoleDTO roleDTO) {
+    @Transactional(readOnly = true)
+    public RoleDTO findById(Long id) {
+        return roleRepository.findById(id)
+                .map(entityMapper::toDTO)
+                .orElseThrow(() -> new ResourceNotFoundException("Role not found with id: " + id));
+    }
+
+    @Transactional
+    public RoleDTO save(@Valid RoleDTO roleDTO) {
         Role role = entityMapper.toEntity(roleDTO);
         Role savedRole = roleRepository.save(role);
         return entityMapper.toDTO(savedRole);
     }
 
-    public RoleDTO update(Long id, RoleDTO roleDTO) {
+    @Transactional
+    public RoleDTO update(Long id, @Valid RoleDTO roleDTO) {
         return roleRepository.findById(id)
                 .map(existingRole -> {
                     existingRole.setNom(roleDTO.getNom());
                     existingRole.setDescription(roleDTO.getDescription());
+                    
                     Role updatedRole = roleRepository.save(existingRole);
                     return entityMapper.toDTO(updatedRole);
                 })
-                .orElse(null);
+                .orElseThrow(() -> new ResourceNotFoundException("Role not found with id: " + id));
     }
 
-    public boolean deleteById(Long id) {
-        return roleRepository.findById(id)
-                .map(role -> {
-                    roleRepository.delete(role);
-                    return true;
-                })
-                .orElse(false);
+    @Transactional
+    public void deleteById(Long id) {
+        roleRepository.deleteById(id);
     }
 }

@@ -1,50 +1,91 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Projet } from '../../core/models/projet.model';
+import { ProjetService } from '../../core/services/projet.service';
+import { Page } from '../../core/models/page.model';
 
 @Component({
   selector: 'app-projets',
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="space-y-6">
-      <div class="bg-white rounded-lg shadow-sm p-6">
-        <h2 class="text-2xl font-bold text-gray-800 mb-4">🏗️ Projets/Chantiers</h2>
-        <p class="text-gray-600">Gestion des projets et chantiers de construction</p>
+    <div class="container mx-auto p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-gray-800">🏗️ Projets</h2>
+        <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+          Nouveau Projet
+        </button>
       </div>
-      
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div class="bg-white rounded-lg shadow-sm p-6">
-          <h3 class="text-lg font-semibold mb-4">Vue d'ensemble</h3>
-          <div class="space-y-2">
-            <div class="flex justify-between">
-              <span class="text-gray-600">Projets actifs:</span>
-              <span class="font-medium">15</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-gray-600">En attente:</span>
-              <span class="font-medium text-yellow-600">3</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-gray-600">Terminés:</span>
-              <span class="font-medium text-green-600">8</span>
-            </div>
-          </div>
-        </div>
+
+      <div class="bg-white rounded-lg shadow-sm p-6">
+        <h3 class="text-lg font-semibold mb-4">Liste des Projets</h3>
+        <div *ngIf="isLoading" class="text-center">Chargement...</div>
+        <div *ngIf="error" class="text-center text-red-500">{{ error }}</div>
         
-        <div class="bg-white rounded-lg shadow-sm p-6">
-          <h3 class="text-lg font-semibold mb-4">Actions</h3>
-          <div class="space-y-2">
-            <button class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-              Nouveau projet
-            </button>
-            <button class="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
-              Liste des projets
-            </button>
-          </div>
+        <div *ngIf="!isLoading && !error && projetsPage" class="overflow-x-auto">
+          <table class="min-w-full bg-white">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="py-2 px-4 text-left">Nom du Projet</th>
+                <th class="py-2 px-4 text-left">Statut</th>
+                <th class="py-2 px-4 text-left">Date de Début</th>
+                <th class="py-2 px-4 text-right">Budget</th>
+                <th class="py-2 px-4 text-left">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let projet of projetsPage.content" class="border-b">
+                <td class="py-2 px-4 font-medium">{{ projet.nom }}</td>
+                <td class="py-2 px-4">
+                  <span class="px-2 py-1 text-xs rounded-full"
+                        [ngClass]="{
+                          'bg-blue-200 text-blue-800': projet.statut === 'PLANIFIE',
+                          'bg-green-200 text-green-800': projet.statut === 'EN_COURS',
+                          'bg-gray-200 text-gray-800': projet.statut === 'TERMINE',
+                          'bg-red-200 text-red-800': projet.statut === 'ANNULE'
+                        }">
+                    {{ projet.statut }}
+                  </span>
+                </td>
+                <td class="py-2 px-4">{{ projet.dateDebut | date:'dd/MM/yyyy' }}</td>
+                <td class="py-2 px-4 text-right">{{ projet.budget | currency:'EUR' }}</td>
+                <td class="py-2 px-4">
+                  <button class="text-blue-600 hover:underline">Détails</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <!-- TODO: Add pagination controls -->
         </div>
       </div>
     </div>
   `,
   styles: []
 })
-export class ProjetsComponent {}
+export class ProjetsComponent implements OnInit {
+  projetsPage: Page<Projet> | null = null;
+  isLoading = true;
+  error: string | null = null;
+
+  constructor(private projetService: ProjetService) {}
+
+  ngOnInit(): void {
+    this.loadProjets();
+  }
+
+  loadProjets(page = 0, size = 10, sort = 'dateDebut,desc'): void {
+    this.isLoading = true;
+    this.error = null;
+    this.projetService.getAllProjets(page, size, sort).subscribe({
+      next: (data) => {
+        this.projetsPage = data;
+        this.isLoading = false;
+      },
+      error: (err) => {
+        this.error = 'Erreur lors du chargement des projets.';
+        this.isLoading = false;
+        console.error(err);
+      }
+    });
+  }
+}

@@ -1,12 +1,15 @@
 package com.btp.controller;
 
-import com.btp.entity.Projet;
+import com.btp.dto.ProjetDTO;
 import com.btp.service.ProjetService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/api/projets")
@@ -16,34 +19,56 @@ public class ProjetController {
     private ProjetService projetService;
 
     @GetMapping
-    public List<Projet> getAllProjets() {
-        return projetService.findAll();
+    public ResponseEntity<Page<ProjetDTO>> getAllProjets(Pageable pageable) {
+        return ResponseEntity.ok(projetService.findAll(pageable));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Projet> getProjetById(@PathVariable Long id) {
-        return projetService.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<ProjetDTO> getProjetById(@PathVariable Long id) {
+        return ResponseEntity.ok(projetService.findById(id));
     }
 
     @PostMapping
-    public Projet createProjet(@RequestBody Projet projet) {
-        return projetService.save(projet);
+    public ResponseEntity<ProjetDTO> createProjet(@Valid @RequestBody ProjetDTO projetDTO) {
+        ProjetDTO created = projetService.save(projetDTO);
+        return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Projet> updateProjet(@PathVariable Long id, @RequestBody Projet projet) {
-        return projetService.update(id, projet)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<ProjetDTO> updateProjet(@PathVariable Long id, @Valid @RequestBody ProjetDTO projetDTO) {
+        return ResponseEntity.ok(projetService.update(id, projetDTO));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProjet(@PathVariable Long id) {
-        if (projetService.delete(id)) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
+        projetService.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/chef/{chefProjetId}")
+    public ResponseEntity<Page<ProjetDTO>> getProjetsByChef(@PathVariable Long chefProjetId, Pageable pageable) {
+        return ResponseEntity.ok(projetService.findByChefProjet(chefProjetId, pageable));
+    }
+
+    @GetMapping("/statut/{statut}")
+    public ResponseEntity<Page<ProjetDTO>> getProjetsByStatut(@PathVariable String statut, Pageable pageable) {
+        return ResponseEntity.ok(projetService.findByStatut(statut, pageable));
+    }
+
+    @GetMapping("/search/by-statut/{statut}/by-chef/{chefProjetId}")
+    public ResponseEntity<Page<ProjetDTO>> getProjetsByStatutAndChef(
+            @PathVariable String statut,
+            @PathVariable Long chefProjetId, Pageable pageable) {
+        return ResponseEntity.ok(projetService.findByStatutAndChefProjet(statut, chefProjetId, pageable));
+    }
+
+    @GetMapping("/search/active")
+    public ResponseEntity<Page<ProjetDTO>> getActiveProjets(Pageable pageable) {
+        return ResponseEntity.ok(projetService.findActiveProjects(pageable));
+    }
+
+    @GetMapping("/search/by-creator/{userId}")
+    public ResponseEntity<Page<ProjetDTO>> getProjetsByCreator(@PathVariable Long userId, Pageable pageable) {
+        return ResponseEntity.ok(projetService.findByCreatedById(userId, pageable));
     }
 }

@@ -1,56 +1,47 @@
 package com.btp.controller;
 
-import com.btp.entity.Depense;
+import com.btp.dto.DepenseDTO;
 import com.btp.service.DepenseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/api/depenses")
-@CrossOrigin(origins = "*")
 public class DepenseController {
 
     @Autowired
     private DepenseService depenseService;
 
     @GetMapping
-    public ResponseEntity<List<Depense>> getAllDepenses() {
-        return ResponseEntity.ok(depenseService.findAll());
+    public ResponseEntity<Page<DepenseDTO>> getAllDepenses(Pageable pageable) {
+        return ResponseEntity.ok(depenseService.findAll(pageable));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Depense> getDepenseById(@PathVariable Long id) {
-        return depenseService.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<DepenseDTO> getDepenseById(@PathVariable Long id) {
+        return ResponseEntity.ok(depenseService.findById(id));
     }
 
     @PostMapping
-    public ResponseEntity<Depense> createDepense(@RequestBody Depense depense) {
-        Depense savedDepense = depenseService.save(depense);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedDepense);
+    public ResponseEntity<DepenseDTO> createDepense(@Valid @RequestBody DepenseDTO depenseDTO) {
+        DepenseDTO created = depenseService.save(depenseDTO);
+        return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Depense> updateDepense(@PathVariable Long id, @RequestBody Depense depense) {
-        return depenseService.findById(id)
-                .map(existing -> {
-                    depense.setId(id);
-                    return ResponseEntity.ok(depenseService.save(depense));
-                })
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<DepenseDTO> updateDepense(@PathVariable Long id, @Valid @RequestBody DepenseDTO depenseDTO) {
+        return ResponseEntity.ok(depenseService.update(id, depenseDTO));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteDepense(@PathVariable Long id) {
-        if (depenseService.findById(id).isPresent()) {
-            depenseService.deleteById(id);
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
+        depenseService.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 }

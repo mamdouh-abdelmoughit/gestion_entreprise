@@ -1,56 +1,47 @@
 package com.btp.controller;
 
-import com.btp.entity.Evenement;
+import com.btp.dto.EvenementDTO;
 import com.btp.service.EvenementService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/api/evenements")
-@CrossOrigin(origins = "*")
 public class EvenementController {
 
     @Autowired
     private EvenementService evenementService;
 
     @GetMapping
-    public ResponseEntity<List<Evenement>> getAllEvenements() {
-        return ResponseEntity.ok(evenementService.findAll());
+    public ResponseEntity<Page<EvenementDTO>> getAllEvenements(Pageable pageable) {
+        return ResponseEntity.ok(evenementService.findAll(pageable));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Evenement> getEvenementById(@PathVariable Long id) {
-        return evenementService.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<EvenementDTO> getEvenementById(@PathVariable Long id) {
+        return ResponseEntity.ok(evenementService.findById(id));
     }
 
     @PostMapping
-    public ResponseEntity<Evenement> createEvenement(@RequestBody Evenement evenement) {
-        Evenement savedEvenement = evenementService.save(evenement);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedEvenement);
+    public ResponseEntity<EvenementDTO> createEvenement(@Valid @RequestBody EvenementDTO evenementDTO) {
+        EvenementDTO created = evenementService.save(evenementDTO);
+        return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Evenement> updateEvenement(@PathVariable Long id, @RequestBody Evenement evenement) {
-        return evenementService.findById(id)
-                .map(existing -> {
-                    evenement.setId(id);
-                    return ResponseEntity.ok(evenementService.save(evenement));
-                })
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<EvenementDTO> updateEvenement(@PathVariable Long id, @Valid @RequestBody EvenementDTO evenementDTO) {
+        return ResponseEntity.ok(evenementService.update(id, evenementDTO));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteEvenement(@PathVariable Long id) {
-        if (evenementService.findById(id).isPresent()) {
-            evenementService.deleteById(id);
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
+        evenementService.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 }

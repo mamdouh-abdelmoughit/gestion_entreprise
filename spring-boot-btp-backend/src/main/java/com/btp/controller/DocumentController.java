@@ -1,56 +1,47 @@
 package com.btp.controller;
 
-import com.btp.entity.Document;
+import com.btp.dto.DocumentDTO;
 import com.btp.service.DocumentService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/api/documents")
-@CrossOrigin(origins = "*")
 public class DocumentController {
 
     @Autowired
     private DocumentService documentService;
 
     @GetMapping
-    public ResponseEntity<List<Document>> getAllDocuments() {
-        return ResponseEntity.ok(documentService.findAll());
+    public ResponseEntity<Page<DocumentDTO>> getAllDocuments(Pageable pageable) {
+        return ResponseEntity.ok(documentService.findAll(pageable));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Document> getDocumentById(@PathVariable Long id) {
-        return documentService.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<DocumentDTO> getDocumentById(@PathVariable Long id) {
+        return ResponseEntity.ok(documentService.findById(id));
     }
 
     @PostMapping
-    public ResponseEntity<Document> createDocument(@RequestBody Document document) {
-        Document savedDocument = documentService.save(document);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedDocument);
+    public ResponseEntity<DocumentDTO> createDocument(@Valid @RequestBody DocumentDTO documentDTO) {
+        DocumentDTO created = documentService.save(documentDTO);
+        return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Document> updateDocument(@PathVariable Long id, @RequestBody Document document) {
-        return documentService.findById(id)
-                .map(existing -> {
-                    document.setId(id);
-                    return ResponseEntity.ok(documentService.save(document));
-                })
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<DocumentDTO> updateDocument(@PathVariable Long id, @Valid @RequestBody DocumentDTO documentDTO) {
+        return ResponseEntity.ok(documentService.update(id, documentDTO));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteDocument(@PathVariable Long id) {
-        if (documentService.findById(id).isPresent()) {
-            documentService.deleteById(id);
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
+        documentService.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 }

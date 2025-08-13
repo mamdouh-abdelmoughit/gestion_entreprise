@@ -1,56 +1,62 @@
 package com.btp.controller;
 
-import com.btp.entity.User;
+import com.btp.dto.UserDTO;
 import com.btp.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin(origins = "*")
 public class UserController {
 
     @Autowired
     private UserService userService;
 
     @GetMapping
-    public ResponseEntity<List<User>> getAllUsers() {
-        return ResponseEntity.ok(userService.findAll());
+    public ResponseEntity<Page<UserDTO>> getAllUsers(Pageable pageable) {
+        return ResponseEntity.ok(userService.findAll(pageable));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Long id) {
-        return userService.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
+        return ResponseEntity.ok(userService.findById(id));
     }
 
     @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody User user) {
-        User savedUser = userService.save(user);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedUser);
+    public ResponseEntity<UserDTO> createUser(@Valid @RequestBody UserDTO userDTO) {
+        UserDTO created = userService.save(userDTO);
+        return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User user) {
-        return userService.findById(id)
-                .map(existing -> {
-                    user.setId(id);
-                    return ResponseEntity.ok(userService.save(user));
-                })
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<UserDTO> updateUser(@PathVariable Long id, @Valid @RequestBody UserDTO userDTO) {
+        return ResponseEntity.ok(userService.update(id, userDTO));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        if (userService.findById(id).isPresent()) {
-            userService.deleteById(id);
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
+        userService.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/exists/id/{id}")
+    public ResponseEntity<Boolean> checkUserExistsById(@PathVariable Long id) {
+        return ResponseEntity.ok(userService.existsById(id));
+    }
+
+    @GetMapping("/exists/username/{username}")
+    public ResponseEntity<Boolean> checkUserExistsByUsername(@PathVariable String username) {
+        return ResponseEntity.ok(userService.existsByUsername(username));
+    }
+
+    @GetMapping("/exists/email/{email}")
+    public ResponseEntity<Boolean> checkUserExistsByEmail(@PathVariable String email) {
+        return ResponseEntity.ok(userService.existsByEmail(email));
     }
 }

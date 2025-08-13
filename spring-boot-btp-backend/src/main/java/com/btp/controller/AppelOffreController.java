@@ -1,12 +1,15 @@
 package com.btp.controller;
 
-import com.btp.entity.AppelOffre;
+import com.btp.dto.AppelOffreDTO;
 import com.btp.service.AppelOffreService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/api/appel-offres")
@@ -16,34 +19,49 @@ public class AppelOffreController {
     private AppelOffreService appelOffreService;
 
     @GetMapping
-    public List<AppelOffre> getAllAppelOffres() {
-        return appelOffreService.findAll();
+    public ResponseEntity<Page<AppelOffreDTO>> getAllAppelOffres(Pageable pageable) {
+        return ResponseEntity.ok(appelOffreService.findAll(pageable));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<AppelOffre> getAppelOffreById(@PathVariable Long id) {
-        return appelOffreService.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<AppelOffreDTO> getAppelOffreById(@PathVariable Long id) {
+        return ResponseEntity.ok(appelOffreService.findById(id));
     }
 
     @PostMapping
-    public AppelOffre createAppelOffre(@RequestBody AppelOffre appelOffre) {
-        return appelOffreService.save(appelOffre);
+    public ResponseEntity<AppelOffreDTO> createAppelOffre(@Valid @RequestBody AppelOffreDTO appelOffreDTO) {
+        AppelOffreDTO created = appelOffreService.save(appelOffreDTO);
+        return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<AppelOffre> updateAppelOffre(@PathVariable Long id, @RequestBody AppelOffre appelOffre) {
-        return appelOffreService.update(id, appelOffre)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<AppelOffreDTO> updateAppelOffre(@PathVariable Long id, @Valid @RequestBody AppelOffreDTO appelOffreDTO) {
+        return ResponseEntity.ok(appelOffreService.update(id, appelOffreDTO));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteAppelOffre(@PathVariable Long id) {
-        if (appelOffreService.delete(id)) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
+        appelOffreService.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/statut/{statut}")
+    public ResponseEntity<Page<AppelOffreDTO>> getAppelOffresByStatut(@PathVariable String statut, Pageable pageable) {
+        return ResponseEntity.ok(appelOffreService.findByStatut(statut, pageable));
+    }
+
+    @GetMapping("/search/by-creator/{userId}")
+    public ResponseEntity<Page<AppelOffreDTO>> getAppelOffresByCreator(@PathVariable Long userId, Pageable pageable) {
+        return ResponseEntity.ok(appelOffreService.findByCreatedById(userId, pageable));
+    }
+
+    @GetMapping("/search/active")
+    public ResponseEntity<Page<AppelOffreDTO>> getActiveAppelOffres(Pageable pageable) {
+        return ResponseEntity.ok(appelOffreService.findActiveAppelsOffres(pageable));
+    }
+
+    @GetMapping("/search/by-statut/{statut}/by-creator/{userId}")
+    public ResponseEntity<Page<AppelOffreDTO>> getAppelOffresByStatutAndCreator(@PathVariable String statut, @PathVariable Long userId, Pageable pageable) {
+        return ResponseEntity.ok(appelOffreService.findByStatutAndCreatedBy(statut, userId, pageable));
     }
 }

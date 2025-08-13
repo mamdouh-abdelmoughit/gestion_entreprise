@@ -2,6 +2,8 @@ package com.btp.repository;
 
 import com.btp.entity.Decompte;
 import com.btp.entity.Projet;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -12,18 +14,18 @@ import java.util.List;
 
 @Repository
 public interface DecompteRepository extends JpaRepository<Decompte, Long> {
-    List<Decompte> findByProjet(Projet projet);
+    Page<Decompte> findByProjet(Projet projet, Pageable pageable);
     
-    List<Decompte> findByStatut(Decompte.StatutDecompte statut);
+    Page<Decompte> findByStatut(Decompte.StatutDecompte statut, Pageable pageable);
     
-    List<Decompte> findByCreatedById(Long userId);
+    Page<Decompte> findByCreatedById(Long userId, Pageable pageable);
     
     @Query("SELECT d FROM Decompte d WHERE d.dateDecompte BETWEEN :startDate AND :endDate")
-    List<Decompte> findByDateRange(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+    Page<Decompte> findByDateRange(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate, Pageable pageable);
     
     @Query("SELECT d FROM Decompte d WHERE d.projet.id = :projetId AND d.statut = :statut")
-    List<Decompte> findByProjetAndStatut(@Param("projetId") Long projetId, @Param("statut") Decompte.StatutDecompte statut);
+    Page<Decompte> findByProjetAndStatut(@Param("projetId") Long projetId, @Param("statut") Decompte.StatutDecompte statut, Pageable pageable);
     
     @Query("SELECT d FROM Decompte d WHERE d.montantTotal > :amount")
-    List<Decompte> findByAmountGreaterThan(@Param("amount") Double amount);
+    Page<Decompte> findByAmountGreaterThan(@Param("amount") Double amount, Pageable pageable);
 }

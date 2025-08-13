@@ -3,6 +3,8 @@ package com.btp.repository;
 import com.btp.entity.Caution;
 import com.btp.entity.Projet;
 import com.btp.entity.AppelOffre;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,22 +15,22 @@ import java.util.List;
 
 @Repository
 public interface CautionRepository extends JpaRepository<Caution, Long> {
-    List<Caution> findByType(Caution.TypeCaution type);
+    Page<Caution> findByType(Caution.TypeCaution type, Pageable pageable);
     
-    List<Caution> findByStatut(Caution.StatutCaution statut);
+    Page<Caution> findByStatut(Caution.StatutCaution statut, Pageable pageable);
     
-    List<Caution> findByProjet(Projet projet);
+    Page<Caution> findByProjet(Projet projet, Pageable pageable);
     
-    List<Caution> findByAppelOffre(AppelOffre appelOffre);
+    Page<Caution> findByAppelOffre(AppelOffre appelOffre, Pageable pageable);
     
-    List<Caution> findByCreatedById(Long userId);
+    Page<Caution> findByCreatedById(Long userId, Pageable pageable);
     
     @Query("SELECT c FROM Caution c WHERE c.dateExpiration < CURRENT_DATE")
-    List<Caution> findExpiredCautions();
+    Page<Caution> findExpiredCautions(Pageable pageable);
     
     @Query("SELECT c FROM Caution c WHERE c.dateExpiration BETWEEN CURRENT_DATE AND :date")
-    List<Caution> findExpiringSoon(@Param("date") LocalDateTime date);
+    Page<Caution> findExpiringSoon(@Param("date") LocalDateTime date, Pageable pageable);
     
     @Query("SELECT c FROM Caution c WHERE c.banque LIKE %:banque%")
-    List<Caution> findByBanque(@Param("banque") String banque);
+    Page<Caution> findByBanque(@Param("banque") String banque, Pageable pageable);
 }

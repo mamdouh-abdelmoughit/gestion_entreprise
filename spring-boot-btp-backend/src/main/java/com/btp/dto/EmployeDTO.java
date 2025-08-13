@@ -18,10 +18,8 @@ public class EmployeDTO {
     private String email;
     private String telephone;
     private String poste;
-    private String departement;
     private LocalDate dateEmbauche;
     private BigDecimal salaire;
     private String adresse;
     private String statut;
-    private LocalDateTime dateCreation;
 }
