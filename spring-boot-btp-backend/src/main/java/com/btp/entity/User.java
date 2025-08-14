@@ -33,8 +33,14 @@ public class User {
     @Column(nullable = false)
     private String lastName;
 
+    // FIX: Added telephone field to match DTO and Service
+    private String telephone;
+
     @Column(nullable = false)
     private Boolean enabled = true;
+
+    // FIX: Added lastLogin field to match DTO and Service
+    private LocalDateTime lastLogin;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
@@ -44,9 +50,9 @@ public class User {
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-        name = "user_roles",
-        joinColumns = @JoinColumn(name = "user_id"),
-        inverseJoinColumns = @JoinColumn(name = "role_id")
+            name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
     )
     private Set<Role> roles;
 

@@ -57,6 +57,12 @@ public class Projet {
     @JoinColumn(name = "chef_projet", nullable = false)
     private User chefProjet;
 
+    // --- START OF FIX ---
+    @ManyToOne
+    @JoinColumn(name = "client_id") // This will be the foreign key column
+    private Client client;
+    // --- END OF FIX ---
+
     @Column(nullable = false)
     private String adresseChantier;
 

@@ -17,6 +17,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.function.Function;
 
+// --- START OF FIX ---
+import java.util.List;
+// --- END OF FIX ---
+
+
 @Service
 public class JwtService {
 
@@ -41,6 +46,7 @@ public class JwtService {
 
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
+        // This will now compile correctly
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());

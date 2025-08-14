@@ -13,7 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.time.LocalDateTime;
 
 @Service
@@ -55,13 +55,18 @@ public class DecompteService {
         return decompteRepository.findById(id)
                 .map(existingDecompte -> {
                     existingDecompte.setNumero(decompteDTO.getNumero());
-                    existingDecompte.setDateDecompte(decompteDTO.getDateDecompte());
-                    existingDecompte.setMontantTotal(decompteDTO.getMontantTotal());
-                    existingDecompte.setMontantPaye(decompteDTO.getMontantPaye());
-                    existingDecompte.setMontantRestant(decompteDTO.getMontantRestant());
-                    existingDecompte.setDescription(decompteDTO.getDescription());
-                    existingDecompte.setStatut(decompteDTO.getStatut());
-                    
+                    // FIX: Map DTO fields to appropriate entity fields
+                    existingDecompte.setDateCreation(decompteDTO.getDateDecompte());
+                    if(decompteDTO.getMontantTotal() != null) {
+                        existingDecompte.setMontantTTC(decompteDTO.getMontantTotal().doubleValue());
+                    }
+                    // NOTE: MontantPaye and MontantRestant from DTO are not mapped as they don't exist in entity.
+                    // You might need to add logic to calculate them based on other fields.
+                    existingDecompte.setObservations(decompteDTO.getDescription());
+                    if(decompteDTO.getStatut() != null) {
+                        existingDecompte.setStatut(Decompte.StatutDecompte.valueOf(decompteDTO.getStatut()));
+                    }
+
                     updateRelationships(existingDecompte, decompteDTO);
 
                     Decompte updatedDecompte = decompteRepository.save(existingDecompte);

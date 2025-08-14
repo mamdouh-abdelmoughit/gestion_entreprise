@@ -1,8 +1,8 @@
 package com.btp.dto;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.Email;
 
 public class RegisterRequest {
     @NotBlank(message = "Username is required")
@@ -17,15 +17,28 @@ public class RegisterRequest {
     @Size(min = 6, max = 100, message = "Password must be between 6 and 100 characters")
     private String password;
 
+    // --- START OF FIX ---
+    @NotBlank(message = "First name is required")
+    @Size(max = 50)
+    private String firstName;
+
+    @NotBlank(message = "Last name is required")
+    @Size(max = 50)
+    private String lastName;
+    // --- END OF FIX ---
+
     private String role;
 
     // Constructors
     public RegisterRequest() {}
 
-    public RegisterRequest(String username, String email, String password, String role) {
+    // FIX: Updated constructor to include new fields
+    public RegisterRequest(String username, String email, String password, String firstName, String lastName, String role) {
         this.username = username;
         this.email = email;
         this.password = password;
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.role = role;
     }
 
@@ -60,5 +73,22 @@ public class RegisterRequest {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    // FIX: Added getters and setters for new fields
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 }

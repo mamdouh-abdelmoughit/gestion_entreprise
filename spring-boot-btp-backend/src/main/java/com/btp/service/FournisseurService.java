@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 @Service
 @Transactional
@@ -41,6 +41,8 @@ public class FournisseurService {
         return entityMapper.toDTO(savedFournisseur);
     }
 
+// INSIDE FournisseurService.java
+
     public FournisseurDTO update(Long id, @Valid FournisseurDTO fournisseurDTO) {
         return fournisseurRepository.findById(id)
                 .map(existing -> {
@@ -48,8 +50,13 @@ public class FournisseurService {
                     existing.setTelephone(fournisseurDTO.getTelephone());
                     existing.setEmail(fournisseurDTO.getEmail());
                     existing.setAdresse(fournisseurDTO.getAdresse());
-                    existing.setSpecialites(fournisseurDTO.getSpecialites());
-                    existing.setStatut(fournisseurDTO.getStatut());
+                    // FIX: Convert Set from DTO to List for the entity
+                    if (fournisseurDTO.getSpecialites() != null) {
+                        existing.setSpecialites(new java.util.ArrayList<>(fournisseurDTO.getSpecialites()));
+                    }
+                    if (fournisseurDTO.getStatut() != null) {
+                        existing.setStatut(Fournisseur.StatutFournisseur.valueOf(fournisseurDTO.getStatut()));
+                    }
                     Fournisseur updatedFournisseur = fournisseurRepository.save(existing);
                     return entityMapper.toDTO(updatedFournisseur);
                 }).orElseThrow(() -> new ResourceNotFoundException("Fournisseur not found with id: " + id));

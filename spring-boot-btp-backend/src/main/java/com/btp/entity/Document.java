@@ -33,6 +33,11 @@ public class Document {
     @JoinColumn(name = "appel_offre_id")
     private AppelOffre appelOffre;
 
+    // FIX: Added ManyToOne relationship to Employe
+    @ManyToOne
+    @JoinColumn(name = "employe_id")
+    private Employe employe;
+
     @Column(nullable = false)
     private String fichier;
 

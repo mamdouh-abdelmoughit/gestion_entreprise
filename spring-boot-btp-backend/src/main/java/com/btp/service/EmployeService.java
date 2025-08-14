@@ -11,7 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 @Service
 @Transactional
@@ -42,6 +42,8 @@ public class EmployeService {
         return entityMapper.toDTO(savedEmploye);
     }
 
+    // INSIDE EmployeService.java
+
     public EmployeDTO update(Long id, @Valid EmployeDTO employeDTO) {
         return employeRepository.findById(id)
                 .map(existingEmploye -> {
@@ -50,11 +52,19 @@ public class EmployeService {
                     existingEmploye.setTelephone(employeDTO.getTelephone());
                     existingEmploye.setEmail(employeDTO.getEmail());
                     existingEmploye.setPoste(employeDTO.getPoste());
-                    existingEmploye.setDateEmbauche(employeDTO.getDateEmbauche());
-                    existingEmploye.setSalaire(employeDTO.getSalaire());
-                    existingEmploye.setStatut(employeDTO.getStatut());
+                    // FIX: Convert LocalDate from DTO to LocalDateTime for entity
+                    if (employeDTO.getDateEmbauche() != null) {
+                        existingEmploye.setDateEmbauche(employeDTO.getDateEmbauche().atStartOfDay());
+                    }
+                    if (employeDTO.getSalaire() != null) {
+                        existingEmploye.setSalaire(employeDTO.getSalaire().doubleValue());
+                    }
+                    // FIX: Convert String from DTO to Enum for the entity
+                    if (employeDTO.getStatut() != null) {
+                        existingEmploye.setStatut(Employe.StatutEmploye.valueOf(employeDTO.getStatut()));
+                    }
                     existingEmploye.setAdresse(employeDTO.getAdresse());
-                    
+
                     Employe updatedEmploye = employeRepository.save(existingEmploye);
                     return entityMapper.toDTO(updatedEmploye);
                 })

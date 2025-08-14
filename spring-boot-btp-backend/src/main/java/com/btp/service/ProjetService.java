@@ -1,10 +1,12 @@
 package com.btp.service;
 
 import com.btp.dto.ProjetDTO;
+import com.btp.entity.Client;
 import com.btp.entity.Projet;
 import com.btp.entity.User;
 import com.btp.exception.ResourceNotFoundException;
 import com.btp.mapper.EntityMapper;
+import com.btp.repository.ClientRepository;
 import com.btp.repository.ProjetRepository;
 import com.btp.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 @Service
 @Transactional
@@ -27,6 +29,11 @@ public class ProjetService {
     // Assuming a ClientRepository exists for the client relationship
     // @Autowired
     // private ClientRepository clientRepository;
+
+    // --- START OF FIX ---
+    @Autowired
+    private ClientRepository clientRepository;
+    // --- END OF FIX ---
 
     @Autowired
     private EntityMapper entityMapper;
@@ -52,19 +59,30 @@ public class ProjetService {
     }
 
     @Transactional
+// INSIDE ProjetService.java
+
     public ProjetDTO update(Long id, @Valid ProjetDTO projetDTO) {
         return projetRepository.findById(id)
                 .map(existingProjet -> {
                     existingProjet.setNom(projetDTO.getNom());
                     existingProjet.setDescription(projetDTO.getDescription());
-                    existingProjet.setDateDebut(projetDTO.getDateDebut());
-                    existingProjet.setDateFin(projetDTO.getDateFin());
-                    existingProjet.setBudget(projetDTO.getBudget());
-                    existingProjet.setStatut(projetDTO.getStatut());
-                    existingProjet.setAdresse(projetDTO.getAdresse());
+                    if (projetDTO.getDateDebut() != null) {
+                        existingProjet.setDateDebut(projetDTO.getDateDebut().atStartOfDay());
+                    }
+                    // FIX: Corrected setter methods to match entity fields
+                    if (projetDTO.getDateFin() != null) {
+                        existingProjet.setDateFinPrevue(projetDTO.getDateFin().atStartOfDay());
+                    }
+                    if (projetDTO.getBudget() != null) {
+                        existingProjet.setMontantContrat(projetDTO.getBudget().doubleValue());
+                    }
+                    if (projetDTO.getStatut() != null) {
+                        existingProjet.setStatut(Projet.StatutProjet.valueOf(projetDTO.getStatut()));
+                    }
+                    existingProjet.setAdresseChantier(projetDTO.getAdresse());
 
                     updateRelationships(existingProjet, projetDTO);
-                    
+
                     Projet updatedProjet = projetRepository.save(existingProjet);
                     return entityMapper.toDTO(updatedProjet);
                 })
@@ -108,16 +126,16 @@ public class ProjetService {
     }
 
     private void updateRelationships(Projet projet, ProjetDTO projetDTO) {
-        if (projetDTO.getResponsableId() != null) {
-            User responsable = userRepository.findById(projetDTO.getResponsableId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Responsable (User) not found with id: " + projetDTO.getResponsableId()));
+        // FIX: Use the new, consistent getter 'getChefProjetId()'
+        if (projetDTO.getChefProjetId() != null) {
+            User responsable = userRepository.findById(projetDTO.getChefProjetId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Responsable (User) not found with id: " + projetDTO.getChefProjetId()));
             projet.setChefProjet(responsable);
         }
-        // Assuming a Client entity and repository
-        // if (projetDTO.getClientId() != null) {
-        //     Client client = clientRepository.findById(projetDTO.getClientId())
-        //             .orElseThrow(() -> new ResourceNotFoundException("Client not found with id: " + projetDTO.getClientId()));
-        //     projet.setClient(client);
-        // }
+        if (projetDTO.getClientId() != null) {
+            Client client = clientRepository.findById(projetDTO.getClientId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Client not found with id: " + projetDTO.getClientId()));
+            projet.setClient(client);
+        }
     }
 }

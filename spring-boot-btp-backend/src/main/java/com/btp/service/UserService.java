@@ -16,12 +16,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.stream.Collectors;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import javax.validation.Valid;
-import java.util.Optional;
+import jakarta.validation.Valid;
+
 
 @Service
 @Transactional
@@ -80,7 +79,7 @@ public class UserService {
                         List<Role> roles = roleRepository.findByNomIn(userDTO.getRoles());
                         existingUser.setRoles(new HashSet<>(roles));
                     }
-                    
+
                     User updatedUser = userRepository.save(existingUser);
                     return entityMapper.toDTO(updatedUser);
                 })
@@ -106,6 +105,9 @@ public class UserService {
         user.setUsername(registerRequest.getUsername());
         user.setEmail(registerRequest.getEmail());
         user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
+        // Set the first and last name from the request
+        user.setFirstName(registerRequest.getFirstName());
+        user.setLastName(registerRequest.getLastName());
         user.setEnabled(true);
 
         Set<String> strRoles = new HashSet<>();
@@ -118,7 +120,8 @@ public class UserService {
         List<Role> roles = roleRepository.findByNomIn(strRoles);
         user.setRoles(new HashSet<>(roles));
 
-        return entityMapper.toDTO(userRepository.save(user));
+        User savedUser = userRepository.save(user); // FIX: capture the saved entity
+        return entityMapper.toDTO(savedUser); // FIX: map the saved entity to DTO
     }
 
     @Transactional(readOnly = true)

@@ -49,6 +49,11 @@ public class Caution {
     @JoinColumn(name = "appel_offre_id")
     private AppelOffre appelOffre;
 
+    // FIX: Added ManyToOne relationship to Fournisseur
+    @ManyToOne
+    @JoinColumn(name = "fournisseur_id")
+    private Fournisseur fournisseur;
+
     @Column(name = "document_scan")
     private String documentScan;
 

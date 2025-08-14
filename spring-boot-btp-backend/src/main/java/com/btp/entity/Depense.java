@@ -22,6 +22,11 @@ public class Depense {
     @JoinColumn(name = "projet_id", nullable = false)
     private Projet projet;
 
+    // FIX: Added ManyToOne relationship to Employe
+    @ManyToOne
+    @JoinColumn(name = "employe_id")
+    private Employe employe;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private CategorieDepense categorie;

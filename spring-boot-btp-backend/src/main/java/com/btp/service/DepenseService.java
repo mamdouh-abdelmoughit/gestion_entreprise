@@ -15,7 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.util.Optional;
 
 @Service
@@ -56,15 +56,24 @@ public class DepenseService {
     }
 
     @Transactional
+// INSIDE DepenseService.java
+
     public DepenseDTO update(Long id, @Valid DepenseDTO depenseDTO) {
         return depenseRepository.findById(id)
                 .map(existingDepense -> {
                     existingDepense.setDescription(depenseDTO.getDescription());
-                    existingDepense.setMontant(depenseDTO.getMontant());
+                    if (depenseDTO.getMontant() != null) {
+                        existingDepense.setMontant(depenseDTO.getMontant().doubleValue());
+                    }
                     existingDepense.setDateDepense(depenseDTO.getDateDepense());
-                    existingDepense.setCategorie(depenseDTO.getCategorie());
-                    existingDepense.setStatut(depenseDTO.getStatut());
-                    
+                    // FIX: Convert String from DTO to Enum for the entity
+                    if (depenseDTO.getCategorie() != null) {
+                        existingDepense.setCategorie(Depense.CategorieDepense.valueOf(depenseDTO.getCategorie()));
+                    }
+                    if (depenseDTO.getStatut() != null) {
+                        existingDepense.setStatut(Depense.StatutDepense.valueOf(depenseDTO.getStatut()));
+                    }
+
                     updateRelationships(existingDepense, depenseDTO);
 
                     Depense updatedDepense = depenseRepository.save(existingDepense);

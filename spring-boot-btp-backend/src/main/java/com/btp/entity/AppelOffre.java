@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set; // Import Set
 
 @Entity
 @Table(name = "appel_offres")
@@ -58,6 +59,16 @@ public class AppelOffre {
     @OneToOne(mappedBy = "appelOffre")
     @JsonIgnoreProperties("appelOffre")
     private Projet projet;
+
+    // FIX: Added ManyToMany relationship to Fournisseur
+    @ManyToMany
+    @JoinTable(
+            name = "appel_offre_fournisseurs",
+            joinColumns = @JoinColumn(name = "appel_offre_id"),
+            inverseJoinColumns = @JoinColumn(name = "fournisseur_id")
+    )
+    private Set<Fournisseur> fournisseurs;
+
 
     public enum StatutAppelOffre {
         EN_COURS, DEPOSE, GAGNE, PERDU, ANNULE

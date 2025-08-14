@@ -17,7 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.time.LocalDateTime;
 
 @Service
@@ -60,17 +60,26 @@ public class CautionService {
         return entityMapper.toDTO(savedCaution);
     }
 
-    @Transactional
+// INSIDE CautionService.java
+
     public CautionDTO update(Long id, @Valid CautionDTO cautionDTO) {
         return cautionRepository.findById(id)
                 .map(existingCaution -> {
-                    existingCaution.setType(cautionDTO.getType());
-                    existingCaution.setMontant(cautionDTO.getMontant());
+                    if (cautionDTO.getType() != null) {
+                        existingCaution.setType(Caution.TypeCaution.valueOf(cautionDTO.getType()));
+                    }
+                    if (cautionDTO.getMontant() != null) {
+                        existingCaution.setMontant(cautionDTO.getMontant().doubleValue());
+                    }
                     existingCaution.setDateEmission(cautionDTO.getDateEmission());
-                    existingCaution.setDateEcheance(cautionDTO.getDateEcheance());
-                    existingCaution.setBeneficiaire(cautionDTO.getBeneficiaire());
-                    existingCaution.setStatut(cautionDTO.getStatut());
-                    
+                    // FIX: Corrected setter method to match the entity field
+                    existingCaution.setDateExpiration(cautionDTO.getDateEcheance());
+                    // FIX: Removed setBeneficiaire as it doesn't exist in the entity
+                    // existingCaution.setBeneficiaire(cautionDTO.getBeneficiaire());
+                    if (cautionDTO.getStatut() != null) {
+                        existingCaution.setStatut(Caution.StatutCaution.valueOf(cautionDTO.getStatut()));
+                    }
+
                     updateRelationships(existingCaution, cautionDTO);
 
                     Caution updatedCaution = cautionRepository.save(existingCaution);

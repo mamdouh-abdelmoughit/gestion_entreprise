@@ -20,5 +20,7 @@ public class ProjetDTO {
     private BigDecimal budget;
     private String adresse;
     private Long clientId;
-    private Long responsableId;
+
+    // FIX: Renamed 'responsableId' to 'chefProjetId' for consistency
+    private Long chefProjetId;
 }

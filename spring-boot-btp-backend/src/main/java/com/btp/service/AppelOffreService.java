@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
+import java.util.List;
 
 @Service
 @Transactional
@@ -55,14 +56,21 @@ public class AppelOffreService {
         return entityMapper.toDTO(savedAppelOffre);
     }
 
+    // INSIDE AppelOffreService.java
+
     public AppelOffreDTO update(Long id, AppelOffreDTO appelOffreDTO) {
         return appelOffreRepository.findById(id).map(existing -> {
-            existing.setTitre(appelOffreDTO.getTitre());
+            // FIX: Corrected setter methods to match the entity fields
+            existing.setIntitule(appelOffreDTO.getTitre());
             existing.setDescription(appelOffreDTO.getDescription());
-            existing.setBudgetEstimatif(appelOffreDTO.getBudgetEstimatif());
+            if (appelOffreDTO.getBudgetEstimatif() != null) {
+                existing.setMontantEstime(appelOffreDTO.getBudgetEstimatif().doubleValue());
+            }
             existing.setDatePublication(appelOffreDTO.getDatePublication());
-            existing.setDateLimite(appelOffreDTO.getDateLimite());
-            existing.setStatut(appelOffreDTO.getStatut());
+            existing.setDateLimiteDepot(appelOffreDTO.getDateLimite()); // FIX: Corrected setter
+            if (appelOffreDTO.getStatut() != null) {
+                existing.setStatut(AppelOffre.StatutAppelOffre.valueOf(appelOffreDTO.getStatut()));
+            }
 
             updateRelationships(existing, appelOffreDTO);
 

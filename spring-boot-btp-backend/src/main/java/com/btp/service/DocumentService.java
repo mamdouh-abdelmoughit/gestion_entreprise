@@ -15,7 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.util.Optional;
 
 @Service
@@ -56,16 +56,21 @@ public class DocumentService {
     }
 
     @Transactional
+    // INSIDE DocumentService.java
+
     public DocumentDTO update(Long id, @Valid DocumentDTO documentDTO) {
         return documentRepository.findById(id)
                 .map(existingDocument -> {
                     existingDocument.setNom(documentDTO.getNom());
-                    existingDocument.setType(documentDTO.getType());
-                    existingDocument.setChemin(documentDTO.getChemin());
+                    if (documentDTO.getType() != null) {
+                        existingDocument.setType(Document.TypeDocument.valueOf(documentDTO.getType()));
+                    }
+                    // FIX: Corrected setter methods to match entity fields
+                    existingDocument.setFichier(documentDTO.getChemin());
+                    existingDocument.setTailleFichier(documentDTO.getTaille());
                     existingDocument.setDateUpload(documentDTO.getDateUpload());
-                    existingDocument.setTaille(documentDTO.getTaille());
                     existingDocument.setDescription(documentDTO.getDescription());
-                    
+
                     updateRelationships(existingDocument, documentDTO);
 
                     Document updatedDocument = documentRepository.save(existingDocument);

@@ -15,7 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.util.Optional;
 
 @Service
@@ -60,7 +60,7 @@ public class AffectationEmployeService {
                     existingAffectation.setRole(affectationEmployeDTO.getRole());
                     existingAffectation.setDateDebut(affectationEmployeDTO.getDateDebut());
                     existingAffectation.setDateFin(affectationEmployeDTO.getDateFin());
-                    existingAffectation.setStatut(affectationEmployeDTO.getStatut());
+                    existingAffectation.setStatut(AffectationEmploye.StatutAffectation.valueOf(affectationEmployeDTO.getStatut()));
 
                     updateRelationships(existingAffectation, affectationEmployeDTO);
 
