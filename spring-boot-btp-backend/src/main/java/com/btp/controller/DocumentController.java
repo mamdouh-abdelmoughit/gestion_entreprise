@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/documents")
+@RequestMapping("/documents")
 public class DocumentController {
 
     @Autowired

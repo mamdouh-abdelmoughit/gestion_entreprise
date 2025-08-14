@@ -1,16 +1,17 @@
 package com.btp.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+import lombok.*; // Import specific annotations
 
 import java.time.LocalDateTime;
+import java.util.Objects; // Import Objects for equals/hashCode
 import java.util.Set;
 
 @Entity
 @Table(name = "users")
-@Data
+// FIX: Replace @Data with more specific, safer annotations for JPA
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
@@ -30,16 +31,14 @@ public class User {
     @Column(nullable = false)
     private String firstName;
 
-    @Column(nullable = false)
+    @Column(nullable =false)
     private String lastName;
 
-    // FIX: Added telephone field to match DTO and Service
     private String telephone;
 
     @Column(nullable = false)
     private Boolean enabled = true;
 
-    // FIX: Added lastLogin field to match DTO and Service
     private LocalDateTime lastLogin;
 
     @Column(nullable = false)
@@ -54,6 +53,8 @@ public class User {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
+    // FIX: Exclude collections from toString() to prevent StackOverflowError
+    @ToString.Exclude
     private Set<Role> roles;
 
     @PrePersist
@@ -65,5 +66,19 @@ public class User {
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
+    }
+
+    // FIX: Implement equals() and hashCode() based ONLY on the ID.
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return id != null && Objects.equals(id, user.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 }

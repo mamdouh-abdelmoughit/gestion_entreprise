@@ -15,17 +15,20 @@ import java.util.List;
 @Repository
 public interface DecompteRepository extends JpaRepository<Decompte, Long> {
     Page<Decompte> findByProjet(Projet projet, Pageable pageable);
-    
+
     Page<Decompte> findByStatut(Decompte.StatutDecompte statut, Pageable pageable);
-    
+
     Page<Decompte> findByCreatedById(Long userId, Pageable pageable);
-    
-    @Query("SELECT d FROM Decompte d WHERE d.dateDecompte BETWEEN :startDate AND :endDate")
+
+    @Query("SELECT d FROM Decompte d WHERE d.dateCreation BETWEEN :startDate AND :endDate") // FIX: Use dateCreation field
     Page<Decompte> findByDateRange(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate, Pageable pageable);
-    
+
     @Query("SELECT d FROM Decompte d WHERE d.projet.id = :projetId AND d.statut = :statut")
     Page<Decompte> findByProjetAndStatut(@Param("projetId") Long projetId, @Param("statut") Decompte.StatutDecompte statut, Pageable pageable);
-    
-    @Query("SELECT d FROM Decompte d WHERE d.montantTotal > :amount")
+
+    // --- START OF FIX ---
+    // Corrected the field name from 'montantTotal' to 'montantTTC' to match the Decompte entity
+    @Query("SELECT d FROM Decompte d WHERE d.montantTTC > :amount")
+    // --- END OF FIX ---
     Page<Decompte> findByAmountGreaterThan(@Param("amount") Double amount, Pageable pageable);
 }

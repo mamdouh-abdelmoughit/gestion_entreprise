@@ -14,7 +14,7 @@ import jakarta.validation.Valid;
 import java.time.LocalDateTime;
 
 @RestController
-@RequestMapping("/api/decomptes")
+@RequestMapping("/decomptes")
 public class DecompteController {
 
     @Autowired

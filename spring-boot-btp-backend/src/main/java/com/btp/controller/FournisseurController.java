@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/fournisseurs")
+@RequestMapping("/fournisseurs")
 public class FournisseurController {
 
     @Autowired

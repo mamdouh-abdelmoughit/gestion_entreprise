@@ -1,15 +1,16 @@
 package com.btp.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+import lombok.*; // Import specific annotations
 
+import java.util.Objects; // Import Objects for equals/hashCode
 import java.util.Set;
 
 @Entity
 @Table(name = "roles")
-@Data
+// FIX: Replace @Data with more specific, safer annotations for JPA
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Role {
@@ -29,9 +30,25 @@ public class Role {
     private Set<String> permissions;
 
     @ManyToOne
-    @JoinColumn(name = "created_by", nullable = false)
+    @JoinColumn(name = "created_by", nullable = true)
     private User createdBy;
 
     @ManyToMany(mappedBy = "roles")
+    // FIX: Exclude collections from toString() to prevent StackOverflowError
+    @ToString.Exclude
     private Set<User> users;
+
+    // FIX: Implement equals() and hashCode() based ONLY on the ID.
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Role role = (Role) o;
+        return id != null && Objects.equals(id, role.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }

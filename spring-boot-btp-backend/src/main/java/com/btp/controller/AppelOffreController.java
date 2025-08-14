@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 @RestController
-@RequestMapping("/api/appel-offres")
+@RequestMapping("/appel-offres")
 public class AppelOffreController {
 
     @Autowired
