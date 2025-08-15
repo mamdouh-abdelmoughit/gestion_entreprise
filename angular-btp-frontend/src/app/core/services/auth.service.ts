@@ -1,9 +1,7 @@
-import { Injectable } from '@angular/core';
+import { Injectable, PLATFORM_ID, Inject } from '@angular/core'; // Import PLATFORM_ID and Inject
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
-import { LoginRequest } from '../models/auth/login-request.model';
-import { LoginResponse } from '../models/auth/login-response.model';
-import { RegisterRequest } from '../models/auth/register-request.model';
+import { isPlatformBrowser } from '@angular/common'; // Import isPlatformBrowser
 
 @Injectable({
   providedIn: 'root'
@@ -12,35 +10,62 @@ export class AuthService {
   private apiUrl = '/api/auth';
   private readonly TOKEN_KEY = 'auth_token';
 
-  private _isLoggedIn$ = new BehaviorSubject<boolean>(!!this.getToken());
-  isLoggedIn$ = this._isLoggedIn$.asObservable();
+  // Initialize _isLoggedIn$ conditionally
+  private _isLoggedIn$: BehaviorSubject<boolean>;
+  isLoggedIn$: Observable<boolean>;
 
-  constructor(private http: HttpClient) { }
+  constructor(
+    private http: HttpClient,
+    @Inject(PLATFORM_ID) private platformId: Object // Inject PLATFORM_ID
+  ) {
+    // Initialize BehaviorSubject based on platform
+    if (isPlatformBrowser(this.platformId)) {
+      this._isLoggedIn$ = new BehaviorSubject<boolean>(!!this.getToken());
+    } else {
+      this._isLoggedIn$ = new BehaviorSubject<boolean>(false); // Default to false for SSR
+    }
+    this.isLoggedIn$ = this._isLoggedIn$.asObservable();
+  }
 
-  login(credentials: LoginRequest): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${this.apiUrl}/login`, credentials).pipe(
-      tap(response => {
-        this.setToken(response.jwt);
-        this._isLoggedIn$.next(true);
+   login(credentials: { username: string; password: string }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/login`, credentials).pipe(
+      tap((response: any) => {
+        if (response && response.token) {
+          this.setToken(response.token);
+          this._isLoggedIn$.next(true);
+        }
       })
     );
   }
 
-  register(userInfo: RegisterRequest): Observable<any> {
-    return this.http.post(`${this.apiUrl}/register`, userInfo);
-  }
+  register(credentials: { username: string; password: string }): Observable<any> {
+      return this.http.post(`${this.apiUrl}/register`, credentials).pipe(
+        tap((response: any) => {
+          if (response && response.token) {
+            this.setToken(response.token);
+            this._isLoggedIn$.next(true);
+          }
+        })
+      );
+    }
 
   logout(): void {
-    localStorage.removeItem(this.TOKEN_KEY);
+    if (isPlatformBrowser(this.platformId)) { // Conditionally remove item
+      localStorage.removeItem(this.TOKEN_KEY);
+    }
     this._isLoggedIn$.next(false);
   }
 
   getToken(): string | null {
-    return localStorage.getItem(this.TOKEN_KEY);
+    if (isPlatformBrowser(this.platformId)) { // Conditionally get item
+      return localStorage.getItem(this.TOKEN_KEY);
+    }
+    return null; // Return null if not in browser
   }
 
   private setToken(token: string): void {
-    localStorage.setItem(this.TOKEN_KEY, token);
+    if (isPlatformBrowser(this.platformId)) { // Conditionally set item
+      localStorage.setItem(this.TOKEN_KEY, token);
+    }
   }
 }
-

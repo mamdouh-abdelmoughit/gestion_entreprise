@@ -11,7 +11,7 @@ import { AuthService } from './core/services/auth.service';
   standalone: true,
   imports: [CommonModule, RouterOutlet, SidebarComponent, HeaderComponent],
   template: `
-    <!-- Show main layout only if logged in -->
+    <!-- Main layout for logged-in users -->
     <div *ngIf="isLoggedIn$ | async" class="min-h-screen flex bg-gray-50">
       <app-sidebar (moduleChange)="onModuleChange($event)"></app-sidebar>
       <div class="flex-1 flex flex-col">
@@ -22,7 +22,7 @@ import { AuthService } from './core/services/auth.service';
       </div>
     </div>
 
-    <!-- Show only the router outlet (for login page) if not logged in -->
+    <!-- Login page layout -->
     <div *ngIf="!(isLoggedIn$ | async)">
       <router-outlet></router-outlet>
     </div>
@@ -30,8 +30,9 @@ import { AuthService } from './core/services/auth.service';
   styles: []
 })
 export class AppComponent {
+  title = 'angular-btp-frontend';
   isLoggedIn$: Observable<boolean>;
-  userEmail = 'admin@btp.com'; // We can improve this later by decoding the JWT
+  userEmail = 'admin@btp.com';
   activeModule = 'dashboard';
 
   constructor(private authService: AuthService) {

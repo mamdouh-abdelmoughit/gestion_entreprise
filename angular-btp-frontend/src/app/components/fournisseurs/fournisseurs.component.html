@@ -1,0 +1,44 @@
+<div class="fournisseurs-container">
+  <div class="fournisseurs-header">
+    <h2 class="fournisseurs-title">🏢 Fournisseurs</h2>
+    <button class="btn btn-primary">Nouveau Fournisseur</button>
+  </div>
+
+  <div class="fournisseurs-content">
+    <h3 class="content-title">Liste des Fournisseurs</h3>
+    
+    <div *ngIf="isLoading" class="loading-state">
+      <div class="loading-spinner"></div>
+      <p>Chargement...</p>
+    </div>
+    
+    <div *ngIf="!isLoading && !error && fournisseursPage" class="table-container">
+      <table class="fournisseurs-table">
+        <thead>
+          <tr>
+            <th>Nom</th>
+            <th>Email</th>
+            <th>Téléphone</th>
+            <th>Statut</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let fournisseur of fournisseursPage.content">
+            <td>{{ fournisseur.nom }}</td>
+            <td>{{ fournisseur.email }}</td>
+            <td>{{ fournisseur.telephone }}</td>
+            <td>
+              <span class="status-badge" [ngClass]="'status-' + fournisseur.statut.toLowerCase()">
+                {{ fournisseur.statut }}
+              </span>
+            </td>
+            <td>
+              <button class="btn btn-link">Détails</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

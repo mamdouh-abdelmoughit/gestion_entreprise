@@ -1,0 +1,640 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentication Form - BTP Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.1);
+        }
+        
+        .form-input {
+            transition: all 0.3s ease;
+            border: 2px solid #e2e8f0;
+        }
+        
+        .form-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .form-input:hover {
+            border-color: #cbd5e0;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: all 0.3s ease;
+            transform: translateY(0);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+        
+        .input-group {
+            position: relative;
+        }
+        
+        .input-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+            transition: color 0.3s ease;
+        }
+        
+        .input-group input:focus + .input-icon {
+            color: #667eea;
+        }
+        
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #64748b;
+            transition: color 0.3s ease;
+        }
+        
+        .password-toggle:hover {
+            color: #667eea;
+        }
+        
+        .form-tab {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .form-tab.active {
+            color: #667eea;
+            border-color: #667eea;
+        }
+        
+        .form-tab:hover {
+            color: #667eea;
+        }
+        
+        .slide-in {
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .floating-shapes {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+        }
+        
+        .floating-shapes::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 2px, transparent 2px);
+            background-size: 50px 50px;
+            animation: float 20s infinite linear;
+        }
+        
+        @keyframes float {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(-50px, -50px) rotate(360deg); }
+        }
+        
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #dc2626;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 16px;
+            animation: shake 0.5s ease-in-out;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        
+        .loading-spinner {
+            border: 2px solid transparent;
+            border-top: 2px solid #ffffff;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .logo-container {
+            animation: logoFloat 3s ease-in-out infinite;
+        }
+        
+        @keyframes logoFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .success-message {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: #16a34a;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="gradient-bg relative overflow-hidden">
+        <div class="floating-shapes"></div>
+        
+        <div class="container mx-auto px-4 py-8 relative z-10">
+            <div class="min-h-screen flex items-center justify-center">
+                <div class="glass-card rounded-2xl p-8 w-full max-w-md">
+                    <!-- Logo Section -->
+                    <div class="text-center mb-8 logo-container">
+                        <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                            <i class="fas fa-hard-hat text-white text-2xl"></i>
+                        </div>
+                        <h1 class="text-2xl font-bold text-gray-800 mb-2">BTP Management</h1>
+                        <p class="text-gray-600 text-sm">Système de gestion de projets BTP</p>
+                    </div>
+
+                    <!-- Tab Navigation -->
+                    <div class="flex mb-6 border-b border-gray-200">
+                        <button id="loginTab" class="form-tab flex-1 py-3 text-center font-medium border-b-2 border-transparent active">
+                            Connexion
+                        </button>
+                        <button id="registerTab" class="form-tab flex-1 py-3 text-center font-medium border-b-2 border-transparent">
+                            Inscription
+                        </button>
+                    </div>
+
+                    <!-- Error/Success Messages -->
+                    <div id="errorMessage" class="error-message hidden">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        <span id="errorText">Une erreur s'est produite</span>
+                    </div>
+
+                    <div id="successMessage" class="success-message hidden">
+                        <i class="fas fa-check-circle mr-2"></i>
+                        <span id="successText">Opération réussie</span>
+                    </div>
+
+                    <!-- Login Form -->
+                    <form id="loginForm" class="space-y-6 slide-in">
+                        <div class="input-group">
+                            <input 
+                                type="email" 
+                                id="loginEmail" 
+                                class="form-input w-full pl-12 pr-4 py-3 rounded-lg focus:outline-none"
+                                placeholder="Adresse e-mail"
+                                required
+                            >
+                            <i class="fas fa-envelope input-icon"></i>
+                        </div>
+
+                        <div class="input-group">
+                            <input 
+                                type="password" 
+                                id="loginPassword" 
+                                class="form-input w-full pl-12 pr-12 py-3 rounded-lg focus:outline-none"
+                                placeholder="Mot de passe"
+                                required
+                            >
+                            <i class="fas fa-lock input-icon"></i>
+                            <i class="fas fa-eye password-toggle" onclick="togglePassword('loginPassword', this)"></i>
+                        </div>
+
+                        <div class="flex items-center justify-between">
+                            <label class="flex items-center text-sm text-gray-600">
+                                <input type="checkbox" class="mr-2 rounded border-gray-300 focus:ring-blue-500">
+                                Se souvenir de moi
+                            </label>
+                            <a href="#" class="text-sm text-blue-600 hover:text-blue-800 transition-colors">
+                                Mot de passe oublié ?
+                            </a>
+                        </div>
+
+                        <button 
+                            type="submit" 
+                            class="btn-primary w-full py-3 text-white font-semibold rounded-lg focus:outline-none flex items-center justify-center"
+                            id="loginBtn"
+                        >
+                            <span id="loginBtnText">Se connecter</span>
+                            <div id="loginSpinner" class="loading-spinner ml-2 hidden"></div>
+                        </button>
+                    </form>
+
+                    <!-- Register Form -->
+                    <form id="registerForm" class="space-y-6 slide-in hidden">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="input-group">
+                                <input 
+                                    type="text" 
+                                    id="firstName" 
+                                    class="form-input w-full pl-12 pr-4 py-3 rounded-lg focus:outline-none"
+                                    placeholder="Prénom"
+                                    required
+                                >
+                                <i class="fas fa-user input-icon"></i>
+                            </div>
+                            <div class="input-group">
+                                <input 
+                                    type="text" 
+                                    id="lastName" 
+                                    class="form-input w-full pl-12 pr-4 py-3 rounded-lg focus:outline-none"
+                                    placeholder="Nom"
+                                    required
+                                >
+                                <i class="fas fa-user input-icon"></i>
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <input 
+                                type="text" 
+                                id="username" 
+                                class="form-input w-full pl-12 pr-4 py-3 rounded-lg focus:outline-none"
+                                placeholder="Nom d'utilisateur"
+                                required
+                            >
+                            <i class="fas fa-at input-icon"></i>
+                        </div>
+
+                        <div class="input-group">
+                            <input 
+                                type="email" 
+                                id="registerEmail" 
+                                class="form-input w-full pl-12 pr-4 py-3 rounded-lg focus:outline-none"
+                                placeholder="Adresse e-mail"
+                                required
+                            >
+                            <i class="fas fa-envelope input-icon"></i>
+                        </div>
+
+                        <div class="input-group">
+                            <input 
+                                type="password" 
+                                id="registerPassword" 
+                                class="form-input w-full pl-12 pr-12 py-3 rounded-lg focus:outline-none"
+                                placeholder="Mot de passe"
+                                required
+                            >
+                            <i class="fas fa-lock input-icon"></i>
+                            <i class="fas fa-eye password-toggle" onclick="togglePassword('registerPassword', this)"></i>
+                        </div>
+
+                        <div class="input-group">
+                            <input 
+                                type="password" 
+                                id="confirmPassword" 
+                                class="form-input w-full pl-12 pr-12 py-3 rounded-lg focus:outline-none"
+                                placeholder="Confirmer le mot de passe"
+                                required
+                            >
+                            <i class="fas fa-lock input-icon"></i>
+                            <i class="fas fa-eye password-toggle" onclick="togglePassword('confirmPassword', this)"></i>
+                        </div>
+
+                        <div class="input-group">
+                            <select 
+                                id="role" 
+                                class="form-input w-full pl-12 pr-4 py-3 rounded-lg focus:outline-none"
+                                required
+                            >
+                                <option value="">Sélectionner un rôle</option>
+                                <option value="CHEF_PROJET">Chef de projet</option>
+                                <option value="EMPLOYE">Employé</option>
+                                <option value="ADMIN">Administrateur</option>
+                            </select>
+                            <i class="fas fa-user-tag input-icon"></i>
+                        </div>
+
+                        <div class="flex items-center">
+                            <input type="checkbox" id="terms" class="mr-2 rounded border-gray-300 focus:ring-blue-500" required>
+                            <label for="terms" class="text-sm text-gray-600">
+                                J'accepte les <a href="#" class="text-blue-600 hover:text-blue-800">conditions d'utilisation</a>
+                            </label>
+                        </div>
+
+                        <button 
+                            type="submit" 
+                            class="btn-primary w-full py-3 text-white font-semibold rounded-lg focus:outline-none flex items-center justify-center"
+                            id="registerBtn"
+                        >
+                            <span id="registerBtnText">S'inscrire</span>
+                            <div id="registerSpinner" class="loading-spinner ml-2 hidden"></div>
+                        </button>
+                    </form>
+
+                    <!-- Footer -->
+                    <div class="mt-8 text-center text-sm text-gray-600">
+                        <p>&copy; 2024 BTP Management. Tous droits réservés.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching functionality
+        const loginTab = document.getElementById('loginTab');
+        const registerTab = document.getElementById('registerTab');
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+
+        loginTab.addEventListener('click', () => {
+            loginTab.classList.add('active');
+            registerTab.classList.remove('active');
+            loginForm.classList.remove('hidden');
+            registerForm.classList.add('hidden');
+            hideMessages();
+        });
+
+        registerTab.addEventListener('click', () => {
+            registerTab.classList.add('active');
+            loginTab.classList.remove('active');
+            registerForm.classList.remove('hidden');
+            loginForm.classList.add('hidden');
+            hideMessages();
+        });
+
+        // Password toggle functionality
+        function togglePassword(inputId, icon) {
+            const input = document.getElementById(inputId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        // Message functions
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            errorText.textContent = message;
+            errorDiv.classList.remove('hidden');
+            hideSuccess();
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.getElementById('successMessage');
+            const successText = document.getElementById('successText');
+            successText.textContent = message;
+            successDiv.classList.remove('hidden');
+            hideError();
+        }
+
+        function hideError() {
+            document.getElementById('errorMessage').classList.add('hidden');
+        }
+
+        function hideSuccess() {
+            document.getElementById('successMessage').classList.add('hidden');
+        }
+
+        function hideMessages() {
+            hideError();
+            hideSuccess();
+        }
+
+        // Loading states
+        function setLoading(formType, isLoading) {
+            const btn = document.getElementById(formType + 'Btn');
+            const btnText = document.getElementById(formType + 'BtnText');
+            const spinner = document.getElementById(formType + 'Spinner');
+            
+            if (isLoading) {
+                btn.disabled = true;
+                btn.classList.add('opacity-75');
+                btnText.textContent = formType === 'login' ? 'Connexion...' : 'Inscription...';
+                spinner.classList.remove('hidden');
+            } else {
+                btn.disabled = false;
+                btn.classList.remove('opacity-75');
+                btnText.textContent = formType === 'login' ? 'Se connecter' : 'S\'inscrire';
+                spinner.classList.add('hidden');
+            }
+        }
+
+        // Form validation
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+
+        function validatePassword(password) {
+            return password.length >= 6;
+        }
+
+        // Login form submission
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideMessages();
+            
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            // Validation
+            if (!validateEmail(email)) {
+                showError('Veuillez entrer une adresse e-mail valide');
+                return;
+            }
+
+            if (!validatePassword(password)) {
+                showError('Le mot de passe doit contenir au moins 6 caractères');
+                return;
+            }
+
+            setLoading('login', true);
+
+            try {
+                // Simulate API call
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                // Simulate login logic here
+                // Replace with actual API call to your backend
+                console.log('Login attempt:', { email, password });
+                
+                // For demo purposes, show success
+                showSuccess('Connexion réussie ! Redirection...');
+                
+                // Redirect after success (replace with actual navigation)
+                setTimeout(() => {
+                    window.location.href = '/dashboard';
+                }, 1500);
+                
+            } catch (error) {
+                showError('Identifiants incorrects. Veuillez réessayer.');
+            } finally {
+                setLoading('login', false);
+            }
+        });
+
+        // Register form submission
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideMessages();
+            
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const role = document.getElementById('role').value;
+
+            // Validation
+            if (!firstName || !lastName || !username) {
+                showError('Veuillez remplir tous les champs requis');
+                return;
+            }
+
+            if (!validateEmail(email)) {
+                showError('Veuillez entrer une adresse e-mail valide');
+                return;
+            }
+
+            if (!validatePassword(password)) {
+                showError('Le mot de passe doit contenir au moins 6 caractères');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showError('Les mots de passe ne correspondent pas');
+                return;
+            }
+
+            if (!role) {
+                showError('Veuillez sélectionner un rôle');
+                return;
+            }
+
+            setLoading('register', true);
+
+            try {
+                // Simulate API call
+                await new Promise(resolve => setTimeout(resolve, 2500));
+                
+                // Simulate registration logic here
+                // Replace with actual API call to your backend
+                console.log('Registration attempt:', { firstName, lastName, username, email, password, role });
+                
+                // For demo purposes, show success and switch to login
+                showSuccess('Inscription réussie ! Vous pouvez maintenant vous connecter.');
+                
+                // Clear form
+                registerForm.reset();
+                
+                // Switch to login tab after success
+                setTimeout(() => {
+                    loginTab.click();
+                }, 1500);
+                
+            } catch (error) {
+                showError('Erreur lors de l\'inscription. Veuillez réessayer.');
+            } finally {
+                setLoading('register', false);
+            }
+        });
+
+        // Input focus animations
+        document.querySelectorAll('.form-input').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.classList.add('focused');
+            });
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.classList.remove('focused');
+            });
+        });
+
+        // Real-time password confirmation validation
+        document.getElementById('confirmPassword').addEventListener('input', function() {
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = this.value;
+            
+            if (confirmPassword && password !== confirmPassword) {
+                this.setCustomValidity('Les mots de passe ne correspondent pas');
+                this.classList.add('border-red-500');
+            } else {
+                this.setCustomValidity('');
+                this.classList.remove('border-red-500');
+            }
+        });
+
+        // Auto-hide messages after 5 seconds
+        function autoHideMessage(messageId) {
+            setTimeout(() => {
+                document.getElementById(messageId).classList.add('hidden');
+            }, 5000);
+        }
+
+        // Override show functions to include auto-hide
+        const originalShowError = showError;
+        const originalShowSuccess = showSuccess;
+
+        showError = function(message) {
+            originalShowError(message);
+            autoHideMessage('errorMessage');
+        };
+
+        showSuccess = function(message) {
+            originalShowSuccess(message);
+            autoHideMessage('successMessage');
+        };
+    </script>
+</body>
+</html>

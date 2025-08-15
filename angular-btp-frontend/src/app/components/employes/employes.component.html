@@ -1,0 +1,40 @@
+<div class="employes-container">
+  <div class="employes-header">
+    <h2 class="employes-title">👥 Employés</h2>
+    <button class="btn btn-primary">Nouvel Employé</button>
+  </div>
+
+  <div class="employes-content">
+    <h3 class="content-title">Liste des Employés</h3>
+    
+    <div *ngIf="isLoading" class="loading-state">
+      <div class="loading-spinner"></div>
+      <p>Chargement...</p>
+    </div>
+    
+    <div *ngIf="!isLoading && !error && employesPage" class="table-container">
+      <table class="employes-table">
+        <thead>
+          <tr>
+            <th>Nom</th>
+            <th>Prénom</th>
+            <th>Email</th>
+            <th>Téléphone</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let employe of employesPage.content">
+            <td>{{ employe.nom }}</td>
+            <td>{{ employe.prenom }}</td>
+            <td>{{ employe.email }}</td>
+            <td>{{ employe.telephone }}</td>
+            <td>
+              <button class="btn btn-link">Détails</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

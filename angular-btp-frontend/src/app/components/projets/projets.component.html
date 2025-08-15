@@ -1,0 +1,56 @@
+<div class="projets-container">
+  <div class="projets-header">
+    <h2 class="projets-title">🏗️ Projets</h2>
+    <button class="btn btn-primary">Nouveau Projet</button>
+  </div>
+
+  <div class="projets-content">
+    <h3 class="content-title">Liste des Projets</h3>
+    
+    <div *ngIf="isLoading" class="loading-state">
+      <div class="loading-spinner"></div>
+      <p>Chargement...</p>
+    </div>
+    
+    <div *ngIf="error" class="error-state">
+      <div class="error-icon">⚠️</div>
+      <p class="error-message">{{ error }}</p>
+    </div>
+    
+    <div *ngIf="!isLoading && !error && projetsPage" class="table-container">
+      <table class="projets-table">
+        <thead>
+          <tr>
+            <th>Nom du Projet</th>
+            <th>Statut</th>
+            <th>Date de Début</th>
+            <th>Budget</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let projet of projetsPage.content">
+            <td class="project-name">{{ projet.nom }}</td>
+            <td>
+              <span class="status-badge" [ngClass]="'status-' + projet.statut.toLowerCase()">
+                {{ projet.statut }}
+              </span>
+            </td>
+            <td>{{ projet.dateDebut | date:'dd/MM/yyyy' }}</td>
+            <td class="budget">{{ projet.budget | currency:'EUR' }}</td>
+            <td>
+              <button class="btn btn-link">Détails</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <div class="pagination-info">
+        <p>Affichage de {{ projetsPage.number * projetsPage.size + 1 }} à 
+           {{ (projetsPage.number + 1) * projetsPage.size > projetsPage.totalElements ? 
+              projetsPage.totalElements : (projetsPage.number + 1) * projetsPage.size }} 
+           sur {{ projetsPage.totalElements }} projets</p>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,44 @@
+<div class="decomptes-container">
+  <div class="decomptes-header">
+    <h2 class="decomptes-title">📊 Décomptes</h2>
+    <button class="btn btn-primary">Nouveau Décompte</button>
+  </div>
+
+  <div class="decomptes-content">
+    <h3 class="content-title">Liste des Décomptes</h3>
+    
+    <div *ngIf="isLoading" class="loading-state">
+      <div class="loading-spinner"></div>
+      <p>Chargement...</p>
+    </div>
+    
+    <div *ngIf="!isLoading && !error && decomptesPage" class="table-container">
+      <table class="decomptes-table">
+        <thead>
+          <tr>
+            <th>Nom du Décompte</th>
+            <th>Statut</th>
+            <th>Montant</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let decompte of decomptesPage.content">
+            <td>{{ decompte.nom }}</td>
+            <td>
+              <span class="status-badge" [ngClass]="'status-' + decompte.statut.toLowerCase()">
+                {{ decompte.statut }}
+              </span>
+            </td>
+            <td>{{ decompte.montant | currency:'EUR' }}</td>
+            <td>{{ decompte.date | date:'dd/MM/yyyy' }}</td>
+            <td>
+              <button class="btn btn-link">Détails</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

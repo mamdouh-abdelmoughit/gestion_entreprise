@@ -1,0 +1,89 @@
+/* You can paste custom styles here if needed, otherwise leave empty or remove styleUrls from .ts */
+/* Example from auth-form-styled.html if you want to apply it specifically to this component */
+.form-input {
+    transition: all 0.3s ease;
+    border: 2px solid #e2e8f0;
+}
+
+.form-input:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    transform: translateY(-2px);
+}
+
+.form-button {
+    background-color: #667eea;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.form-button:hover {
+    background-color: #5a67d8;
+    transform: translateY(-2px);
+}
+/* Add any additional styles you want to apply to the login component here */
+/* This file is for the login component styles, you can add more styles as needed */
+/* Example styles for the login component */
+.login-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background-color: #f5f5f5;
+}
+
+.login-form {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    width: 300px;
+}       
+.login-title {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #333;
+}
+.login-input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}   
+.login-button
+{
+    width: 100%;
+    padding: 10px;
+    background-color: #667eea;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.login-button:hover {
+    background-color: #5a67d8;
+}
+.login-error {
+    color: red;
+    margin-top: 10px;
+}
+.login-success {
+    color: green;
+    margin-top: 10px;
+}
+.login-footer {
+    margin-top: 20px;
+    text-align: center;
+}
+.login-footer a {
+    color: #667eea;
+    text-decoration: none;
+}
+.login-footer a:hover {
+    text-decoration: underline;
+}
+

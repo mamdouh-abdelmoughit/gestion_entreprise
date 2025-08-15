@@ -8,10 +8,10 @@ import { CautionsComponent } from './components/cautions/cautions.component';
 import { DecomptesComponent } from './components/decomptes/decomptes.component';
 import { DocumentsComponent } from './components/documents/documents.component';
 import { Routes } from '@angular/router'
-import { SignInFormComponent } from './auth/sign-in-form.component';
+import { LoginComponent } from './auth/login/login.component';
 
 export const routes: Routes = [
-  { path: 'login', component: SignInFormComponent },
+  { path: 'login', component: LoginComponent }, // Your login route
   { path: '', redirectTo: '/login', pathMatch: 'full' },
   { path: 'dashboard', component: DashboardComponent },
   { path: 'appel-offres', component: AppelOffresComponent },

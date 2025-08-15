@@ -1,0 +1,44 @@
+<div class="cautions-container">
+  <div class="cautions-header">
+    <h2 class="cautions-title">💰 Cautions</h2>
+    <button class="btn btn-primary">Nouvelle Caution</button>
+  </div>
+
+  <div class="cautions-content">
+    <h3 class="content-title">Liste des Cautions</h3>
+    
+    <div *ngIf="isLoading" class="loading-state">
+      <div class="loading-spinner"></div>
+      <p>Chargement...</p>
+    </div>
+    
+    <div *ngIf="!isLoading && !error && cautionsPage" class="table-container">
+      <table class="cautions-table">
+        <thead>
+          <tr>
+            <th>Nom</th>
+            <th>Type</th>
+            <th>Montant</th>
+            <th>Statut</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let caution of cautionsPage.content">
+            <td>{{ caution.nom }}</td>
+            <td>{{ caution.type }}</td>
+            <td>{{ caution.montant | currency:'EUR' }}</td>
+            <td>
+              <span class="status-badge" [ngClass]="'status-' + caution.statut.toLowerCase()">
+                {{ caution.statut }}
+              </span>
+            </td>
+            <td>
+              <button class="btn btn-link">Détails</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

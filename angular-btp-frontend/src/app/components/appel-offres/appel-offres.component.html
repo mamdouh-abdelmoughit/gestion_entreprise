@@ -1,0 +1,44 @@
+<div class="appel-offres-container">
+  <div class="appel-offres-header">
+    <h2 class="appel-offres-title">📋 Appels d'offres</h2>
+    <button class="btn btn-primary">Nouvel Appel d'offres</button>
+  </div>
+
+  <div class="appel-offres-content">
+    <h3 class="content-title">Liste des Appels d'offres</h3>
+    
+    <div *ngIf="isLoading" class="loading-state">
+      <div class="loading-spinner"></div>
+      <p>Chargement...</p>
+    </div>
+    
+    <div *ngIf="!isLoading && !error && appelOffresPage" class="table-container">
+      <table class="appel-offres-table">
+        <thead>
+          <tr>
+            <th>Nom de l'Appel d'offres</th>
+            <th>Statut</th>
+            <th>Date de Début</th>
+            <th>Budget</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let appelOffre of appelOffresPage.content">
+            <td>{{ appelOffre.nom }}</td>
+            <td>
+              <span class="status-badge" [ngClass]="'status-' + appelOffre.statut.toLowerCase()">
+                {{ appelOffre.statut }}
+              </span>
+            </td>
+            <td>{{ appelOffre.dateDebut | date:'dd/MM/yyyy' }}</td>
+            <td>{{ appelOffre.budget | currency:'EUR' }}</td>
+            <td>
+              <button class="btn btn-link">Détails</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
