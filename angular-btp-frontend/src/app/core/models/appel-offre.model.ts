@@ -1,12 +1,11 @@
 export interface AppelOffre {
   id: number;
-  titre: string;
+  titre: string; // FIX: This is the correct property name, not 'nom'
   description: string;
-  budgetEstimatif: number; // Corresponds to BigDecimal
-  datePublication: string; // Corresponds to LocalDateTime
+  budgetEstimatif: number;
+  datePublication: string;
   dateLimite: string;
   statut: string;
   projetId: number;
   fournisseurIds: number[];
 }
-

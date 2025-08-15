@@ -1,0 +1,58 @@
+<div class="container mx-auto p-6">
+  <div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-lg shadow-sm p-6">
+      <!-- Dynamic Title -->
+      <h2 class="text-2xl font-bold text-gray-800 mb-6">
+        {{ isEditMode ? 'Modifier le Client' : 'Créer un Nouveau Client' }}
+      </h2>
+      <div *ngIf="isLoading" class="text-center">Chargement...</div>
+
+      <form [formGroup]="clientForm" (ngSubmit)="onSubmit()" *ngIf="!isLoading">
+        <div class="space-y-4">
+          <!-- Nom Field -->
+          <div>
+            <label for="nom" class="block text-sm font-medium text-gray-700">Nom du Client</label>
+            <input id="nom" type="text" formControlName="nom" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+            <div *ngIf="clientForm.get('nom')?.invalid && clientForm.get('nom')?.touched" class="text-red-500 text-xs mt-1">
+              Le nom est requis (3 caractères min).
+            </div>
+          </div>
+
+          <!-- Email Field -->
+          <div>
+            <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+            <input id="email" type="email" formControlName="email" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+            <div *ngIf="clientForm.get('email')?.invalid && clientForm.get('email')?.touched" class="text-red-500 text-xs mt-1">
+              Un email valide est requis.
+            </div>
+          </div>
+
+          <!-- Telephone Field -->
+          <div>
+            <label for="telephone" class="block text-sm font-medium text-gray-700">Téléphone</label>
+            <input id="telephone" type="text" formControlName="telephone" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+          </div>
+
+          <!-- Adresse Field -->
+          <div>
+            <label for="adresse" class="block text-sm font-medium text-gray-700">Adresse</label>
+            <textarea id="adresse" formControlName="adresse" rows="3" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
+          </div>
+        </div>
+
+        <!-- Error Message -->
+        <div *ngIf="error" class="mt-4 text-red-500">{{ error }}</div>
+
+        <!-- Action Buttons -->
+        <div class="mt-6 flex justify-end gap-4">
+          <button type="button" (click)="router.navigate(['/clients'])" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">
+            Annuler
+          </button>
+          <button type="submit" [disabled]="clientForm.invalid || isLoading" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-300">
+            {{ isEditMode ? 'Mettre à jour' : 'Sauvegarder' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

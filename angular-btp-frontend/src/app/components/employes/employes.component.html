@@ -1,17 +1,18 @@
 <div class="employes-container">
   <div class="employes-header">
     <h2 class="employes-title">👥 Employés</h2>
-    <button class="btn btn-primary">Nouvel Employé</button>
-  </div>
+    <button routerLink="/employes/new" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+      Nouvel Employé
+    </button>  </div>
 
   <div class="employes-content">
     <h3 class="content-title">Liste des Employés</h3>
-    
+
     <div *ngIf="isLoading" class="loading-state">
       <div class="loading-spinner"></div>
       <p>Chargement...</p>
     </div>
-    
+
     <div *ngIf="!isLoading && !error && employesPage" class="table-container">
       <table class="employes-table">
         <thead>
@@ -31,6 +32,10 @@
             <td>{{ employe.telephone }}</td>
             <td>
               <button class="btn btn-link">Détails</button>
+              <button [routerLink]="['/employes/edit', employe.id]" class="text-blue-600 hover:underline">Modifier</button>
+              <button (click)="deleteEmploye(employe.id)" class="text-red-600 hover:underline">Supprimer</button>
+
+
             </td>
           </tr>
         </tbody>

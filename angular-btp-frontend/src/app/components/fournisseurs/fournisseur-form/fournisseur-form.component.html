@@ -1,0 +1,44 @@
+<div class="container mx-auto p-6">
+  <div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-lg shadow-sm p-6">
+      <h2 class="text-2xl font-bold text-gray-800 mb-6">{{ isEditMode ? 'Modifier le Fournisseur' : 'Nouveau Fournisseur' }}</h2>
+      <div *ngIf="isLoading" class="text-center">Chargement...</div>
+      <form [formGroup]="fournisseurForm" (ngSubmit)="onSubmit()" *ngIf="!isLoading">
+        <div class="space-y-4">
+          <div>
+            <label for="nom" class="form-label">Nom</label>
+            <input id="nom" type="text" formControlName="nom" class="input-control">
+          </div>
+          <div>
+            <label for="email" class="form-label">Email</label>
+            <input id="email" type="email" formControlName="email" class="input-control">
+          </div>
+          <div>
+            <label for="telephone" class="form-label">Téléphone</label>
+            <input id="telephone" type="text" formControlName="telephone" class="input-control">
+          </div>
+          <div>
+            <label for="adresse" class="form-label">Adresse</label>
+            <textarea id="adresse" formControlName="adresse" class="input-control"></textarea>
+          </div>
+          <div>
+            <label for="specialites" class="form-label">Spécialités (séparées par une virgule)</label>
+            <input id="specialites" type="text" formControlName="specialites" class="input-control">
+          </div>
+          <div>
+            <label for="statut" class="form-label">Statut</label>
+            <select id="statut" formControlName="statut" class="input-control">
+              <option value="ACTIF">Actif</option>
+              <option value="INACTIF">Inactif</option>
+            </select>
+          </div>
+        </div>
+        <div *ngIf="error" class="mt-4 text-red-500">{{ error }}</div>
+        <div class="mt-6 flex justify-end gap-4">
+          <button type="button" (click)="router.navigate(['/fournisseurs'])" class="btn-secondary">Annuler</button>
+          <button type="submit" [disabled]="fournisseurForm.invalid || isLoading" class="btn-primary">{{ isEditMode ? 'Mettre à jour' : 'Sauvegarder' }}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

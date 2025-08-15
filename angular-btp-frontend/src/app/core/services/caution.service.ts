@@ -3,12 +3,13 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Page } from '../models/page.model';
 import { Caution } from '../models/caution.model';
+import { environment } from '../../../environments/environment'; // IDE might flag this
 
 @Injectable({
   providedIn: 'root'
 })
 export class CautionService {
-  private apiUrl = '/api/cautions';
+  private apiUrl = '${environment.apiUrl}/cautions';
 
   constructor(private http: HttpClient) { }
 

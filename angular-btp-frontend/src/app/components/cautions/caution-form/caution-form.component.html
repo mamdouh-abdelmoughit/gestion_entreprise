@@ -1,0 +1,53 @@
+<div class="container mx-auto p-6">
+  <div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-lg shadow-sm p-6">
+      <h2 class="text-2xl font-bold text-gray-800 mb-6">{{ isEditMode ? 'Modifier la Caution' : 'Nouvelle Caution' }}</h2>
+      <div *ngIf="isLoading" class="text-center">Chargement...</div>
+      <form [formGroup]="cautionForm" (ngSubmit)="onSubmit()" *ngIf="!isLoading">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label for="type" class="form-label">Type de Caution</label>
+            <select id="type" formControlName="type" class="input-control">
+              <option value="PROVISOIRE">Provisoire</option>
+              <option value="DEFINITIVE">Définitive</option>
+              <option value="BONNE_EXECUTION">Bonne Exécution</option>
+              <option value="RETENUE_GARANTIE">Retenue de Garantie</option>
+            </select>
+          </div>
+          <div>
+            <label for="montant" class="form-label">Montant (EUR)</label>
+            <input id="montant" type="number" formControlName="montant" class="input-control">
+          </div>
+          <div>
+            <label for="dateEmission" class="form-label">Date d'Émission</label>
+            <input id="dateEmission" type="date" formControlName="dateEmission" class="input-control">
+          </div>
+          <div>
+            <label for="dateEcheance" class="form-label">Date d'Échéance</label>
+            <input id="dateEcheance" type="date" formControlName="dateEcheance" class="input-control">
+          </div>
+          <div>
+            <label for="statut" class="form-label">Statut</label>
+            <select id="statut" formControlName="statut" class="input-control">
+              <option value="ACTIVE">Active</option>
+              <option value="EXPIREE">Expirée</option>
+              <option value="CLOTUREE">Clôturée</option>
+            </select>
+          </div>
+          <div>
+            <label for="projetId" class="form-label">Projet Associé (Optionnel)</label>
+            <select id="projetId" formControlName="projetId" class="input-control">
+              <option [ngValue]="null">Aucun</option>
+              <option *ngFor="let projet of projets" [value]="projet.id">{{ projet.nom }}</option>
+            </select>
+          </div>
+        </div>
+        <div *ngIf="error" class="mt-4 text-red-500">{{ error }}</div>
+        <div class="mt-6 flex justify-end gap-4">
+          <button type="button" (click)="router.navigate(['/cautions'])" class="btn-secondary">Annuler</button>
+          <button type="submit" [disabled]="cautionForm.invalid || isLoading" class="btn-primary">{{ isEditMode ? 'Mettre à jour' : 'Sauvegarder' }}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

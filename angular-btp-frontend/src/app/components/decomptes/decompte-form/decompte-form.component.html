@@ -1,0 +1,49 @@
+
+<div class="container mx-auto p-6">
+  <div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-lg shadow-sm p-6">
+      <h2 class="text-2xl font-bold text-gray-800 mb-6">{{ isEditMode ? 'Modifier le Décompte' : 'Nouveau Décompte' }}</h2>
+      <div *ngIf="isLoading" class="text-center">Chargement...</div>
+      <form [formGroup]="decompteForm" (ngSubmit)="onSubmit()" *ngIf="!isLoading">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="md:col-span-2">
+            <label for="projetId" class="form-label">Projet</label>
+            <select id="projetId" formControlName="projetId" class="input-control">
+              <option [ngValue]="null" disabled>Sélectionnez un projet</option>
+              <option *ngFor="let projet of projets" [value]="projet.id">{{ projet.nom }}</option>
+            </select>
+          </div>
+          <div>
+            <label for="numero" class="form-label">Numéro de Décompte</label>
+            <input id="numero" type="text" formControlName="numero" class="input-control">
+          </div>
+          <div>
+            <label for="dateDecompte" class="form-label">Date</label>
+            <input id="dateDecompte" type="date" formControlName="dateDecompte" class="input-control">
+          </div>
+          <div>
+            <label for="montantTotal" class="form-label">Montant Total (EUR)</label>
+            <input id="montantTotal" type="number" formControlName="montantTotal" class="input-control">
+          </div>
+          <div>
+            <label for="statut" class="form-label">Statut</label>
+            <select id="statut" formControlName="statut" class="input-control">
+              <option value="EN_ATTENTE">En Attente</option>
+              <option value="VALIDE">Validé</option>
+              <option value="REJETE">Rejeté</option>
+            </select>
+          </div>
+          <div class="md:col-span-2">
+            <label for="description" class="form-label">Description / Observations</label>
+            <textarea id="description" formControlName="description" class="input-control"></textarea>
+          </div>
+        </div>
+        <div *ngIf="error" class="mt-4 text-red-500">{{ error }}</div>
+        <div class="mt-6 flex justify-end gap-4">
+          <button type="button" (click)="router.navigate(['/decomptes'])" class="btn-secondary">Annuler</button>
+          <button type="submit" [disabled]="decompteForm.invalid || isLoading" class="btn-primary">{{ isEditMode ? 'Mettre à jour' : 'Sauvegarder' }}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

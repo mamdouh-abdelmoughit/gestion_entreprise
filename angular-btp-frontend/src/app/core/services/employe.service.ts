@@ -3,12 +3,14 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Page } from '../models/page.model';
 import { Employe } from '../models/employe.model';
+import { environment } from '../../../environments/environment'; // IDE might flag this
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class EmployeService {
-  private apiUrl = '/api/employes';
+  private apiUrl = '${environment.apiUrl}/employes';
 
   constructor(private http: HttpClient) { }
 

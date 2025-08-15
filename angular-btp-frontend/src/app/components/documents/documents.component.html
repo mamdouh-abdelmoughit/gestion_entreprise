@@ -1,38 +1,46 @@
 <div class="documents-container">
   <div class="documents-header">
     <h2 class="documents-title">📄 Documents</h2>
-    <button class="btn btn-primary">Nouveau Document</button>
+    <button routerLink="/documents/new" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+      Nouveau Document
+    </button>
   </div>
 
   <div class="documents-content">
     <h3 class="content-title">Liste des Documents</h3>
-    
+
     <div *ngIf="isLoading" class="loading-state">
       <div class="loading-spinner"></div>
       <p>Chargement...</p>
     </div>
-    
+
     <div *ngIf="!isLoading && !error && documentsPage" class="table-container">
-      <table class="documents-table">
-        <thead>
-          <tr>
-            <th>Nom</th>
-            <th>Type</th>
-            <th>Date</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let document of documentsPage.content">
-            <td>{{ document.nom }}</td>
-            <td>{{ document.type }}</td>
-            <td>{{ document.date | date:'dd/MM/yyyy' }}</td>
-            <td>
-              <button class="btn btn-link">Télécharger</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <table class="min-w-full bg-white">
+      <thead class="bg-gray-100">
+      <tr>
+        <th class="py-2 px-4 text-left">Nom</th>
+        <th class="py-2 px-4 text-left">Type</th>
+        <th class="py-2 px-4 text-left">Date d'Upload</th>
+        <th class="py-2 px-4 text-right">Taille (ko)</th>
+        <th class="py-2 px-4 text-left">Actions</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let document of documentsPage.content" class="border-b">
+        <td class="py-2 px-4 font-medium">{{ document.nom }}</td>
+        <td class="py-2 px-4">{{ document.type }}</td>
+        <!-- This line is now corrected -->
+        <td class="py-2 px-4">{{ document.dateUpload | date:'dd/MM/yyyy HH:mm' }}</td>
+        <td class="py-2 px-4 text-right">{{ (document.taille / 1024) | number:'1.2-2' }}</td>
+        <td class="py-2 px-4">
+          <button [routerLink]="['/documents/edit', document.id]" class="text-blue-600 hover:underline mr-4">Modifier</button>
+          <button (click)="deleteDocument(document.id)" class="text-red-600 hover:underline">Supprimer</button>
+
+          <button class="text-green-600 hover:underline">Télécharger</button>
+        </td>
+      </tr>
+      </tbody>
+    </table>
     </div>
   </div>
 </div>

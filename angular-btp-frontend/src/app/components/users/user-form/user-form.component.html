@@ -1,0 +1,23 @@
+<div class="container mx-auto p-6">
+  <div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-lg shadow-sm p-6">
+      <h2 class="text-2xl font-bold text-gray-800 mb-6">Modifier l'Utilisateur</h2>
+      <div *ngIf="isLoading" class="text-center">Chargement...</div>
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" *ngIf="!isLoading">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div><label for="firstName" class="form-label">Prénom</label><input id="firstName" type="text" formControlName="firstName" class="input-control"></div>
+          <div><label for="lastName" class="form-label">Nom</label><input id="lastName" type="text" formControlName="lastName" class="input-control"></div>
+          <div><label for="username" class="form-label">Nom d'utilisateur</label><input id="username" type="text" formControlName="username" class="input-control"></div>
+          <div><label for="email" class="form-label">Email</label><input id="email" type="email" formControlName="email" class="input-control"></div>
+          <div class="md:col-span-2"><label for="roles" class="form-label">Rôles (séparés par une virgule)</label><input id="roles" type="text" formControlName="roles" class="input-control"></div>
+          <div class="md:col-span-2 flex items-center"><input id="enabled" type="checkbox" formControlName="enabled" class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"><label for="enabled" class="ml-2 block text-sm text-gray-900">Compte Activé</label></div>
+        </div>
+        <div *ngIf="error" class="mt-4 text-red-500">{{ error }}</div>
+        <div class="mt-6 flex justify-end gap-4">
+          <button type="button" (click)="router.navigate(['/users'])" class="btn-secondary">Annuler</button>
+          <button type="submit" [disabled]="form.invalid || isLoading" class="btn-primary">Mettre à jour</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

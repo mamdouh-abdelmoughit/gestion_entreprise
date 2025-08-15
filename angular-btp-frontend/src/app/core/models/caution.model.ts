@@ -1,8 +1,9 @@
 export interface Caution {
   id: number;
+  numero: string; // FIX: This property was missing
   type: string;
-  montant: number; // Corresponds to BigDecimal
-  dateEmission: string; // Corresponds to LocalDateTime
+  montant: number;
+  dateEmission: string;
   dateEcheance: string;
   beneficiaire: string;
   statut: string;
@@ -10,4 +11,3 @@ export interface Caution {
   fournisseurId: number;
   appelOffreId: number;
 }
-

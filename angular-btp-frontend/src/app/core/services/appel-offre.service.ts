@@ -3,12 +3,13 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Page } from '../models/page.model';
 import { AppelOffre } from '../models/appel-offre.model';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AppelOffreService {
-  private apiUrl = '/api/appel-offres';
+  private apiUrl = '${environment.apiUrl}/appel-offres';
 
   constructor(private http: HttpClient) { }
 

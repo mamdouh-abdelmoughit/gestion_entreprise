@@ -1,0 +1,51 @@
+
+<div class="container mx-auto p-6">
+  <div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-lg shadow-sm p-6">
+      <h2 class="text-2xl font-bold text-gray-800 mb-6">{{ isEditMode ? 'Modifier l\'Affectation' : 'Nouvelle Affectation' }}</h2>
+      <div *ngIf="isLoading" class="text-center">Chargement...</div>
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" *ngIf="!isLoading">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="md:col-span-2">
+            <label for="projetId" class="form-label">Projet</label>
+            <select id="projetId" formControlName="projetId" class="input-control">
+              <option [ngValue]="null" disabled>Sélectionnez un projet</option>
+              <option *ngFor="let projet of projets" [value]="projet.id">{{ projet.nom }}</option>
+            </select>
+          </div>
+          <div class="md:col-span-2">
+            <label for="employeId" class="form-label">Employé</label>
+            <select id="employeId" formControlName="employeId" class="input-control">
+              <option [ngValue]="null" disabled>Sélectionnez un employé</option>
+              <option *ngFor="let employe of employes" [value]="employe.id">{{ employe.prenom }} {{ employe.nom }}</option>
+            </select>
+          </div>
+          <div class="md:col-span-2">
+            <label for="role" class="form-label">Rôle sur le chantier</label>
+            <input id="role" type="text" formControlName="role" class="input-control">
+          </div>
+          <div>
+            <label for="dateDebut" class="form-label">Date de Début</label>
+            <input id="dateDebut" type="date" formControlName="dateDebut" class="input-control">
+          </div>
+          <div>
+            <label for="dateFin" class="form-label">Date de Fin (Optionnel)</label>
+            <input id="dateFin" type="date" formControlName="dateFin" class="input-control">
+          </div>
+          <div>
+            <label for="statut" class="form-label">Statut</label>
+            <select id="statut" formControlName="statut" class="input-control">
+              <option value="ACTIF">Actif</option>
+              <option value="TERMINE">Terminé</option>
+            </select>
+          </div>
+        </div>
+        <div *ngIf="error" class="mt-4 text-red-500">{{ error }}</div>
+        <div class="mt-6 flex justify-end gap-4">
+          <button type="button" (click)="router.navigate(['/affectations'])" class="btn-secondary">Annuler</button>
+          <button type="submit" [disabled]="form.invalid || isLoading" class="btn-primary">{{ isEditMode ? 'Mettre à jour' : 'Sauvegarder' }}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

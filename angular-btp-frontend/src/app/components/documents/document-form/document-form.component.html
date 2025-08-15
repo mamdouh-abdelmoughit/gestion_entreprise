@@ -1,0 +1,39 @@
+<div class="container mx-auto p-6">
+  <div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-lg shadow-sm p-6">
+      <h2 class="text-2xl font-bold text-gray-800 mb-6">Nouveau Document</h2>
+      <div *ngIf="isLoading" class="text-center">Envoi en cours...</div>
+      <form [formGroup]="documentForm" (ngSubmit)="onSubmit()" *ngIf="!isLoading">
+        <div class="space-y-4">
+          <div>
+            <label for="nom" class="form-label">Nom du Document</label>
+            <input id="nom" type="text" formControlName="nom" class="input-control">
+          </div>
+          <div>
+            <label for="type" class="form-label">Type</label>
+            <select id="type" formControlName="type" class="input-control">
+              <option value="CONTRAT">Contrat</option>
+              <option value="FACTURE">Facture</option>
+              <option value="PV_RECEPTION">PV de Réception</option>
+              <option value="AUTRE">Autre</option>
+            </select>
+          </div>
+          <div>
+            <label for="description" class="form-label">Description</label>
+            <textarea id="description" formControlName="description" class="input-control"></textarea>
+          </div>
+          <div>
+            <label for="file" class="form-label">Fichier</label>
+            <input id="file" type="file" (change)="onFileSelected($event)" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+            <p *ngIf="selectedFile" class="text-xs text-gray-500 mt-1">Fichier sélectionné: {{ selectedFile.name }}</p>
+          </div>
+        </div>
+        <div *ngIf="error" class="mt-4 text-red-500">{{ error }}</div>
+        <div class="mt-6 flex justify-end gap-4">
+          <button type="button" (click)="router.navigate(['/documents'])" class="btn-secondary">Annuler</button>
+          <button type="submit" [disabled]="documentForm.invalid || !selectedFile || isLoading" class="btn-primary">Sauvegarder</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,25 @@
+<div class="container mx-auto p-6">
+  <div class="flex justify-between items-center mb-6">
+    <h2 class="text-2xl font-bold text-gray-800">🛡️ Gestion des Rôles</h2>
+  </div>
+  <div class="bg-white rounded-lg shadow-sm p-6">
+    <div *ngIf="isLoading" class="text-center">Chargement...</div>
+    <div *ngIf="error" class="text-center text-red-500">{{ error }}</div>
+    <div *ngIf="!isLoading && !error && rolesPage" class="overflow-x-auto">
+      <table class="min-w-full bg-white">
+        <thead class="bg-gray-100">
+        <tr>
+          <th class="py-2 px-4 text-left">Nom du Rôle</th>
+          <th class="py-2 px-4 text-left">Description</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let role of rolesPage.content" class="border-b">
+          <td class="py-2 px-4 font-medium">{{ role.nom }}</td>
+          <td class="py-2 px-4">{{ role.description }}</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

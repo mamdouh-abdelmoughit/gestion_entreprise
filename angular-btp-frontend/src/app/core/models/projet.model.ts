@@ -3,11 +3,10 @@ export interface Projet {
   nom: string;
   description: string;
   statut: string;
-  dateDebut: string; // Corresponds to LocalDate
-  dateFin: string;   // Corresponds to LocalDate
-  budget: number;    // Corresponds to BigDecimal
+  dateDebut: string;
+  dateFin: string;
+  budget: number;
   adresse: string;
   clientId: number;
-  responsableId: number;
+  chefProjetId: number; // FIX: Was 'responsableId'
 }
-

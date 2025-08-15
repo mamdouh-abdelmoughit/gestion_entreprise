@@ -5,8 +5,8 @@ export interface Employe {
   email: string;
   telephone: string;
   poste: string;
-  dateEmbauche: string; // Corresponds to LocalDate
+  dateEmbauche: string;
+  salaire: number; // FIX: This property was missing
   adresse: string;
   statut: string;
 }
-

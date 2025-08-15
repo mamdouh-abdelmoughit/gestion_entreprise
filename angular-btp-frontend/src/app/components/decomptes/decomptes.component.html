@@ -1,42 +1,53 @@
 <div class="decomptes-container">
   <div class="decomptes-header">
     <h2 class="decomptes-title">📊 Décomptes</h2>
-    <button class="btn btn-primary">Nouveau Décompte</button>
+    <button routerLink="/decomptes/new" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+      Nouveau décompte
+    </button>
   </div>
 
   <div class="decomptes-content">
     <h3 class="content-title">Liste des Décomptes</h3>
-    
+
     <div *ngIf="isLoading" class="loading-state">
       <div class="loading-spinner"></div>
       <p>Chargement...</p>
     </div>
-    
+
     <div *ngIf="!isLoading && !error && decomptesPage" class="table-container">
-      <table class="decomptes-table">
-        <thead>
-          <tr>
-            <th>Nom du Décompte</th>
-            <th>Statut</th>
-            <th>Montant</th>
-            <th>Date</th>
-            <th>Actions</th>
-          </tr>
+      <table class="min-w-full bg-white">
+        <thead class="bg-gray-100">
+        <tr>
+          <!-- FIX: Updated headers to match the correct model properties -->
+          <th class="py-2 px-4 text-left">Numéro</th>
+          <th class="py-2 px-4 text-left">Date</th>
+          <th class="py-2 px-4 text-left">Montant Total</th>
+          <th class="py-2 px-4 text-left">Statut</th>
+          <th class="py-2 px-4 text-left">Actions</th>
+        </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let decompte of decomptesPage.content">
-            <td>{{ decompte.nom }}</td>
-            <td>
-              <span class="status-badge" [ngClass]="'status-' + decompte.statut.toLowerCase()">
-                {{ decompte.statut }}
-              </span>
-            </td>
-            <td>{{ decompte.montant | currency:'EUR' }}</td>
-            <td>{{ decompte.date | date:'dd/MM/yyyy' }}</td>
-            <td>
-              <button class="btn btn-link">Détails</button>
-            </td>
-          </tr>
+        <tr *ngFor="let decompte of decomptesPage.content" class="border-b">
+          <!-- FIX: Changed all properties to match the corrected model -->
+          <td class="py-2 px-4">{{ decompte.numero }}</td>
+          <td class="py-2 px-4">{{ decompte.dateDecompte | date:'dd/MM/yyyy' }}</td>
+          <td class="py-2 px-4">{{ decompte.montantTotal | currency:'EUR' }}</td>
+          <td class="py-2 px-4">
+        <span class="px-2 py-1 text-xs rounded-full"
+              [ngClass]="{
+                'bg-yellow-200 text-yellow-800': decompte.statut === 'EN_ATTENTE',
+                'bg-green-200 text-green-800': decompte.statut === 'VALIDE',
+                'bg-red-200 text-red-800': decompte.statut === 'REJETE'
+              }">
+          {{ decompte.statut }}
+        </span>
+          </td>
+          <td class="py-2 px-4">
+            <button [routerLink]="['/decomptes/edit', decompte.id]" class="text-blue-600 hover:underline">Modifier</button>
+            <button (click)="deleteDecompte(decompte.id)" class="text-red-600 hover:underline">Supprimer</button>
+
+          </td>
+        </tr>
         </tbody>
       </table>
     </div>

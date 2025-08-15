@@ -1,0 +1,90 @@
+<div class="container mx-auto p-6">
+  <div class="max-w-3xl mx-auto">
+    <div class="bg-white rounded-lg shadow-sm p-6">
+      <h2 class="text-2xl font-bold text-gray-800 mb-6">
+        {{ isEditMode ? 'Modifier le Projet' : 'Créer un Nouveau Projet' }}
+      </h2>
+
+      <div *ngIf="isLoading" class="text-center">Chargement du formulaire...</div>
+
+      <form [formGroup]="projetForm" (ngSubmit)="onSubmit()" *ngIf="!isLoading">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Nom du Projet -->
+          <div class="md:col-span-2">
+            <label for="nom" class="block text-sm font-medium text-gray-700">Nom du Projet</label>
+            <input id="nom" type="text" formControlName="nom" class="mt-1 block w-full input-control">
+          </div>
+
+          <!-- Description -->
+          <div class="md:col-span-2">
+            <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+            <textarea id="description" formControlName="description" rows="3" class="mt-1 block w-full input-control"></textarea>
+          </div>
+
+          <!-- Client -->
+          <div>
+            <label for="clientId" class="block text-sm font-medium text-gray-700">Client</label>
+            <select id="clientId" formControlName="clientId" class="mt-1 block w-full input-control">
+              <option [ngValue]="null" disabled>Sélectionnez un client</option>
+              <option *ngFor="let client of clients" [value]="client.id">{{ client.nom }}</option>
+            </select>
+          </div>
+
+          <!-- Chef de Projet -->
+          <div>
+            <label for="chefProjetId" class="block text-sm font-medium text-gray-700">Chef de Projet</label>
+            <select id="chefProjetId" formControlName="chefProjetId" class="mt-1 block w-full input-control">
+              <option [ngValue]="null" disabled>Sélectionnez un chef de projet</option>
+              <option *ngFor="let user of chefsProjet" [value]="user.id">{{ user.username }}</option>
+            </select>
+          </div>
+
+          <!-- Date de Début -->
+          <div>
+            <label for="dateDebut" class="block text-sm font-medium text-gray-700">Date de Début</label>
+            <input id="dateDebut" type="date" formControlName="dateDebut" class="mt-1 block w-full input-control">
+          </div>
+
+          <!-- Date de Fin -->
+          <div>
+            <label for="dateFin" class="block text-sm font-medium text-gray-700">Date de Fin Prévue</label>
+            <input id="dateFin" type="date" formControlName="dateFin" class="mt-1 block w-full input-control">
+          </div>
+
+          <!-- Budget -->
+          <div>
+            <label for="budget" class="block text-sm font-medium text-gray-700">Budget (EUR)</label>
+            <input id="budget" type="number" formControlName="budget" class="mt-1 block w-full input-control">
+          </div>
+
+          <!-- Statut -->
+          <div>
+            <label for="statut" class="block text-sm font-medium text-gray-700">Statut</label>
+            <select id="statut" formControlName="statut" class="mt-1 block w-full input-control">
+              <option value="EN_PREPARATION">En Préparation</option>
+              <option value="EN_COURS">En Cours</option>
+              <option value="SUSPENDU">Suspendu</option>
+              <option value="TERMINE">Terminé</option>
+              <option value="LIVRE">Livré</option>
+            </select>
+          </div>
+
+          <!-- Adresse -->
+          <div class="md:col-span-2">
+            <label for="adresse" class="block text-sm font-medium text-gray-700">Adresse du Chantier</label>
+            <input id="adresse" type="text" formControlName="adresse" class="mt-1 block w-full input-control">
+          </div>
+        </div>
+
+        <div *ngIf="error" class="mt-4 text-red-500">{{ error }}</div>
+
+        <div class="mt-6 flex justify-end gap-4">
+          <button type="button" (click)="router.navigate(['/projets'])" class="btn-secondary">Annuler</button>
+          <button type="submit" [disabled]="projetForm.invalid || isLoading" class="btn-primary">
+            {{ isEditMode ? 'Mettre à jour' : 'Sauvegarder' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

@@ -1,38 +1,54 @@
 <div class="depenses-container">
   <div class="depenses-header">
     <h2 class="depenses-title">💸 Dépenses</h2>
-    <button class="btn btn-primary">Nouvelle Dépense</button>
+    <button routerLink="/depenses/new" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+      Nouvelle Dépense
+    </button>
   </div>
 
   <div class="depenses-content">
     <h3 class="content-title">Liste des Dépenses</h3>
-    
+
     <div *ngIf="isLoading" class="loading-state">
       <div class="loading-spinner"></div>
       <p>Chargement...</p>
     </div>
-    
+
     <div *ngIf="!isLoading && !error && depensesPage" class="table-container">
-      <table class="depenses-table">
-        <thead>
-          <tr>
-            <th>Description</th>
-            <th>Montant</th>
-            <th>Catégorie</th>
-            <th>Date</th>
-            <th>Actions</th>
-          </tr>
+      <table class="min-w-full bg-white">
+        <thead class="bg-gray-100">
+        <tr>
+          <th class="py-2 px-4 text-left">Description</th>
+          <th class="py-2 px-4 text-left">Catégorie</th>
+          <th class="py-2 px-4 text-left">Date</th>
+          <th class="py-2 px-4 text-right">Montant</th>
+          <th class="py-2 px-4 text-left">Statut</th>
+          <th class="py-2 px-4 text-left">Actions</th>
+        </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let depense of depensesPage.content">
-            <td>{{ depense.description }}</td>
-            <td>{{ depense.montant | currency:'EUR' }}</td>
-            <td>{{ depense.categorie }}</td>
-            <td>{{ depense.date | date:'dd/MM/yyyy' }}</td>
-            <td>
-              <button class="btn btn-link">Détails</button>
-            </td>
-          </tr>
+        <tr *ngFor="let depense of depensesPage.content" class="border-b">
+          <td class="py-2 px-4 font-medium">{{ depense.description }}</td>
+          <td class="py-2 px-4">{{ depense.categorie }}</td>
+          <!-- This line is now corrected -->
+          <td class="py-2 px-4">{{ depense.dateDepense | date:'dd/MM/yyyy' }}</td>
+          <td class="py-2 px-4 text-right">{{ depense.montant | currency:'EUR' }}</td>
+          <td class="py-2 px-4">
+        <span class="px-2 py-1 text-xs rounded-full"
+              [ngClass]="{
+                'bg-yellow-200 text-yellow-800': depense.statut === 'EN_ATTENTE',
+                'bg-green-200 text-green-800': depense.statut === 'APPROUVEE',
+                'bg-red-200 text-red-800': depense.statut === 'REJETEE'
+              }">
+          {{ depense.statut }}
+        </span>
+          </td>
+          <td class="py-2 px-4">
+            <button [routerLink]="['/depenses/edit', depense.id]" class="text-blue-600 hover:underline">Modifier</button>
+            <button (click)="deleteDepense(depense.id)" class="text-red-600 hover:underline">Supprimer</button>
+
+          </td>
+        </tr>
         </tbody>
       </table>
     </div>

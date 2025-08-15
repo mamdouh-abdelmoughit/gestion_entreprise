@@ -2,16 +2,16 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AuthService } from '../../core/services/auth.service'; // Adjust path based on your structure
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
-  selector: 'app-login', // Renamed selector
+  selector: 'app-login',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './login.component.html', // Point to external HTML file
-  styleUrls: ['./login.component.css'] // Point to external CSS file (optional)
+  templateUrl: './login.component.html',
+  styleUrls: ['./login.component.css']
 })
-export class LoginComponent implements OnInit { // Renamed class
+export class LoginComponent implements OnInit {
   loginForm!: FormGroup;
   errorMessage: string | null = null;
 
@@ -23,7 +23,9 @@ export class LoginComponent implements OnInit { // Renamed class
 
   ngOnInit(): void {
     this.loginForm = this.fb.group({
-      username: ['', [Validators.required, Validators.email]],
+      // FIX: Removed Validators.email to allow for usernames as well as emails.
+      // The backend expects a field named 'username'.
+      username: ['', [Validators.required]],
       password: ['', [Validators.required]]
     });
   }

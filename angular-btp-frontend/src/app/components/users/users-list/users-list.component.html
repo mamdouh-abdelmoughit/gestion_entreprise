@@ -1,0 +1,40 @@
+<p>users-list works!</p>
+<div class="container mx-auto p-6">
+  <div class="flex justify-between items-center mb-6">
+    <h2 class="text-2xl font-bold text-gray-800">🔑 Gestion des Utilisateurs</h2>
+    <!-- Note: User creation is handled by the register page, so no "New" button here -->
+  </div>
+  <div class="bg-white rounded-lg shadow-sm p-6">
+    <div *ngIf="isLoading" class="text-center">Chargement...</div>
+    <div *ngIf="error" class="text-center text-red-500">{{ error }}</div>
+    <div *ngIf="!isLoading && !error && usersPage" class="overflow-x-auto">
+      <table class="min-w-full bg-white">
+        <thead class="bg-gray-100">
+        <tr>
+          <th class="py-2 px-4 text-left">Nom d'utilisateur</th>
+          <th class="py-2 px-4 text-left">Email</th>
+          <th class="py-2 px-4 text-left">Rôles</th>
+          <th class="py-2 px-4 text-left">Statut</th>
+          <th class="py-2 px-4 text-left">Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let user of usersPage.content" class="border-b">
+          <td class="py-2 px-4 font-medium">{{ user.username }}</td>
+          <td class="py-2 px-4">{{ user.email }}</td>
+          <td class="py-2 px-4">{{ user.roles.join(', ') }}</td>
+          <td class="py-2 px-4">
+<span class="px-2 py-1 text-xs rounded-full" [ngClass]="user.enabled ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'">
+{{ user.enabled ? 'Activé' : 'Désactivé' }}
+</span>
+          </td>
+          <td class="py-2 px-4 flex gap-4">
+            <button [routerLink]="['/users/edit', user.id]" class="text-blue-600 hover:underline">Modifier</button>
+            <button (click)="deleteUser(user.id)" class="text-red-600 hover:underline">Supprimer</button>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

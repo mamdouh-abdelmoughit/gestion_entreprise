@@ -1,22 +1,24 @@
 <div class="projets-container">
   <div class="projets-header">
     <h2 class="projets-title">🏗️ Projets</h2>
-    <button class="btn btn-primary">Nouveau Projet</button>
+    <button routerLink="/projets/new" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+      Nouveau Projet
+    </button>
   </div>
 
   <div class="projets-content">
     <h3 class="content-title">Liste des Projets</h3>
-    
+
     <div *ngIf="isLoading" class="loading-state">
       <div class="loading-spinner"></div>
       <p>Chargement...</p>
     </div>
-    
+
     <div *ngIf="error" class="error-state">
       <div class="error-icon">⚠️</div>
       <p class="error-message">{{ error }}</p>
     </div>
-    
+
     <div *ngIf="!isLoading && !error && projetsPage" class="table-container">
       <table class="projets-table">
         <thead>
@@ -40,15 +42,19 @@
             <td class="budget">{{ projet.budget | currency:'EUR' }}</td>
             <td>
               <button class="btn btn-link">Détails</button>
-            </td>
+            <td class="py-2 px-4">
+              <button [routerLink]="['/projets/edit', projet.id]" class="text-blue-600 hover:underline">Modifier</button>
+            <button (click)="deleteProjet(projet.id)" class="text-red-600 hover:underline">Supprimer</button>
+
+          </td>
           </tr>
         </tbody>
       </table>
-      
+
       <div class="pagination-info">
-        <p>Affichage de {{ projetsPage.number * projetsPage.size + 1 }} à 
-           {{ (projetsPage.number + 1) * projetsPage.size > projetsPage.totalElements ? 
-              projetsPage.totalElements : (projetsPage.number + 1) * projetsPage.size }} 
+        <p>Affichage de {{ projetsPage.number * projetsPage.size + 1 }} à
+           {{ (projetsPage.number + 1) * projetsPage.size > projetsPage.totalElements ?
+              projetsPage.totalElements : (projetsPage.number + 1) * projetsPage.size }}
            sur {{ projetsPage.totalElements }} projets</p>
       </div>
     </div>

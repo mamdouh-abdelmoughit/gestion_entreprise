@@ -1,17 +1,19 @@
 <div class="appel-offres-container">
   <div class="appel-offres-header">
     <h2 class="appel-offres-title">📋 Appels d'offres</h2>
-    <button class="btn btn-primary">Nouvel Appel d'offres</button>
+    <button routerLink="/appel-offres/new" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+      Nouvel Appel d'Offres
+    </button>
   </div>
 
   <div class="appel-offres-content">
     <h3 class="content-title">Liste des Appels d'offres</h3>
-    
+
     <div *ngIf="isLoading" class="loading-state">
       <div class="loading-spinner"></div>
       <p>Chargement...</p>
     </div>
-    
+
     <div *ngIf="!isLoading && !error && appelOffresPage" class="table-container">
       <table class="appel-offres-table">
         <thead>
@@ -23,20 +25,30 @@
             <th>Actions</th>
           </tr>
         </thead>
+        <!-- ... inside the table body ... -->
         <tbody>
-          <tr *ngFor="let appelOffre of appelOffresPage.content">
-            <td>{{ appelOffre.nom }}</td>
-            <td>
-              <span class="status-badge" [ngClass]="'status-' + appelOffre.statut.toLowerCase()">
-                {{ appelOffre.statut }}
-              </span>
-            </td>
-            <td>{{ appelOffre.dateDebut | date:'dd/MM/yyyy' }}</td>
-            <td>{{ appelOffre.budget | currency:'EUR' }}</td>
-            <td>
-              <button class="btn btn-link">Détails</button>
-            </td>
-          </tr>
+        <tr *ngFor="let appelOffre of appelOffresPage.content" class="border-b">
+          <!-- FIX: Changed appelOffre.nom to the correct property, appelOffre.titre -->
+          <td class="py-2 px-4 font-medium">{{ appelOffre.titre }}</td>
+          <td class="py-2 px-4">{{ appelOffre.dateLimite | date:'dd/MM/yyyy' }}</td>
+          <td class="py-2 px-4">{{ appelOffre.budgetEstimatif | currency:'EUR' }}</td>
+          <td class="py-2 px-4">
+      <span class="px-2 py-1 text-xs rounded-full"
+            [ngClass]="{
+              'bg-blue-200 text-blue-800': appelOffre.statut === 'OUVERT',
+              'bg-gray-200 text-gray-800': appelOffre.statut === 'FERME',
+              'bg-green-200 text-green-800': appelOffre.statut === 'ATTRIBUE',
+              'bg-red-200 text-red-800': appelOffre.statut === 'ANNULE'
+            }">
+        {{ appelOffre.statut }}
+      </span>
+          </td>
+          <td class="py-2 px-4">
+            <button [routerLink]="['/appel-offres/edit', appelOffre.id]" class="text-blue-600 hover:underline">Modifier</button>
+            <button (click)="deleteAppelOffre(appelOffre.id)" class="text-red-600 hover:underline">Supprimer</button>
+
+          </td>
+        </tr>
         </tbody>
       </table>
     </div>
