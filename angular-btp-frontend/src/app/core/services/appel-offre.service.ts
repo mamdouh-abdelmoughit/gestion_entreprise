@@ -9,7 +9,7 @@ import { environment } from '../../../environments/environment';
   providedIn: 'root'
 })
 export class AppelOffreService {
-  private apiUrl = '${environment.apiUrl}/appel-offres';
+  private apiUrl = `${environment.apiUrl}/appel-offres`;
 
   constructor(private http: HttpClient) { }
 

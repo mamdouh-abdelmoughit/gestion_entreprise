@@ -1,6 +1,8 @@
 export interface AppelOffre {
   id: number;
-  titre: string; // FIX: This is the correct property name, not 'nom'
+  numero: string; // Add the property here
+  titre: string;
+  maitreDOuvrage: string;
   description: string;
   budgetEstimatif: number;
   datePublication: string;

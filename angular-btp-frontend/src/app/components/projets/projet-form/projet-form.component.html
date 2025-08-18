@@ -10,11 +10,19 @@
       <form [formGroup]="projetForm" (ngSubmit)="onSubmit()" *ngIf="!isLoading">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <!-- Nom du Projet -->
-          <div class="md:col-span-2">
-            <label for="nom" class="block text-sm font-medium text-gray-700">Nom du Projet</label>
-            <input id="nom" type="text" formControlName="nom" class="mt-1 block w-full input-control">
+          <div>
+            <label for="numero" class="form-label">Numéro du Projet</label>
+            <input id="numero" type="text" formControlName="numero" class="input-control">
           </div>
-
+          <div>
+            <label for="nom" class="form-label">Nom du Projet</label>
+            <input id="nom" type="text" formControlName="nom" class="input-control">
+          </div>
+        </div>
+        <div class="md:col-span-2">
+          <label for="maitreDOuvrage" class="form-label">Maître d'Ouvrage</label>
+          <input id="maitreDOuvrage" type="text" formControlName="maitreDOuvrage" class="input-control">
+        </div>
           <!-- Description -->
           <div class="md:col-span-2">
             <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
@@ -52,10 +60,10 @@
           </div>
 
           <!-- Budget -->
-          <div>
-            <label for="budget" class="block text-sm font-medium text-gray-700">Budget (EUR)</label>
-            <input id="budget" type="number" formControlName="budget" class="mt-1 block w-full input-control">
-          </div>
+        <div>
+          <label for="montantContrat" class="form-label">Montant du Contrat (EUR)</label>
+          <input id="montantContrat" type="number" formControlName="montantContrat" class="input-control">
+        </div>
 
           <!-- Statut -->
           <div>
@@ -74,7 +82,7 @@
             <label for="adresse" class="block text-sm font-medium text-gray-700">Adresse du Chantier</label>
             <input id="adresse" type="text" formControlName="adresse" class="mt-1 block w-full input-control">
           </div>
-        </div>
+
 
         <div *ngIf="error" class="mt-4 text-red-500">{{ error }}</div>
 

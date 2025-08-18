@@ -32,6 +32,10 @@
         </tr>
         </tbody>
       </table>
+      <app-pagination
+      [page]="affectationsPage"
+      (pageChange)="onPageChange($event)">
+    </app-pagination>
     </div>
   </div>
 </div>

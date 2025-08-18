@@ -38,13 +38,15 @@ export class CautionFormComponent implements OnInit {
 
   private initForm(): void {
     this.cautionForm = this.fb.group({
+      numero: ['', [Validators.required]], // Add the form control
       type: ['', [Validators.required]],
+      banque: ['', [Validators.required]], // Add the form control
       montant: [0, [Validators.required, Validators.min(0)]],
       dateEmission: ['', [Validators.required]],
       dateEcheance: ['', [Validators.required]],
       statut: ['ACTIVE', [Validators.required]],
-      projetId: [null] // Can be nullable
-      // beneficiaire is in the model but not handled here for simplicity
+      projetId: [null]
+      // numero is in the entity, but not yet on the form. This will be the next bug.
     });
   }
 

@@ -1,0 +1,31 @@
+<div *ngIf="page && page.totalPages > 1" class="flex items-center justify-between mt-6">
+  <!-- Previous Button -->
+  <button
+    (click)="goToPage(page.number - 1)"
+    [disabled]="page.first"
+    class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
+    Précédent
+  </button>
+
+  <!-- Page Numbers (simplified for now) -->
+  <div class="flex items-center gap-2">
+    <button
+      *ngFor="let pageNum of getPages()"
+      (click)="goToPage(pageNum)"
+      class="px-4 py-2 text-sm font-medium rounded-lg"
+      [ngClass]="{
+        'bg-blue-600 text-white': pageNum === page.number,
+        'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100': pageNum !== page.number
+      }">
+      {{ pageNum + 1 }}
+    </button>
+  </div>
+
+  <!-- Next Button -->
+  <button
+    (click)="goToPage(page.number + 1)"
+    [disabled]="page.last"
+    class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
+    Suivant
+  </button>
+</div>

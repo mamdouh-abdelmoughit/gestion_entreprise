@@ -4,11 +4,12 @@ import { AppelOffre } from '../../core/models/appel-offre.model';
 import { AppelOffreService } from '../../core/services/appel-offre.service';
 import { Page } from '../../core/models/page.model';
 import {RouterLink} from "@angular/router";
+import {PaginationComponent} from "../../shared/pagination/pagination.component";
 
 @Component({
   selector: 'app-appel-offres',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, PaginationComponent],
   templateUrl: './appel-offres.component.html',
   styleUrls: ['./appel-offres.component.css']
 })
@@ -37,6 +38,9 @@ export class AppelOffresComponent implements OnInit {
         console.error(err);
       }
     });
+  }
+  onPageChange(newPage: number): void {
+    this.loadAppelOffres(newPage);
   }
   deleteAppelOffre(id: number): void {
     if (confirm('Êtes-vous sûr de vouloir supprimer cet appel d\'offres ?')) {

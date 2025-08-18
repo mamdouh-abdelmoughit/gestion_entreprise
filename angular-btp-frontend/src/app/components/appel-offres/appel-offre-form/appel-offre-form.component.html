@@ -1,21 +1,40 @@
 <div class="container mx-auto p-6">
   <div class="max-w-2xl mx-auto">
     <div class="bg-white rounded-lg shadow-sm p-6">
-      <h2 class="text-2xl font-bold text-gray-800 mb-6">{{ isEditMode ? 'Modifier l\'Appel d\'Offres' : 'Nouvel Appel d\'Offres' }}</h2>
+      <h2 class="text-2xl font-bold text-gray-800 mb-6">
+        {{ isEditMode ? 'Modifier l\'Appel d\'Offres' : 'Nouvel Appel d\'Offres' }}
+      </h2>
       <div *ngIf="isLoading" class="text-center">Chargement...</div>
-      <form [formGroup]="appelOffreForm" (ngSubmit)="onSubmit()" *ngIf="!isLoading">
+
+      <form [formGroup]="appelOffreForm" (ngSubmit)="onSubmit()" *ngIf="!isLoading && appelOffreForm">
         <div class="space-y-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label for="numero" class="form-label">Numéro d'Appel d'Offres</label>
+              <input id="numero" type="text" formControlName="numero" class="input-control">
+            </div>
+            <div>
+              <label for="titre" class="form-label">Titre</label>
+              <input id="titre" type="text" formControlName="titre" class="input-control">
+            </div>
+          </div>
           <div>
-            <label for="titre" class="form-label">Titre</label>
-            <input id="titre" type="text" formControlName="titre" class="input-control">
+            <label for="maitreDOuvrage" class="form-label">Maître d'Ouvrage</label>
+            <input id="maitreDOuvrage" type="text" formControlName="maitreDOuvrage" class="input-control">
           </div>
           <div>
             <label for="description" class="form-label">Description</label>
             <textarea id="description" formControlName="description" class="input-control"></textarea>
           </div>
-          <div>
-            <label for="dateLimite" class="form-label">Date Limite de Dépôt</label>
-            <input id="dateLimite" type="date" formControlName="dateLimite" class="input-control">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label for="datePublication" class="form-label">Date de Publication</label>
+              <input id="datePublication" type="date" formControlName="datePublication" class="input-control">
+            </div>
+            <div>
+              <label for="dateLimite" class="form-label">Date Limite de Dépôt</label>
+              <input id="dateLimite" type="date" formControlName="dateLimite" class="input-control">
+            </div>
           </div>
           <div>
             <label for="budgetEstimatif" class="form-label">Budget Estimatif (EUR)</label>
@@ -24,9 +43,10 @@
           <div>
             <label for="statut" class="form-label">Statut</label>
             <select id="statut" formControlName="statut" class="input-control">
-              <option value="OUVERT">Ouvert</option>
-              <option value="FERME">Fermé</option>
-              <option value="ATTRIBUE">Attribué</option>
+              <option value="EN_COURS">En Cours</option>
+              <option value="DEPOSE">Déposé</option>
+              <option value="GAGNE">Gagné</option>
+              <option value="PERDU">Perdu</option>
               <option value="ANNULE">Annulé</option>
             </select>
           </div>
@@ -34,7 +54,9 @@
         <div *ngIf="error" class="mt-4 text-red-500">{{ error }}</div>
         <div class="mt-6 flex justify-end gap-4">
           <button type="button" (click)="router.navigate(['/appel-offres'])" class="btn-secondary">Annuler</button>
-          <button type="submit" [disabled]="appelOffreForm.invalid || isLoading" class="btn-primary">{{ isEditMode ? 'Mettre à jour' : 'Sauvegarder' }}</button>
+          <button type="submit" [disabled]="appelOffreForm.invalid || isLoading" class="btn-primary">
+            {{ isEditMode ? 'Mettre à jour' : 'Sauvegarder' }}
+          </button>
         </div>
       </form>
     </div>

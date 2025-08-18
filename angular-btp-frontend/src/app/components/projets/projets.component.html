@@ -39,7 +39,7 @@
               </span>
             </td>
             <td>{{ projet.dateDebut | date:'dd/MM/yyyy' }}</td>
-            <td class="budget">{{ projet.budget | currency:'EUR' }}</td>
+            <td class="budget">{{ projet.montantContrat | currency:'EUR' }}</td>
             <td>
               <button class="btn btn-link">Détails</button>
             <td class="py-2 px-4">
@@ -50,6 +50,10 @@
           </tr>
         </tbody>
       </table>
+      <app-pagination
+        [page]="projetsPage"
+        (pageChange)="onPageChange($event)">
+      </app-pagination>
 
       <div class="pagination-info">
         <p>Affichage de {{ projetsPage.number * projetsPage.size + 1 }} à

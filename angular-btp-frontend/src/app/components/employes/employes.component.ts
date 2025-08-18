@@ -4,11 +4,12 @@ import { Employe } from '../../core/models/employe.model';
 import { EmployeService } from '../../core/services/employe.service';
 import { Page } from '../../core/models/page.model';
 import {RouterLink} from "@angular/router";
+import {PaginationComponent} from "../../shared/pagination/pagination.component";
 
 @Component({
   selector: 'app-employes',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, PaginationComponent],
   templateUrl: './employes.component.html',
   styleUrls: ['./employes.component.css']
 })
@@ -37,6 +38,9 @@ export class EmployesComponent implements OnInit {
         console.error(err);
       }
     });
+  }
+  onPageChange(newPage:number){
+    this.loadEmployes(newPage);
   }
   deleteEmploye(id: number): void {
     if (confirm('Êtes-vous sûr de vouloir supprimer cet employé ?')) {

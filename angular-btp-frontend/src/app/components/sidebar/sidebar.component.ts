@@ -1,17 +1,15 @@
-import { Component, Output, EventEmitter } from '@angular/core';
+import { Component, Output, EventEmitter, Input } from '@angular/core'; // Import Input
 import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-sidebar',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './sidebar.component.html',
-  styleUrls: ['./sidebar.component.css']
+  templateUrl: './sidebar.component.html'
 })
 export class SidebarComponent {
   @Output() moduleChange = new EventEmitter<string>();
-
-  activeModule = 'dashboard';
+  @Input() activeModule: string = 'dashboard'; // 1. Add Input property
 
   modules = [
     { id: 'dashboard', name: 'Tableau de bord', icon: '📊' },
@@ -28,9 +26,4 @@ export class SidebarComponent {
     { id: 'users', name: 'Utilisateurs', icon: '🔑' }, // Add this line
     { id: 'roles', name: 'Rôles', icon: '🛡️' } // Add this line
   ];
-
-  selectModule(moduleId: string) {
-    this.activeModule = moduleId;
-    this.moduleChange.emit(moduleId);
-  }
 }

@@ -39,7 +39,8 @@
               [ngClass]="{
                 'bg-green-200 text-green-800': caution.statut === 'ACTIVE',
                 'bg-red-200 text-red-800': caution.statut === 'EXPIREE',
-                'bg-gray-200 text-gray-800': caution.statut === 'CLOTUREE'
+                'bg-gray-200 text-gray-800': caution.statut === 'RESTITUEE',
+                'bg-orange-200 text-orange-800': caution.statut === 'CONFISQUEE'
               }">
           {{ caution.statut }}
         </span>
@@ -52,6 +53,10 @@
         </tr>
         </tbody>
       </table>
+      <app-pagination
+        [page]="cautionsPage"
+        (pageChange)="onPageChange($event)">
+      </app-pagination>
     </div>
   </div>
 </div>

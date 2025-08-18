@@ -1,56 +1,62 @@
-<div class="appel-offres-container">
-  <div class="appel-offres-header">
-    <h2 class="appel-offres-title">📋 Appels d'offres</h2>
+<div class="container mx-auto p-6">
+  <div class="flex justify-between items-center mb-6">
+    <h2 class="text-2xl font-bold text-gray-800">📢 Appels d'Offres</h2>
     <button routerLink="/appel-offres/new" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
       Nouvel Appel d'Offres
     </button>
   </div>
 
-  <div class="appel-offres-content">
-    <h3 class="content-title">Liste des Appels d'offres</h3>
+  <div class="bg-white rounded-lg shadow-sm p-6">
+    <h3 class="text-lg font-semibold mb-4">Liste des Appels d'Offres</h3>
+    <div *ngIf="isLoading" class="text-center">Chargement...</div>
+    <div *ngIf="error" class="text-center text-red-500">{{ error }}</div>
 
-    <div *ngIf="isLoading" class="loading-state">
-      <div class="loading-spinner"></div>
-      <p>Chargement...</p>
-    </div>
-
-    <div *ngIf="!isLoading && !error && appelOffresPage" class="table-container">
-      <table class="appel-offres-table">
-        <thead>
-          <tr>
-            <th>Nom de l'Appel d'offres</th>
-            <th>Statut</th>
-            <th>Date de Début</th>
-            <th>Budget</th>
-            <th>Actions</th>
-          </tr>
+    <div *ngIf="!isLoading && !error && appelOffresPage" class="overflow-x-auto">
+      <table class="min-w-full bg-white">
+        <thead class="bg-gray-100">
+        <tr>
+          <!-- CORRECTED HEADERS to match the data -->
+          <th class="py-2 px-4 text-left">Numéro</th>
+          <th class="py-2 px-4 text-left">Titre</th>
+          <th class="py-2 px-4 text-left">Date Limite</th>
+          <th class="py-2 px-4 text-right">Budget Estimatif</th>
+          <th class="py-2 px-4 text-left">Statut</th>
+          <th class="py-2 px-4 text-left">Actions</th>
+        </tr>
         </thead>
-        <!-- ... inside the table body ... -->
         <tbody>
         <tr *ngFor="let appelOffre of appelOffresPage.content" class="border-b">
-          <!-- FIX: Changed appelOffre.nom to the correct property, appelOffre.titre -->
-          <td class="py-2 px-4 font-medium">{{ appelOffre.titre }}</td>
+          <!-- CORRECTED DATA BINDING to show all relevant fields -->
+          <td class="py-2 px-4 font-medium">{{ appelOffre.numero }}</td>
+          <td class="py-2 px-4">{{ appelOffre.titre }}</td>
           <td class="py-2 px-4">{{ appelOffre.dateLimite | date:'dd/MM/yyyy' }}</td>
-          <td class="py-2 px-4">{{ appelOffre.budgetEstimatif | currency:'EUR' }}</td>
+          <td class="py-2 px-4 text-right">{{ appelOffre.budgetEstimatif | currency:'EUR' }}</td>
           <td class="py-2 px-4">
-      <span class="px-2 py-1 text-xs rounded-full"
-            [ngClass]="{
-              'bg-blue-200 text-blue-800': appelOffre.statut === 'OUVERT',
-              'bg-gray-200 text-gray-800': appelOffre.statut === 'FERME',
-              'bg-green-200 text-green-800': appelOffre.statut === 'ATTRIBUE',
-              'bg-red-200 text-red-800': appelOffre.statut === 'ANNULE'
-            }">
-        {{ appelOffre.statut }}
-      </span>
+            <!-- CORRECTED [ngClass] to use the backend ENUM values -->
+            <span class="px-2 py-1 text-xs font-semibold rounded-full"
+                  [ngClass]="{
+                      'bg-blue-200 text-blue-800': appelOffre.statut === 'EN_COURS',
+                      'bg-yellow-200 text-yellow-800': appelOffre.statut === 'DEPOSE',
+                      'bg-green-200 text-green-800': appelOffre.statut === 'GAGNE',
+                      'bg-red-200 text-red-800': appelOffre.statut === 'PERDU',
+                      'bg-gray-200 text-gray-800': appelOffre.statut === 'ANNULE'
+                    }">
+                {{ appelOffre.statut }}
+              </span>
           </td>
-          <td class="py-2 px-4">
+          <td class="py-2 px-4 flex gap-4">
             <button [routerLink]="['/appel-offres/edit', appelOffre.id]" class="text-blue-600 hover:underline">Modifier</button>
             <button (click)="deleteAppelOffre(appelOffre.id)" class="text-red-600 hover:underline">Supprimer</button>
-
           </td>
         </tr>
         </tbody>
       </table>
+
+      <app-pagination
+        [page]="appelOffresPage"
+        (pageChange)="onPageChange($event)">
+      </app-pagination>
+
     </div>
   </div>
 </div>

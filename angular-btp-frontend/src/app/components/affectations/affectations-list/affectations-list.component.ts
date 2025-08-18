@@ -4,11 +4,12 @@ import { RouterLink } from '@angular/router';
 import { AffectationEmploye } from '../../../core/models/affectation-employe.model';
 import { AffectationEmployeService } from '../../../core/services/affectation-employe.service';
 import { Page } from '../../../core/models/page.model';
+import {PaginationComponent} from "../../../shared/pagination/pagination.component";
 
 @Component({
   selector: 'app-affectations-list',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, PaginationComponent],
   templateUrl: './affectations-list.component.html'
 })
 export class AffectationsListComponent implements OnInit {
@@ -35,6 +36,9 @@ export class AffectationsListComponent implements OnInit {
         this.isLoading = false;
       }
     });
+  }
+  onPageChange(newPage: number): void {
+    this.loadAffectations(newPage);
   }
 
   deleteAffectation(id: number): void {

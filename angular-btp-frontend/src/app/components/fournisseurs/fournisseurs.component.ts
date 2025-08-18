@@ -3,13 +3,14 @@ import { CommonModule } from '@angular/common';
 import { Fournisseur } from '../../core/models/fournisseur.model';
 import { FournisseurService } from '../../core/services/fournisseur.service';
 import { Page } from '../../core/models/page.model';
-import { RouterLink } from '@angular/router'; // 1. Import RouterLink
+import { RouterLink } from '@angular/router';
+import {PaginationComponent} from "../../shared/pagination/pagination.component"; // 1. Import RouterLink
 
 
 @Component({
   selector: 'app-fournisseurs',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, PaginationComponent],
   templateUrl: './fournisseurs.component.html',
   styleUrls: ['./fournisseurs.component.css']
 })
@@ -38,6 +39,9 @@ export class FournisseursComponent implements OnInit {
         console.error(err);
       }
     });
+  }
+  onPageChange(newPage:number){
+    this.loadFournisseurs(newPage);
   }
   deleteFournisseur(id: number): void {
     if (confirm('Êtes-vous sûr de vouloir supprimer ce fournisseur ?')) {

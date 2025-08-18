@@ -4,11 +4,12 @@ import { Projet } from '../../core/models/projet.model';
 import { ProjetService } from '../../core/services/projet.service';
 import { Page } from '../../core/models/page.model';
 import {RouterLink} from "@angular/router";
+import {PaginationComponent} from "../../shared/pagination/pagination.component";
 
 @Component({
   selector: 'app-projets',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, PaginationComponent],
   templateUrl: './projets.component.html',
   styleUrls: ['./projets.component.css']
 })
@@ -37,7 +38,11 @@ export class ProjetsComponent implements OnInit {
         console.error(err);
       }
     });
-  }deleteProjet(id: number): void {
+  }
+  onPageChange(newPage:number){
+   this.loadProjets(newPage);
+  }
+  deleteProjet(id: number): void {
     if (confirm('Êtes-vous sûr de vouloir supprimer ce projet ? Cette action est irréversible.')) {
       this.projetService.deleteProjet(id).subscribe({
         next: () => {

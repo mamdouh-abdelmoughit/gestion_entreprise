@@ -45,7 +45,10 @@
         </tr>
         </tbody>
       </table>
-      <!-- TODO: Add pagination controls -->
+      <app-pagination
+        [page]="clientsPage"
+        (pageChange)="onPageChange($event)">
+      </app-pagination>
     </div>
   </div>
 </div>

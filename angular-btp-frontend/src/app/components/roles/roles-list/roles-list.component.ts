@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { Role } from '../../../core/models/role.model';
 import { RoleService } from '../../../core/services/role.service';
 import { Page } from '../../../core/models/page.model';
+import {PaginationComponent} from "../../../shared/pagination/pagination.component";
 
 @Component({
   selector: 'app-roles-list',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, PaginationComponent],
   templateUrl: './roles-list.component.html'
 })
 export class RolesListComponent implements OnInit {
@@ -34,5 +35,8 @@ export class RolesListComponent implements OnInit {
         this.isLoading = false;
       }
     });
+  }
+  onPageChange(newPage:number){
+    this.loadRoles(newPage);
   }
 }

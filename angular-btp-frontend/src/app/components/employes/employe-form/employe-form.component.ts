@@ -32,12 +32,14 @@ export class EmployeFormComponent implements OnInit {
 
   private initForm(): void {
     this.employeForm = this.fb.group({
+      cin: ['', [Validators.required]], // Add the form control
       nom: ['', [Validators.required]],
       prenom: ['', [Validators.required]],
       email: ['', [Validators.required, Validators.email]],
       telephone: [''],
       poste: ['', [Validators.required]],
       dateEmbauche: ['', [Validators.required]],
+      salaire: [0, [Validators.required, Validators.min(0)]], // Add the form control
       adresse: [''],
       statut: ['ACTIF', [Validators.required]]
     });

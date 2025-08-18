@@ -3,7 +3,8 @@
     <div class="bg-white rounded-lg shadow-sm p-6">
       <h2 class="text-2xl font-bold text-gray-800 mb-6">{{ isEditMode ? 'Modifier l\'Employé' : 'Nouvel Employé' }}</h2>
       <div *ngIf="isLoading" class="text-center">Chargement...</div>
-      <form [formGroup]="employeForm" (ngSubmit)="onSubmit()" *ngIf="!isLoading">
+
+      <form [formGroup]="employeForm" (ngSubmit)="onSubmit()" *ngIf="!isLoading && employeForm">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label for="nom" class="form-label">Nom</label>
@@ -12,6 +13,10 @@
           <div>
             <label for="prenom" class="form-label">Prénom</label>
             <input id="prenom" type="text" formControlName="prenom" class="input-control">
+          </div>
+          <div class="md:col-span-2">
+            <label for="cin" class="form-label">CIN (Carte d'Identité Nationale)</label>
+            <input id="cin" type="text" formControlName="cin" class="input-control">
           </div>
           <div>
             <label for="email" class="form-label">Email</label>
@@ -29,22 +34,33 @@
             <label for="dateEmbauche" class="form-label">Date d'Embauche</label>
             <input id="dateEmbauche" type="date" formControlName="dateEmbauche" class="input-control">
           </div>
+          <div>
+            <label for="salaire" class="form-label">Salaire (EUR)</label>
+            <input id="salaire" type="number" formControlName="salaire" class="input-control">
+          </div>
           <div class="md:col-span-2">
             <label for="adresse" class="form-label">Adresse</label>
             <textarea id="adresse" formControlName="adresse" class="input-control"></textarea>
           </div>
           <div>
             <label for="statut" class="form-label">Statut</label>
+            <!-- CORRECTED <select> to use the backend ENUM values -->
             <select id="statut" formControlName="statut" class="input-control">
               <option value="ACTIF">Actif</option>
-              <option value="INACTIF">Inactif</option>
+              <option value="CONGE">En Congé</option>
+              <option value="SUSPENDU">Suspendu</option>
+              <option value="DEMISSIONNE">Démissionné</option>
             </select>
           </div>
         </div>
+
         <div *ngIf="error" class="mt-4 text-red-500">{{ error }}</div>
+
         <div class="mt-6 flex justify-end gap-4">
           <button type="button" (click)="router.navigate(['/employes'])" class="btn-secondary">Annuler</button>
-          <button type="submit" [disabled]="employeForm.invalid || isLoading" class="btn-primary">{{ isEditMode ? 'Mettre à jour' : 'Sauvegarder' }}</button>
+          <button type="submit" [disabled]="employeForm.invalid || isLoading" class="btn-primary">
+            {{ isEditMode ? 'Mettre à jour' : 'Sauvegarder' }}
+          </button>
         </div>
       </form>
     </div>

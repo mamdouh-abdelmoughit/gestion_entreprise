@@ -36,9 +36,9 @@
           <td class="py-2 px-4">
         <span class="px-2 py-1 text-xs rounded-full"
               [ngClass]="{
-                'bg-yellow-200 text-yellow-800': depense.statut === 'EN_ATTENTE',
-                'bg-green-200 text-green-800': depense.statut === 'APPROUVEE',
-                'bg-red-200 text-red-800': depense.statut === 'REJETEE'
+              'bg-yellow-200 text-yellow-800': depense.statut === 'PREVUE',
+              'bg-blue-200 text-blue-800': depense.statut === 'ENGEAGEE',
+              'bg-green-200 text-green-800': depense.statut === 'PAYEE'
               }">
           {{ depense.statut }}
         </span>
@@ -51,6 +51,10 @@
         </tr>
         </tbody>
       </table>
+      <app-pagination
+        [page]="depensesPage"
+        (pageChange)="onPageChange($event)">
+      </app-pagination>
     </div>
   </div>
 </div>

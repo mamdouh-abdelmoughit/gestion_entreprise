@@ -1,5 +1,6 @@
 export interface Employe {
   id: number;
+  cin: string; // Add the property here
   nom: string;
   prenom: string;
   email: string;

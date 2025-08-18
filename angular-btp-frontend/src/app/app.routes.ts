@@ -1,123 +1,123 @@
 import { Routes } from '@angular/router';
 
-// Auth Components
+// Layouts and Guards
+import { MainLayoutComponent } from './layouts/main-layout/main-layout.component';
+import { AuthGuard } from './core/guards/auth.guard';
+
+// Page Components
 import { LoginComponent } from './auth/login/login.component';
-
-// Main Layout Components
 import { DashboardComponent } from './components/dashboard/dashboard.component';
-
-// --- START OF IMPORTS ---
-
-// Client Components
 import { ClientsComponent } from './components/clients/clients.component';
 import { ClientFormComponent } from './components/clients/client-form/client-form.component';
-
-// Projet Components
 import { ProjetsComponent } from './components/projets/projets.component';
 import { ProjetFormComponent } from './components/projets/projet-form/projet-form.component';
-
-// Appel d'Offres Components
 import { AppelOffresComponent } from './components/appel-offres/appel-offres.component';
 import { AppelOffreFormComponent } from './components/appel-offres/appel-offre-form/appel-offre-form.component';
-
-// Caution Components
 import { CautionsComponent } from './components/cautions/cautions.component';
 import { CautionFormComponent } from './components/cautions/caution-form/caution-form.component';
-
-// Decompte Components
 import { DecomptesComponent } from './components/decomptes/decomptes.component';
 import { DecompteFormComponent } from './components/decomptes/decompte-form/decompte-form.component';
-
-// Depense Components
 import { DepensesComponent } from './components/depenses/depenses.component';
 import { DepenseFormComponent } from './components/depenses/depense-form/depense-form.component';
-
-// Document Components
 import { DocumentsComponent } from './components/documents/documents.component';
 import { DocumentFormComponent } from './components/documents/document-form/document-form.component';
-
-// Employe Components
 import { EmployesComponent } from './components/employes/employes.component';
 import { EmployeFormComponent } from './components/employes/employe-form/employe-form.component';
-
-// Fournisseur Components
 import { FournisseursComponent } from './components/fournisseurs/fournisseurs.component';
 import { FournisseurFormComponent } from './components/fournisseurs/fournisseur-form/fournisseur-form.component';
-import {AffectationsListComponent} from "./components/affectations/affectations-list/affectations-list.component";
-import {AffectationFormComponent} from "./components/affectations/affectation-form/affectation-form.component";
-import {UsersListComponent} from "./components/users/users-list/users-list.component";
-import {UserFormComponent} from "./components/users/user-form/user-form.component";
-import {RolesListComponent} from "./components/roles/roles-list/roles-list.component";
+import { AffectationsListComponent } from './components/affectations/affectations-list/affectations-list.component';
+import { AffectationFormComponent } from './components/affectations/affectation-form/affectation-form.component';
+import { UsersListComponent } from './components/users/users-list/users-list.component';
+import { UserFormComponent } from './components/users/user-form/user-form.component';
+import { RolesListComponent } from './components/roles/roles-list/roles-list.component';
+import { RegisterComponent } from './auth/register/register.component'; // 1. Import the component
+import { LoginGuard } from './core/guards/login.guard'; // 1. Import the new LoginGuard
 
-// --- END OF IMPORTS ---
+
+
 
 export const routes: Routes = [
-  // Authentication
-  { path: 'login', component: LoginComponent },
-  { path: '', redirectTo: '/dashboard', pathMatch: 'full' }, // Redirect to dashboard after login as a default
+  // --- PUBLIC ROUTES ---
+  // These routes do not use the MainLayout and do not require the AuthGuard.
+  { path: 'login', component: LoginComponent ,
+    canActivate: [LoginGuard]},
+  { path: 'register', component: RegisterComponent ,
+    canActivate: [LoginGuard]}, // 2. Add the new route
 
-  // Dashboard
-  { path: 'dashboard', component: DashboardComponent },
 
-  // Projets
-  { path: 'projets', component: ProjetsComponent },
-  { path: 'projets/new', component: ProjetFormComponent },
-  { path: 'projets/edit/:id', component: ProjetFormComponent },
+  // --- AUTHENTICATED ROUTES ---
+  // All routes inside this block will be children of the MainLayoutComponent.
+  // The AuthGuard is applied ONCE to the parent, protecting all children.
+  {
+    path: '', // This acts as the parent route for the main application layout
+    component: MainLayoutComponent,
+    canActivate: [AuthGuard],
+    children: [
+      { path: 'dashboard', component: DashboardComponent },
 
-  // Clients
-  { path: 'clients', component: ClientsComponent },
-  { path: 'clients/new', component: ClientFormComponent },
-  { path: 'clients/edit/:id', component: ClientFormComponent },
+      // Clients
+      { path: 'clients', component: ClientsComponent },
+      { path: 'clients/new', component: ClientFormComponent },
+      { path: 'clients/edit/:id', component: ClientFormComponent },
 
-  // Appel d'Offres
-  { path: 'appel-offres', component: AppelOffresComponent },
-  { path: 'appel-offres/new', component: AppelOffreFormComponent },
-  { path: 'appel-offres/edit/:id', component: AppelOffreFormComponent },
+      // Projets
+      { path: 'projets', component: ProjetsComponent },
+      { path: 'projets/new', component: ProjetFormComponent },
+      { path: 'projets/edit/:id', component: ProjetFormComponent },
 
-  // Cautions
-  { path: 'cautions', component: CautionsComponent },
-  { path: 'cautions/new', component: CautionFormComponent },
-  { path: 'cautions/edit/:id', component: CautionFormComponent },
+      // Appel d'Offres
+      { path: 'appel-offres', component: AppelOffresComponent },
+      { path: 'appel-offres/new', component: AppelOffreFormComponent },
+      { path: 'appel-offres/edit/:id', component: AppelOffreFormComponent },
 
-  // Décomptes
-  { path: 'decomptes', component: DecomptesComponent },
-  { path: 'decomptes/new', component: DecompteFormComponent },
-  { path: 'decomptes/edit/:id', component: DecompteFormComponent },
+      // Cautions
+      { path: 'cautions', component: CautionsComponent },
+      { path: 'cautions/new', component: CautionFormComponent },
+      { path: 'cautions/edit/:id', component: CautionFormComponent },
 
-  // Dépenses
-  { path: 'depenses', component: DepensesComponent },
-  { path: 'depenses/new', component: DepenseFormComponent },
-  { path: 'depenses/edit/:id', component: DepenseFormComponent },
+      // Décomptes
+      { path: 'decomptes', component: DecomptesComponent },
+      { path: 'decomptes/new', component: DecompteFormComponent },
+      { path: 'decomptes/edit/:id', component: DecompteFormComponent },
 
-  // Documents
-  { path: 'documents', component: DocumentsComponent },
-  { path: 'documents/new', component: DocumentFormComponent },
-  // Note: Document edit might not be a standard feature, but the route is here if you need it.
-  { path: 'documents/edit/:id', component: DocumentFormComponent },
+      // Dépenses
+      { path: 'depenses', component: DepensesComponent },
+      { path: 'depenses/new', component: DepenseFormComponent },
+      { path: 'depenses/edit/:id', component: DepenseFormComponent },
 
-  // Employés
-  { path: 'employes', component: EmployesComponent },
-  { path: 'employes/new', component: EmployeFormComponent },
-  { path: 'employes/edit/:id', component: EmployeFormComponent },
+      // Documents
+      { path: 'documents', component: DocumentsComponent },
+      { path: 'documents/new', component: DocumentFormComponent },
+      { path: 'documents/edit/:id', component: DocumentFormComponent },
 
-  // Affectations
-  { path: 'affectations', component: AffectationsListComponent },
-  { path: 'affectations/new', component: AffectationFormComponent },
-  { path: 'affectations/edit/:id', component: AffectationFormComponent },
+      // Employés
+      { path: 'employes', component: EmployesComponent },
+      { path: 'employes/new', component: EmployeFormComponent },
+      { path: 'employes/edit/:id', component: EmployeFormComponent },
 
-  // Fournisseurs
-  { path: 'fournisseurs', component: FournisseursComponent },
-  { path: 'fournisseurs/new', component: FournisseurFormComponent },
-  { path: 'fournisseurs/edit/:id', component: FournisseurFormComponent },
+      // Affectations
+      { path: 'affectations', component: AffectationsListComponent },
+      { path: 'affectations/new', component: AffectationFormComponent },
+      { path: 'affectations/edit/:id', component: AffectationFormComponent },
 
-  // User Management
-  { path: 'users', component: UsersListComponent },
-  { path: 'users/edit/:id', component: UserFormComponent },
+      // Fournisseurs
+      { path: 'fournisseurs', component: FournisseursComponent },
+      { path: 'fournisseurs/new', component: FournisseurFormComponent },
+      { path: 'fournisseurs/edit/:id', component: FournisseurFormComponent },
 
-  // Role Management
-  { path: 'roles', component: RolesListComponent },
+      // User Management
+      { path: 'users', component: UsersListComponent },
+      { path: 'users/edit/:id', component: UserFormComponent },
 
-  // Wildcard route for 404 - Not Found pages
-  // It's good practice to add this at the end
-  { path: '**', redirectTo: '/dashboard' }
+      // Role Management
+      { path: 'roles', component: RolesListComponent },
+
+      // Default authenticated route
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
+    ]
+  },
+
+  // --- WILDCARD ROUTE ---
+  // This will catch any route that doesn't match the ones above.
+  { path: '**', redirectTo: 'login', pathMatch: 'full' }
 ];

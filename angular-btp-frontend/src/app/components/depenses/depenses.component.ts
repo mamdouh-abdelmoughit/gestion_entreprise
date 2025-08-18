@@ -4,11 +4,12 @@ import { Depense } from '../../core/models/depense.model';
 import { DepenseService } from '../../core/services/depense.service';
 import { Page } from '../../core/models/page.model';
 import {RouterLink} from "@angular/router";
+import {PaginationComponent} from "../../shared/pagination/pagination.component";
 
 @Component({
   selector: 'app-depenses',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, PaginationComponent],
   templateUrl: './depenses.component.html',
   styleUrls: ['./depenses.component.css']
 })
@@ -37,6 +38,9 @@ export class DepensesComponent implements OnInit {
         console.error(err);
       }
     });
+  }
+  onPageChange(newPage:number){
+    this.loadDepenses(newPage);
   }
   deleteDepense(id: number): void {
     if (confirm('Êtes-vous sûr de vouloir supprimer cette dépense ?')) {

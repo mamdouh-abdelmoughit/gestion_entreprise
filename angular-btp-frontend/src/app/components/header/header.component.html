@@ -1,0 +1,28 @@
+<header class="bg-white shadow-sm border-b px-6 py-4">
+  <div class="flex justify-between items-center">
+    <!-- Left side: Application Title -->
+    <div>
+      <h1 class="text-2xl font-semibold text-gray-800">
+        Gestion BTP & Marchés Publics
+      </h1>
+      <p class="text-sm text-gray-500">
+        Plateforme complète pour entreprises de BTP au Maroc
+      </p>
+    </div>
+
+    <!-- Right side: User Info and Logout Button -->
+    <div class="flex items-center gap-4">
+      <div class="text-right">
+        <p class="text-sm font-medium text-gray-700">
+          {{ userEmail || 'Utilisateur' }}
+        </p>
+        <p class="text-xs text-gray-500">Administrateur</p>
+      </div>
+
+      <!-- This is the button we wired up to the logout() method -->
+      <button (click)="logout()" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
+        Déconnexion
+      </button>
+    </div>
+  </div>
+</header>

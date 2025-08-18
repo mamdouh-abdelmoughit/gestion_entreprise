@@ -20,6 +20,10 @@
         </tr>
         </tbody>
       </table>
+      <app-pagination
+        [page]="rolesPage"
+        (pageChange)="onPageChange($event)">
+      </app-pagination>
     </div>
   </div>
 </div>

@@ -4,11 +4,12 @@ import { RouterLink } from '@angular/router';
 import { User } from '../../../core/models/user.model';
 import { UserService } from '../../../core/services/user.service';
 import { Page } from '../../../core/models/page.model';
+import {PaginationComponent} from "../../../shared/pagination/pagination.component";
 
 @Component({
   selector: 'app-users-list',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, PaginationComponent],
   templateUrl: './users-list.component.html'
 })
 export class UsersListComponent implements OnInit {
@@ -33,7 +34,9 @@ export class UsersListComponent implements OnInit {
       error: () => this.handleError('Erreur de chargement des utilisateurs.')
     });
   }
-
+  onPageChange(newPage:number){
+    this.loadUsers(newPage);
+  }
   deleteUser(id: number): void {
     if (confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) {
       this.userService.delete(id).subscribe({

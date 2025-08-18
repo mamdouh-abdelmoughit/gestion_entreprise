@@ -10,7 +10,7 @@ import { environment } from '../../../environments/environment'; // IDE might fl
   providedIn: 'root'
 })
 export class DepenseService {
-  private apiUrl = '${environment.apiUrl}/depenses';
+  private apiUrl = `${environment.apiUrl}/depenses`;
 
   constructor(private http: HttpClient) { }
 

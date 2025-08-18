@@ -18,6 +18,10 @@
             <input id="numero" type="text" formControlName="numero" class="input-control">
           </div>
           <div>
+            <label for="periode" class="form-label">Période (ex: YYYY-MM)</label>
+            <input id="periode" type="text" formControlName="periode" class="input-control" placeholder="2025-08">
+          </div>
+          <div>
             <label for="dateDecompte" class="form-label">Date</label>
             <input id="dateDecompte" type="date" formControlName="dateDecompte" class="input-control">
           </div>
@@ -28,9 +32,10 @@
           <div>
             <label for="statut" class="form-label">Statut</label>
             <select id="statut" formControlName="statut" class="input-control">
-              <option value="EN_ATTENTE">En Attente</option>
+              <option value="BROUILLON">Brouillon</option>
+              <option value="ENVOYE">Envoyé</option>
               <option value="VALIDE">Validé</option>
-              <option value="REJETE">Rejeté</option>
+              <option value="PAYE">Payé</option>
             </select>
           </div>
           <div class="md:col-span-2">

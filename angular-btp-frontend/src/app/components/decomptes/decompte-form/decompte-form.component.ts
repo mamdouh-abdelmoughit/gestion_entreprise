@@ -39,6 +39,7 @@ export class DecompteFormComponent implements OnInit {
   private initForm(): void {
     this.decompteForm = this.fb.group({
       numero: ['', [Validators.required]],
+      periode: ['', [Validators.required]], // Add the form control
       dateDecompte: ['', [Validators.required]],
       montantTotal: [0, [Validators.required, Validators.min(0)]],
       description: [''],

@@ -1,7 +1,8 @@
 export interface Caution {
   id: number;
-  numero: string; // FIX: This property was missing
+  numero: string;
   type: string;
+  banque: string; // Add the property here
   montant: number;
   dateEmission: string;
   dateEcheance: string;

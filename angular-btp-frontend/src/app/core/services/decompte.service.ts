@@ -9,7 +9,7 @@ import { environment } from '../../../environments/environment'; // IDE might fl
   providedIn: 'root'
 })
 export class DecompteService {
-  private apiUrl = '${environment.apiUrl}/decomptes';
+  private apiUrl = `${environment.apiUrl}/decomptes`;
 
   constructor(private http: HttpClient) { }
 

@@ -4,11 +4,13 @@ import { Client } from '../../core/models/client.model';
 import { ClientService } from '../../core/services/client.service';
 import { Page } from '../../core/models/page.model';
 import {RouterLink} from "@angular/router";
+import { PaginationComponent } from '../../shared/pagination/pagination.component';
+
 
 @Component({
   selector: 'app-clients',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink,  PaginationComponent],
   templateUrl: './clients.component.html',
   styleUrls: ['./clients.component.css']
 })
@@ -41,6 +43,11 @@ export class ClientsComponent implements OnInit {
    * Deletes a client after user confirmation.
    * @param id The ID of the client to delete.
    */
+
+  onPageChange(newPage: number): void {
+    this.loadClients(newPage);
+  }
+
   deleteClient(id: number): void {
     // 1. Ask for confirmation before proceeding.
     if (confirm('Êtes-vous sûr de vouloir supprimer ce client ?')) {

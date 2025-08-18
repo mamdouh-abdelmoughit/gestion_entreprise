@@ -33,6 +33,8 @@ export class FournisseurFormComponent implements OnInit {
   private initForm(): void {
     this.fournisseurForm = this.fb.group({
       nom: ['', [Validators.required]],
+      contact: ['', [Validators.required]], // Add the form control
+      type: ['FOURNISSEUR', [Validators.required]], // Add the form control with a default
       email: ['', [Validators.required, Validators.email]],
       telephone: [''],
       adresse: [''],

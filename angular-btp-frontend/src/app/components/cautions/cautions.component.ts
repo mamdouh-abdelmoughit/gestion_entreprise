@@ -4,11 +4,12 @@ import { Caution } from '../../core/models/caution.model';
 import { CautionService } from '../../core/services/caution.service';
 import { Page } from '../../core/models/page.model';
 import {RouterLink} from "@angular/router";
+import {PaginationComponent} from "../../shared/pagination/pagination.component";
 
 @Component({
   selector: 'app-cautions',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, PaginationComponent],
   templateUrl: './cautions.component.html',
   styleUrls: ['./cautions.component.css']
 })
@@ -24,7 +25,7 @@ export class CautionsComponent implements OnInit {
     this.loadCautions();
   }
 
-  loadCautions(page = 0, size = 10, sort = 'dateEcheance,asc'): void {
+  loadCautions(page = 0, size = 10, sort = 'dateExpiration,asc'): void {
     this.isLoading = true;
     this.error = null;
     this.cautionService.getAllCautions(page, size, sort).subscribe({
@@ -38,6 +39,9 @@ export class CautionsComponent implements OnInit {
         console.error(err);
       }
     });
+  }
+  onPageChange(newPage:number){
+    this.loadCautions(newPage);
   }
   deleteCaution(id: number): void {
     if (confirm('Êtes-vous sûr de vouloir supprimer cette caution ?')) {

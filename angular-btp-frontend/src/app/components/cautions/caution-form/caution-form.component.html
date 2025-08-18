@@ -15,6 +15,16 @@
             </select>
           </div>
           <div>
+            <label for="numero" class="form-label">Numéro de Caution</label>
+            <input id="numero" type="text" formControlName="numero" class="input-control">
+          </div>
+          <!-- START OF FIX: Add the new input field for the bank -->
+          <div>
+            <label for="banque" class="form-label">Banque</label>
+            <input id="banque" type="text" formControlName="banque" class="input-control">
+          </div>
+          <!-- END OF FIX -->
+          <div>
             <label for="montant" class="form-label">Montant (EUR)</label>
             <input id="montant" type="number" formControlName="montant" class="input-control">
           </div>
@@ -30,8 +40,9 @@
             <label for="statut" class="form-label">Statut</label>
             <select id="statut" formControlName="statut" class="input-control">
               <option value="ACTIVE">Active</option>
+              <option value="RESTITUEE">Restituée</option>
+              <option value="CONFISQUEE">Confisquée</option>
               <option value="EXPIREE">Expirée</option>
-              <option value="CLOTUREE">Clôturée</option>
             </select>
           </div>
           <div>

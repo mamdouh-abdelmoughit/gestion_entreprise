@@ -41,6 +41,10 @@
       </tr>
       </tbody>
     </table>
+      <app-pagination
+        [page]="documentsPage"
+        (pageChange)="onPageChange($event)">
+      </app-pagination>
     </div>
   </div>
 </div>

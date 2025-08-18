@@ -5,6 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ProjetService } from '../../../core/services/projet.service';
 import { ClientService } from '../../../core/services/client.service';
 import { Client } from '../../../core/models/client.model';
+import {Projet} from "../../../core/models/projet.model";
 // We need a simple User model for the dropdown
 interface UserRef { id: number; username: string; }
 
@@ -31,7 +32,7 @@ export class ProjetFormComponent implements OnInit {
     private projetService: ProjetService,
     private clientService: ClientService,
     // private userService: UserService, // You will create this service later
-    private router: Router,
+    protected router: Router,
     private route: ActivatedRoute
   ) {}
 
@@ -41,17 +42,19 @@ export class ProjetFormComponent implements OnInit {
     this.checkEditMode();
   }
 
-  private initForm(): void {
+  private initForm(data?: Projet): void {
     this.projetForm = this.fb.group({
-      nom: ['', [Validators.required]],
-      description: [''],
-      dateDebut: ['', [Validators.required]],
-      dateFin: ['', [Validators.required]],
-      budget: [0, [Validators.required, Validators.min(0)]],
-      adresse: [''],
-      statut: ['EN_PREPARATION', [Validators.required]],
-      clientId: [null, [Validators.required]],
-      chefProjetId: [null, [Validators.required]]
+      numero: [data?.numero || '', [Validators.required]], // FIX: Add FormControl
+      nom: [data?.nom || '', [Validators.required]],
+      maitreDOuvrage: [data?.maitreDOuvrage || '', [Validators.required]], // FIX: Add FormControl
+      description: [data?.description || ''],
+      dateDebut: [data ? new Date(data.dateDebut).toISOString().split('T')[0] : '', [Validators.required]],
+      dateFin: [data ? new Date(data.dateFin).toISOString().split('T')[0] : '', [Validators.required]],
+      montantContrat: [data?.montantContrat ?? 0, [Validators.required, Validators.min(0)]], // FIX: Rename FormControl
+      adresse: [data?.adresse || ''],
+      statut: [data?.statut || 'EN_PREPARATION', [Validators.required]],
+      clientId: [data?.clientId || null, [Validators.required]],
+      chefProjetId: [data?.chefProjetId || null, [Validators.required]]
     });
   }
 

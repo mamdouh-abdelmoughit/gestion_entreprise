@@ -4,11 +4,12 @@ import { Document } from '../../core/models/document.model';
 import { DocumentService } from '../../core/services/document.service';
 import { Page } from '../../core/models/page.model';
 import {RouterLink} from "@angular/router";
+import {PaginationComponent} from "../../shared/pagination/pagination.component";
 
 @Component({
   selector: 'app-documents',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, PaginationComponent],
   templateUrl: './documents.component.html',
   styleUrls: ['./documents.component.css']
 })
@@ -37,6 +38,9 @@ export class DocumentsComponent implements OnInit {
         console.error(err);
       }
     });
+  }
+  onPageChange(newPage:number){
+    this.loadDocuments(newPage);
   }
   deleteDocument(id: number): void {
     if (confirm('Êtes-vous sûr de vouloir supprimer ce document ?')) {

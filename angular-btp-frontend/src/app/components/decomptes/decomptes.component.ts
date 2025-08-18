@@ -4,11 +4,12 @@ import { Decompte } from '../../core/models/decompte.model';
 import { DecompteService } from '../../core/services/decompte.service';
 import { Page } from '../../core/models/page.model';
 import {RouterLink} from "@angular/router";
+import {PaginationComponent} from "../../shared/pagination/pagination.component";
 
 @Component({
   selector: 'app-decomptes',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, PaginationComponent],
   templateUrl: './decomptes.component.html',
   styleUrls: ['./decomptes.component.css']
 })
@@ -37,6 +38,9 @@ export class DecomptesComponent implements OnInit {
         console.error(err);
       }
     });
+  }
+  onPageChange(newPage:number){
+    this.loadDecomptes(newPage);
   }
   deleteDecompte(id: number): void {
     if (confirm('Êtes-vous sûr de vouloir supprimer ce décompte ?')) {

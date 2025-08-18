@@ -24,9 +24,9 @@
           <td class="py-2 px-4">{{ user.email }}</td>
           <td class="py-2 px-4">{{ user.roles.join(', ') }}</td>
           <td class="py-2 px-4">
-<span class="px-2 py-1 text-xs rounded-full" [ngClass]="user.enabled ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'">
-{{ user.enabled ? 'Activé' : 'Désactivé' }}
-</span>
+              <span class="px-2 py-1 text-xs rounded-full" [ngClass]="user.enabled ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'">
+              {{ user.enabled ? 'Activé' : 'Désactivé' }}
+              </span>
           </td>
           <td class="py-2 px-4 flex gap-4">
             <button [routerLink]="['/users/edit', user.id]" class="text-blue-600 hover:underline">Modifier</button>
@@ -35,6 +35,10 @@
         </tr>
         </tbody>
       </table>
+      <app-pagination
+        [page]="usersPage"
+        (pageChange)="onPageChange($event)">
+      </app-pagination>
     </div>
   </div>
 </div>

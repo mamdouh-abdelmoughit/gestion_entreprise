@@ -43,6 +43,10 @@
           </tr>
         </tbody>
       </table>
+      <app-pagination
+        [page]="fournisseursPage"
+        (pageChange)="onPageChange($event)">
+      </app-pagination>
     </div>
   </div>
 </div>
