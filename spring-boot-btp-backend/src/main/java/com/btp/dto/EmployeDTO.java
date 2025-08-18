@@ -12,6 +12,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class EmployeDTO {
     private Long id;
+    private String cin; // Add the missing field
     private String nom;
     private String prenom;
     private String email;

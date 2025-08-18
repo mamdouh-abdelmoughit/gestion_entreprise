@@ -8,10 +8,15 @@ import com.btp.repository.EmployeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.btp.entity.User; // 1. Import User
+import com.btp.repository.UserRepository;
 
 import jakarta.validation.Valid;
+
+import java.time.LocalDate;
 
 @Service
 @Transactional
@@ -22,6 +27,9 @@ public class EmployeService {
 
     @Autowired
     private EntityMapper entityMapper;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Transactional(readOnly = true)
     public Page<EmployeDTO> findAll(Pageable pageable) {
@@ -38,6 +46,14 @@ public class EmployeService {
 
     public EmployeDTO save(@Valid EmployeDTO employeDTO) {
         Employe employe = entityMapper.toEntity(employeDTO);
+
+        // --- START OF FIX ---
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("Authenticated user not found"));
+        employe.setCreatedBy(currentUser);
+        // --- END OF FIX ---
+
         Employe savedEmploye = employeRepository.save(employe);
         return entityMapper.toDTO(savedEmploye);
     }
@@ -54,7 +70,7 @@ public class EmployeService {
                     existingEmploye.setPoste(employeDTO.getPoste());
                     // FIX: Convert LocalDate from DTO to LocalDateTime for entity
                     if (employeDTO.getDateEmbauche() != null) {
-                        existingEmploye.setDateEmbauche(employeDTO.getDateEmbauche().atStartOfDay());
+                        existingEmploye.setDateEmbauche(LocalDate.from(employeDTO.getDateEmbauche().atStartOfDay()));
                     }
                     if (employeDTO.getSalaire() != null) {
                         existingEmploye.setSalaire(employeDTO.getSalaire().doubleValue());

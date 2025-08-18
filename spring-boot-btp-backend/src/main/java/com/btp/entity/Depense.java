@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "depenses")
@@ -42,7 +42,7 @@ public class Depense {
     private Fournisseur fournisseur;
 
     @Column(nullable = false)
-    private LocalDateTime dateDepense;
+    private LocalDate dateDepense;
 
     @Column(name = "justificatif")
     private String justificatif;

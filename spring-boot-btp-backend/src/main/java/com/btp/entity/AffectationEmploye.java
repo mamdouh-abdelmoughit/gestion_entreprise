@@ -5,7 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "affectations_employes")
@@ -26,9 +26,9 @@ public class AffectationEmploye {
     private Projet projet;
 
     @Column(nullable = false)
-    private LocalDateTime dateDebut;
+    private LocalDate dateDebut;
 
-    private LocalDateTime dateFin;
+    private LocalDate dateFin;
 
     @Column(nullable = false)
     private String role;

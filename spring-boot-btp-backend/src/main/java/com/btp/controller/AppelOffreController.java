@@ -31,6 +31,8 @@ public class AppelOffreController {
 
     @PostMapping
     public ResponseEntity<AppelOffreDTO> createAppelOffre(@Valid @RequestBody AppelOffreDTO appelOffreDTO) {
+        System.out.println("--- INSIDE CONTROLLER ---");
+        System.out.println("Received DTO: " + appelOffreDTO.toString());
         AppelOffreDTO created = appelOffreService.save(appelOffreDTO);
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }

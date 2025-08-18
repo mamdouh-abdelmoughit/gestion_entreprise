@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 @Entity
@@ -36,7 +36,7 @@ public class Employe {
     private String poste;
 
     @Column(nullable = false)
-    private LocalDateTime dateEmbauche;
+    private LocalDate dateEmbauche;
 
     @Column(nullable = false)
     private Double salaire;

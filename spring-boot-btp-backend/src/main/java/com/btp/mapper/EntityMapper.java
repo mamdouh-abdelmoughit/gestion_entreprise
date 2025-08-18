@@ -4,6 +4,7 @@ import com.btp.dto.*;
 import com.btp.entity.*;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -51,11 +52,13 @@ public class EntityMapper {
 
         AppelOffreDTO dto = new AppelOffreDTO();
         dto.setId(entity.getId());
+        dto.setNumero(entity.getNumero()); // Map the new field
         dto.setTitre(entity.getIntitule()); // FIX: Field was named intitule in entity
+        dto.setMaitreDOuvrage(entity.getMaitreDOuvrage());
         dto.setDescription(entity.getDescription());
         dto.setBudgetEstimatif(entity.getMontantEstime() != null ? java.math.BigDecimal.valueOf(entity.getMontantEstime()) : null); // FIX: Type conversion
         dto.setDatePublication(entity.getDatePublication());
-        dto.setDateLimite(entity.getDateLimiteDepot()); // FIX: Field name mismatch
+        dto.setDateLimite(entity.getDateLimite()); // FIX: Field name mismatch
         if (entity.getStatut() != null) {
             dto.setStatut(entity.getStatut().name());
         }
@@ -77,13 +80,15 @@ public class EntityMapper {
 
         AppelOffre entity = new AppelOffre();
         entity.setId(dto.getId());
+        entity.setNumero(dto.getNumero());
         entity.setIntitule(dto.getTitre()); // FIX: Field was named intitule in entity
+        entity.setMaitreDOuvrage(dto.getMaitreDOuvrage()); // Map the new field
         entity.setDescription(dto.getDescription());
         entity.setMontantEstime(dto.getBudgetEstimatif() != null ? dto.getBudgetEstimatif().doubleValue() : null); // FIX: Type conversion
         entity.setDatePublication(dto.getDatePublication());
-        entity.setDateLimiteDepot(dto.getDateLimite()); // FIX: Field name mismatch
+        entity.setDateLimite(dto.getDateLimite()); // FIX: Field name mismatch
         if (dto.getStatut() != null) {
-            entity.setStatut(AppelOffre.StatutAppelOffre.valueOf(dto.getStatut()));
+            entity.setStatut(AppelOffre.StatutAppelOffre.valueOf(dto.getStatut().toUpperCase()));
         }
 
         return entity;
@@ -97,6 +102,8 @@ public class EntityMapper {
         dto.setId(entity.getId());
         // There is no `numero` in DTO, but exists in entity. Assuming it's ok.
         dto.setType(entity.getType() != null ? entity.getType().name() : null); // FIX: Enum to String
+        dto.setNumero(entity.getNumero()); // Map the new field
+        dto.setBanque(entity.getBanque()); // Map the new field
         dto.setMontant(entity.getMontant() != null ? java.math.BigDecimal.valueOf(entity.getMontant()) : null); // FIX: Type conversion
         dto.setDateEmission(entity.getDateEmission());
         dto.setDateEcheance(entity.getDateExpiration()); // FIX: Field name mismatch
@@ -123,7 +130,9 @@ public class EntityMapper {
         if (dto.getType() != null) {
             entity.setType(Caution.TypeCaution.valueOf(dto.getType()));
         }
+        entity.setNumero(dto.getNumero()); // Map the new field
         entity.setMontant(dto.getMontant() != null ? dto.getMontant().doubleValue() : null); // FIX: Type conversion
+        entity.setBanque(dto.getBanque()); // Map the new field
         entity.setDateEmission(dto.getDateEmission());
         entity.setDateExpiration(dto.getDateEcheance()); // FIX: Field name mismatch
         // No banque or beneficiaire in DTO
@@ -141,10 +150,11 @@ public class EntityMapper {
         DecompteDTO dto = new DecompteDTO();
         dto.setId(entity.getId());
         dto.setNumero(entity.getNumero());
+        dto.setPeriode(entity.getPeriode()); // Map the new field
         dto.setMontantTotal(entity.getMontantTTC() != null ? java.math.BigDecimal.valueOf(entity.getMontantTTC()) : null); // Mapping TTC to total
         dto.setMontantPaye(null); // No direct mapping
         dto.setMontantRestant(null); // No direct mapping
-        dto.setDateDecompte(entity.getDateCreation());
+        dto.setDateDecompte(entity.getDateDecompte());
         dto.setDescription(entity.getObservations());
         if(entity.getStatut() != null) {
             dto.setStatut(entity.getStatut().name());
@@ -160,6 +170,7 @@ public class EntityMapper {
         Decompte entity = new Decompte();
         entity.setId(dto.getId());
         entity.setNumero(dto.getNumero());
+        entity.setPeriode(dto.getPeriode()); // Map the new field
         entity.setMontantTTC(dto.getMontantTotal() != null ? dto.getMontantTotal().doubleValue() : null);
         // Set other financial fields to default values
         entity.setMontantHT(0.0);
@@ -167,7 +178,7 @@ public class EntityMapper {
         entity.setRetenuGarantie(0.0);
         entity.setAvance(0.0);
         entity.setMontantNet(0.0);
-        entity.setDateCreation(dto.getDateDecompte());
+        entity.setDateDecompte(dto.getDateDecompte());
         entity.setObservations(dto.getDescription());
         if(dto.getStatut() != null) {
             entity.setStatut(Decompte.StatutDecompte.valueOf(dto.getStatut()));
@@ -262,12 +273,13 @@ public class EntityMapper {
 
         EmployeDTO dto = new EmployeDTO();
         dto.setId(entity.getId());
+        dto.setCin(entity.getCin()); // Map the new field
         dto.setNom(entity.getNom());
         dto.setPrenom(entity.getPrenom());
         dto.setEmail(entity.getEmail());
         dto.setTelephone(entity.getTelephone());
         dto.setPoste(entity.getPoste());
-        dto.setDateEmbauche(entity.getDateEmbauche() != null ? entity.getDateEmbauche().toLocalDate() : null);
+        dto.setDateEmbauche(entity.getDateEmbauche() != null ? entity.getDateEmbauche() : null);
         dto.setSalaire(entity.getSalaire() != null ? java.math.BigDecimal.valueOf(entity.getSalaire()) : null);
         dto.setAdresse(entity.getAdresse());
         if (entity.getStatut() != null) {
@@ -282,12 +294,13 @@ public class EntityMapper {
 
         Employe entity = new Employe();
         entity.setId(dto.getId());
+        entity.setCin(dto.getCin()); // Map the new field
         entity.setNom(dto.getNom());
         entity.setPrenom(dto.getPrenom());
         entity.setEmail(dto.getEmail());
         entity.setTelephone(dto.getTelephone());
         entity.setPoste(dto.getPoste());
-        entity.setDateEmbauche(dto.getDateEmbauche() != null ? dto.getDateEmbauche().atStartOfDay() : null);
+        entity.setDateEmbauche(dto.getDateEmbauche() != null ? LocalDate.from(dto.getDateEmbauche().atStartOfDay()) : null);
         entity.setSalaire(dto.getSalaire() != null ? dto.getSalaire().doubleValue() : null);
         entity.setAdresse(dto.getAdresse());
         if (dto.getStatut() != null) {
@@ -340,6 +353,10 @@ public class EntityMapper {
         FournisseurDTO dto = new FournisseurDTO();
         dto.setId(entity.getId());
         dto.setNom(entity.getNom());
+        dto.setContact(entity.getContact()); // Map the new field
+        if (entity.getType() != null) { // Map the new enum field
+            dto.setType(entity.getType().name());
+        }
         dto.setEmail(entity.getEmail());
         dto.setTelephone(entity.getTelephone());
         dto.setAdresse(entity.getAdresse());
@@ -360,6 +377,10 @@ public class EntityMapper {
         entity.setId(dto.getId());
         entity.setNom(dto.getNom());
         entity.setEmail(dto.getEmail());
+        if (dto.getType() != null) { // Map the new enum field
+            entity.setType(Fournisseur.TypeFournisseur.valueOf(dto.getType().toUpperCase()));
+        }
+        entity.setContact(dto.getContact()); // Map the new field
         entity.setTelephone(dto.getTelephone());
         entity.setAdresse(dto.getAdresse());
         if (dto.getSpecialites() != null) {
@@ -373,41 +394,54 @@ public class EntityMapper {
     }
 
     // ===== Projet mappings =====
+    // ... inside the EntityMapper class ...
+
+    // Method to convert Entity -> DTO
     public ProjetDTO toDTO(Projet entity) {
         if (entity == null) return null;
 
         ProjetDTO dto = new ProjetDTO();
         dto.setId(entity.getId());
+        dto.setNumero(entity.getNumero());
         dto.setNom(entity.getNom());
+        dto.setMaitreDOuvrage(entity.getMaitreDOuvrage());
         dto.setDescription(entity.getDescription());
         if (entity.getStatut() != null) {
             dto.setStatut(entity.getStatut().name());
         }
-        dto.setDateDebut(entity.getDateDebut() != null ? entity.getDateDebut().toLocalDate() : null);
-        dto.setDateFin(entity.getDateFinPrevue() != null ? entity.getDateFinPrevue().toLocalDate() : null);
-        dto.setBudget(entity.getMontantContrat() != null ? java.math.BigDecimal.valueOf(entity.getMontantContrat()) : null);
+        dto.setDateDebut(entity.getDateDebut());
+        dto.setDateFin(entity.getDateFinPrevue());
+        if (entity.getMontantContrat() != null) {
+            dto.setMontantContrat(java.math.BigDecimal.valueOf(entity.getMontantContrat()));
+        }
         dto.setAdresse(entity.getAdresseChantier());
-        dto.setChefProjetId(entity.getChefProjet() != null ? entity.getChefProjet().getId() : null);
-
-        // FIX: Map the client ID
-        dto.setClientId(entity.getClient() != null ? entity.getClient().getId() : null);
-
+        if (entity.getClient() != null) {
+            dto.setClientId(entity.getClient().getId());
+        }
+        if (entity.getChefProjet() != null) {
+            dto.setChefProjetId(entity.getChefProjet().getId());
+        }
         return dto;
     }
 
+    // Method to convert DTO -> Entity
     public Projet toEntity(ProjetDTO dto) {
         if (dto == null) return null;
 
         Projet entity = new Projet();
         entity.setId(dto.getId());
+        entity.setNumero(dto.getNumero());
         entity.setNom(dto.getNom());
+        entity.setMaitreDOuvrage(dto.getMaitreDOuvrage());
         entity.setDescription(dto.getDescription());
         if (dto.getStatut() != null) {
             entity.setStatut(Projet.StatutProjet.valueOf(dto.getStatut()));
         }
-        entity.setDateDebut(dto.getDateDebut() != null ? dto.getDateDebut().atStartOfDay() : null);
-        entity.setDateFinPrevue(dto.getDateFin() != null ? dto.getDateFin().atStartOfDay() : null);
-        entity.setMontantContrat(dto.getBudget() != null ? dto.getBudget().doubleValue() : null);
+        entity.setDateDebut(dto.getDateDebut());
+        entity.setDateFinPrevue(dto.getDateFin());
+        if (dto.getMontantContrat() != null) {
+            entity.setMontantContrat(dto.getMontantContrat().doubleValue());
+        }
         entity.setAdresseChantier(dto.getAdresse());
 
         return entity;

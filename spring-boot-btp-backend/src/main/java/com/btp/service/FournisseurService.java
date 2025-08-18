@@ -2,12 +2,15 @@ package com.btp.service;
 
 import com.btp.dto.FournisseurDTO;
 import com.btp.entity.Fournisseur;
+import com.btp.entity.User;
 import com.btp.exception.ResourceNotFoundException;
 import com.btp.mapper.EntityMapper;
 import com.btp.repository.FournisseurRepository;
+import com.btp.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +26,9 @@ public class FournisseurService {
     @Autowired
     private EntityMapper entityMapper;
 
+    @Autowired
+    private UserRepository userRepository;
+
     @Transactional(readOnly = true)
     public Page<FournisseurDTO> findAll(Pageable pageable) {
         return fournisseurRepository.findAll(pageable).map(entityMapper::toDTO);
@@ -37,10 +43,17 @@ public class FournisseurService {
 
     public FournisseurDTO save(@Valid FournisseurDTO fournisseurDTO) {
         Fournisseur fournisseur = entityMapper.toEntity(fournisseurDTO);
+
+        // --- START OF FIX ---
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("Authenticated user not found"));
+        fournisseur.setCreatedBy(currentUser);
+        // --- END OF FIX ---
+
         Fournisseur savedFournisseur = fournisseurRepository.save(fournisseur);
         return entityMapper.toDTO(savedFournisseur);
     }
-
 // INSIDE FournisseurService.java
 
     public FournisseurDTO update(Long id, @Valid FournisseurDTO fournisseurDTO) {

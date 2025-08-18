@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "cautions")
@@ -32,10 +32,10 @@ public class Caution {
     private String banque;
 
     @Column(nullable = false)
-    private LocalDateTime dateEmission;
+    private LocalDate dateEmission;
 
     @Column(nullable = false)
-    private LocalDateTime dateExpiration;
+    private LocalDate dateExpiration;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

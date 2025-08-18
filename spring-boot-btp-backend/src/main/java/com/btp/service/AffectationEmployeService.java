@@ -12,8 +12,11 @@ import com.btp.repository.ProjetRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.btp.entity.User; // 1. Import User
+import com.btp.repository.UserRepository;
 
 import jakarta.validation.Valid;
 import java.util.Optional;
@@ -32,6 +35,9 @@ public class AffectationEmployeService {
     private ProjetRepository projetRepository;
 
     @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
     private EntityMapper entityMapper;
 
     @Transactional(readOnly = true)
@@ -47,8 +53,16 @@ public class AffectationEmployeService {
                 .orElseThrow(() -> new ResourceNotFoundException("AffectationEmploye not found with id: " + id));
     }
 
-    public AffectationEmployeDTO save(@Valid AffectationEmployeDTO affectationEmployeDTO) {
+    public AffectationEmployeDTO create(@Valid AffectationEmployeDTO affectationEmployeDTO) {
         AffectationEmploye affectationEmploye = entityMapper.toEntity(affectationEmployeDTO);
+
+        // --- START OF THE FINAL FIX ---
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("Authenticated user not found"));
+        affectationEmploye.setCreatedBy(currentUser);
+        // --- END OF THE FINAL FIX ---
+
         updateRelationships(affectationEmploye, affectationEmployeDTO);
         AffectationEmploye savedAffectation = affectationEmployeRepository.save(affectationEmploye);
         return entityMapper.toDTO(savedAffectation);

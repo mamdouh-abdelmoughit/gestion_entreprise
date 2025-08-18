@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "decomptes")
@@ -51,11 +51,11 @@ public class Decompte {
     private StatutDecompte statut;
 
     @Column(nullable = false)
-    private LocalDateTime dateCreation;
+    private LocalDate dateDecompte;
 
-    private LocalDateTime dateEnvoi;
+    private LocalDate dateEnvoi;
 
-    private LocalDateTime datePaiement;
+    private LocalDate datePaiement;
 
     @Column(columnDefinition = "TEXT")
     private String observations;

@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "documents")
@@ -45,7 +45,7 @@ public class Document {
     private Long tailleFichier;
 
     @Column(nullable = false)
-    private LocalDateTime dateUpload;
+    private LocalDate dateUpload;
 
     @Column(columnDefinition = "TEXT")
     private String description;

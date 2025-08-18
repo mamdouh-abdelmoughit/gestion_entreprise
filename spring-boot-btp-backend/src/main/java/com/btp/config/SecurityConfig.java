@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer; // 1. Import Customizer
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -18,6 +19,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration; // 2. Import CORS classes
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -29,40 +36,45 @@ public class SecurityConfig {
     @Autowired
     private UserDetailsService userDetailsService;
 
-// INSIDE SecurityConfig.java
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // FIX: Using a more explicit lambda DSL to disable CSRF. This is a common fix for 403 errors.
+                // 3. Enable CORS at the security level
+                .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
-
                 .authorizeHttpRequests(auth -> auth
-                        // Explicitly permit all requests to the auth endpoints
                         .requestMatchers("/auth/**").permitAll()
-
-                        // You can add other public endpoints here if needed
                         .requestMatchers("/public/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-
-                        // All other requests must be authenticated
                         .anyRequest().authenticated()
                 )
-
-                // Ensure session management is stateless
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
-                // Set the custom authentication provider
                 .authenticationProvider(authenticationProvider())
-
-                // Add the JWT filter before the standard username/password filter
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-
-                // This is required to allow the H2 console to be viewed in a browser frame
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable));
 
         return http.build();
+    }
+
+    // 4. Create the CorsConfigurationSource bean
+    // This is where we define the CORS rules that Spring Security will use.
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        // This is the origin of your Angular application
+        configuration.setAllowedOrigins(List.of("http://localhost:4200"));
+        // These are the HTTP methods you want to allow
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+        // These are the headers you want to allow
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
+        // This allows credentials (like cookies or auth tokens) to be sent
+        configuration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        // Apply this configuration to all paths in your application
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 
     @Bean

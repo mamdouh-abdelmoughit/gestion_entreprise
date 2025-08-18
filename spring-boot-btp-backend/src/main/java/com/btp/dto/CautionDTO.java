@@ -5,17 +5,19 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class CautionDTO {
     private Long id;
+    private String numero; // Add the missing field
     private String type;
     private BigDecimal montant;
-    private LocalDateTime dateEmission;
-    private LocalDateTime dateEcheance;
+    private String banque; // Add the missing field
+    private LocalDate dateEmission;
+    private LocalDate dateEcheance;
     private String beneficiaire;
     private String statut;
     private Long projetId;

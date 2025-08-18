@@ -12,6 +12,8 @@ import java.util.Set;
 public class FournisseurDTO {
     private Long id;
     private String nom;
+    private String contact; // Add the missing field
+    private String type; // Add the missing field
     private String email;
     private String telephone;
     private String adresse;

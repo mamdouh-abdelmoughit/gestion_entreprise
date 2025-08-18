@@ -3,7 +3,7 @@ package com.btp.entity;
 import jakarta.persistence.*;
 import lombok.*; // Import specific annotations
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.Objects; // Import Objects for equals/hashCode
 import java.util.Set;
 
@@ -39,13 +39,13 @@ public class User {
     @Column(nullable = false)
     private Boolean enabled = true;
 
-    private LocalDateTime lastLogin;
+    private LocalDate lastLogin;
 
     @Column(nullable = false)
-    private LocalDateTime createdAt;
+    private LocalDate createdAt;
 
     @Column(nullable = false)
-    private LocalDateTime updatedAt;
+    private LocalDate updatedAt;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
@@ -59,13 +59,13 @@ public class User {
 
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
+        createdAt = LocalDate.now();
+        updatedAt = LocalDate.now();
     }
 
     @PreUpdate
     protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
+        updatedAt = LocalDate.now();
     }
 
     // FIX: Implement equals() and hashCode() based ONLY on the ID.

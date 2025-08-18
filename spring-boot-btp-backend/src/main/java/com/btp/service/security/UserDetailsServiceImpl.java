@@ -22,17 +22,17 @@ public class UserDetailsServiceImpl implements UserDetailsService { // <-- It im
 
     @Override
     @Transactional(readOnly = true)
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        // 1. Find the user in your database
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User Not Found with username: " + username));
+    public UserDetails loadUserByUsername(String usernameOrEmail) throws UsernameNotFoundException {
+        // --- START OF FIX ---
+        // Use the new repository method to find the user by either username or email.
+        User user = userRepository.findByUsernameOrEmail(usernameOrEmail)
+                .orElseThrow(() -> new UsernameNotFoundException("User Not Found with username or email: " + usernameOrEmail));
+        // --- END OF FIX ---
 
-        // 2. Convert the user's roles (from your entity) into Spring Security's GrantedAuthority objects
         List<GrantedAuthority> authorities = user.getRoles().stream()
                 .map(role -> new SimpleGrantedAuthority(role.getNom()))
                 .collect(Collectors.toList());
 
-        // 3. Return a Spring Security User object
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
                 user.getPassword(),

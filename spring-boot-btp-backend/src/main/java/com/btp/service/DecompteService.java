@@ -12,6 +12,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.btp.entity.User; // 1. Import User
+import com.btp.repository.UserRepository; // 2. Import UserRepository
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import jakarta.validation.Valid;
 import java.time.LocalDateTime;
@@ -25,6 +28,9 @@ public class DecompteService {
 
     @Autowired
     private ProjetRepository projetRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private EntityMapper entityMapper;
@@ -45,6 +51,14 @@ public class DecompteService {
     @Transactional
     public DecompteDTO save(@Valid DecompteDTO decompteDTO) {
         Decompte decompte = entityMapper.toEntity(decompteDTO);
+
+        // --- START OF FIX ---
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("Authenticated user not found"));
+        decompte.setCreatedBy(currentUser);
+        // --- END OF FIX ---
+
         updateRelationships(decompte, decompteDTO);
         Decompte savedDecompte = decompteRepository.save(decompte);
         return entityMapper.toDTO(savedDecompte);
@@ -56,7 +70,7 @@ public class DecompteService {
                 .map(existingDecompte -> {
                     existingDecompte.setNumero(decompteDTO.getNumero());
                     // FIX: Map DTO fields to appropriate entity fields
-                    existingDecompte.setDateCreation(decompteDTO.getDateDecompte());
+                    existingDecompte.setDateDecompte(decompteDTO.getDateDecompte());
                     if(decompteDTO.getMontantTotal() != null) {
                         existingDecompte.setMontantTTC(decompteDTO.getMontantTotal().doubleValue());
                     }

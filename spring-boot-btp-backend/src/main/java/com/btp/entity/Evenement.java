@@ -5,7 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "evenements")
@@ -40,7 +40,7 @@ public class Evenement {
     private User user;
 
     @Column(nullable = false)
-    private LocalDateTime dateEvenement;
+    private LocalDate dateEvenement;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

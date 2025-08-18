@@ -6,7 +6,8 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate; // 1. Import LocalDate instead of LocalDateTime
+
 import java.util.List;
 import java.util.Set; // Import Set
 
@@ -30,10 +31,10 @@ public class AppelOffre {
     private String maitreDOuvrage;
 
     @Column(nullable = false)
-    private LocalDateTime datePublication;
+    private LocalDate datePublication;
 
     @Column(nullable = false)
-    private LocalDateTime dateLimiteDepot;
+    private LocalDate dateLimite;
 
     private Double montantEstime;
 

@@ -12,10 +12,13 @@ import com.btp.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.validation.Valid;
+
+import java.time.LocalDate;
 
 @Service
 @Transactional
@@ -53,7 +56,22 @@ public class ProjetService {
     @Transactional
     public ProjetDTO save(@Valid ProjetDTO projetDTO) {
         Projet projet = entityMapper.toEntity(projetDTO);
+
+        // --- START OF THE FINAL FIX ---
+        // Get the username of the currently authenticated user from the security context
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        // Fetch the full User entity from the database
+        User currentUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("Authenticated user '" + username + "' not found in database."));
+
+        // Set the creator of the new projet
+        projet.setCreatedBy(currentUser);
+        // --- END OF THE FINAL FIX ---
+
+        // Update relationships for ChefProjet and Client
         updateRelationships(projet, projetDTO);
+
         Projet savedProjet = projetRepository.save(projet);
         return entityMapper.toDTO(savedProjet);
     }
@@ -67,14 +85,14 @@ public class ProjetService {
                     existingProjet.setNom(projetDTO.getNom());
                     existingProjet.setDescription(projetDTO.getDescription());
                     if (projetDTO.getDateDebut() != null) {
-                        existingProjet.setDateDebut(projetDTO.getDateDebut().atStartOfDay());
+                        existingProjet.setDateDebut(LocalDate.from(projetDTO.getDateDebut().atStartOfDay()));
                     }
                     // FIX: Corrected setter methods to match entity fields
                     if (projetDTO.getDateFin() != null) {
-                        existingProjet.setDateFinPrevue(projetDTO.getDateFin().atStartOfDay());
+                        existingProjet.setDateFinPrevue(LocalDate.from(projetDTO.getDateFin().atStartOfDay()));
                     }
-                    if (projetDTO.getBudget() != null) {
-                        existingProjet.setMontantContrat(projetDTO.getBudget().doubleValue());
+                    if (projetDTO.getMontantContrat() != null) {
+                        existingProjet.setMontantContrat(projetDTO.getMontantContrat().doubleValue());
                     }
                     if (projetDTO.getStatut() != null) {
                         existingProjet.setStatut(Projet.StatutProjet.valueOf(projetDTO.getStatut()));

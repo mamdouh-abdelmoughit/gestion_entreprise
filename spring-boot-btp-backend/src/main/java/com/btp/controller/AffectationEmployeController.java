@@ -30,7 +30,7 @@ public class AffectationEmployeController {
 
     @PostMapping
     public ResponseEntity<AffectationEmployeDTO> createAffectation(@Valid @RequestBody AffectationEmployeDTO affectationEmployeDTO) {
-        AffectationEmployeDTO created = affectationEmployeService.save(affectationEmployeDTO);
+        AffectationEmployeDTO created = affectationEmployeService.create(affectationEmployeDTO);
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 

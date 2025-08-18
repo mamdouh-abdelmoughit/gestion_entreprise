@@ -16,7 +16,7 @@ public interface AppelOffreRepository extends JpaRepository<AppelOffre, Long> {
     
     Page<AppelOffre> findByCreatedById(Long userId, Pageable pageable);
     
-    @Query("SELECT a FROM AppelOffre a WHERE a.dateLimiteDepot > CURRENT_DATE")
+    @Query("SELECT a FROM AppelOffre a WHERE a.dateLimite > CURRENT_DATE")
     Page<AppelOffre> findActiveAppelsOffres(Pageable pageable);
     
     @Query("SELECT a FROM AppelOffre a WHERE a.statut = :statut AND a.createdBy.id = :userId")

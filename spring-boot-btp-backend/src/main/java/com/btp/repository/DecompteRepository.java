@@ -20,7 +20,7 @@ public interface DecompteRepository extends JpaRepository<Decompte, Long> {
 
     Page<Decompte> findByCreatedById(Long userId, Pageable pageable);
 
-    @Query("SELECT d FROM Decompte d WHERE d.dateCreation BETWEEN :startDate AND :endDate") // FIX: Use dateCreation field
+    @Query("SELECT d FROM Decompte d WHERE d.dateDecompte BETWEEN :startDate AND :endDate") // FIX: Use dateCreation field
     Page<Decompte> findByDateRange(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate, Pageable pageable);
 
     @Query("SELECT d FROM Decompte d WHERE d.projet.id = :projetId AND d.statut = :statut")

@@ -5,7 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
@@ -14,7 +14,7 @@ public class DepenseDTO {
     private Long id;
     private String description;
     private BigDecimal montant;
-    private LocalDateTime dateDepense;
+    private LocalDate dateDepense;
     private String categorie;
     private String statut;
     private Long projetId;

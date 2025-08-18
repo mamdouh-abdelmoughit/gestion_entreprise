@@ -12,8 +12,11 @@ import com.btp.repository.ProjetRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.btp.entity.User; // 1. Import User
+import com.btp.repository.UserRepository; // 2. Import UserRepository
 
 import jakarta.validation.Valid;
 import java.util.Optional;
@@ -30,6 +33,9 @@ public class DocumentService {
 
     @Autowired
     private EmployeRepository employeRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private EntityMapper entityMapper;
@@ -50,10 +56,19 @@ public class DocumentService {
     @Transactional
     public DocumentDTO save(@Valid DocumentDTO documentDTO) {
         Document document = entityMapper.toEntity(documentDTO);
+
+        // --- START OF THE FINAL FIX ---
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("Authenticated user not found"));
+        document.setCreatedBy(currentUser);
+        // --- END OF THE FINAL FIX ---
+
         updateRelationships(document, documentDTO);
         Document savedDocument = documentRepository.save(document);
         return entityMapper.toDTO(savedDocument);
     }
+
 
     @Transactional
     // INSIDE DocumentService.java

@@ -16,6 +16,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.btp.entity.User; // 1. Import User
+import com.btp.repository.UserRepository; // 2. Import UserRepository
+import org.springframework.security.core.context.SecurityContextHolder; //
 
 import jakarta.validation.Valid;
 import java.time.LocalDateTime;
@@ -37,6 +40,9 @@ public class CautionService {
     private AppelOffreRepository appelOffreRepository;
 
     @Autowired
+    private UserRepository userRepository; // 4. Inject UserRepository
+
+    @Autowired
     private EntityMapper entityMapper;
 
     @Transactional(readOnly = true)
@@ -55,6 +61,14 @@ public class CautionService {
     @Transactional
     public CautionDTO save(@Valid CautionDTO cautionDTO) {
         Caution caution = entityMapper.toEntity(cautionDTO);
+
+        // --- START OF THE FINAL FIX ---
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("Authenticated user not found"));
+        caution.setCreatedBy(currentUser);
+        // --- END OF THE FINAL FIX ---
+
         updateRelationships(caution, cautionDTO);
         Caution savedCaution = cautionRepository.save(caution);
         return entityMapper.toDTO(savedCaution);

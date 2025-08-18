@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 @Entity
@@ -20,7 +20,7 @@ public class Projet {
     private Long id;
 
     @Column(nullable = false)
-    private String numero;
+    private String numero = "N/A"; // FIX: Provide a default value
 
     @Column(nullable = false)
     private String nom;
@@ -30,28 +30,28 @@ public class Projet {
     private AppelOffre appelOffre;
 
     @Column(nullable = false)
-    private String maitreDOuvrage;
+    private String maitreDOuvrage = "N/A";
 
     @Column(nullable = false)
-    private Double montantContrat;
+    private Double montantContrat = 0.0;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Double budgetEstime;
 
     @Column(nullable = false)
-    private LocalDateTime dateDebut;
+    private LocalDate dateDebut;
 
     @Column(nullable = false)
-    private LocalDateTime dateFinPrevue;
+    private LocalDate dateFinPrevue;
 
-    private LocalDateTime dateFinReelle;
+    private LocalDate dateFinReelle;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private StatutProjet statut;
 
     @Column(nullable = false)
-    private Double avancement; // 0-100
+    private Double avancement= 0.0; // 0-100
 
     @ManyToOne
     @JoinColumn(name = "chef_projet", nullable = false)

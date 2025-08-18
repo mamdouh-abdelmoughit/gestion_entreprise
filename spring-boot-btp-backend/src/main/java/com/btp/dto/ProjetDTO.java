@@ -13,11 +13,13 @@ import java.time.LocalDate;
 public class ProjetDTO {
     private Long id;
     private String nom;
+    private String numero;
+    private String maitreDOuvrage; // FIX: Add field
     private String description;
     private String statut;
     private LocalDate dateDebut;
     private LocalDate dateFin;
-    private BigDecimal budget;
+    private BigDecimal montantContrat; // FIX: Rename 'budget' for clarity
     private String adresse;
     private Long clientId;
 
