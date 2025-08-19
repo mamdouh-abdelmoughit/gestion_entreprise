@@ -13,7 +13,7 @@ public class DocumentDTO {
     private Long id;
     private String nom;
     private String type;
-    private String chemin;
+    private String fichier;
     private Long taille;
     private LocalDate dateUpload;
     private String description;

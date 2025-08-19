@@ -238,7 +238,7 @@ public class EntityMapper {
         if (entity.getType() != null) {
             dto.setType(entity.getType().name());
         }
-        dto.setChemin(entity.getFichier()); // FIX: Field name mismatch
+        dto.setFichier(entity.getFichier()); // FIX: Field name mismatch
         dto.setTaille(entity.getTailleFichier()); // FIX: Field name mismatch
         dto.setDateUpload(entity.getDateUpload());
         dto.setDescription(entity.getDescription());
@@ -259,7 +259,7 @@ public class EntityMapper {
         if (dto.getType() != null) {
             entity.setType(Document.TypeDocument.valueOf(dto.getType()));
         }
-        entity.setFichier(dto.getChemin()); // FIX: Field name mismatch
+        entity.setFichier(dto.getFichier()); // FIX: Field name mismatch
         entity.setTailleFichier(dto.getTaille()); // FIX: Field name mismatch
         entity.setDateUpload(dto.getDateUpload());
         entity.setDescription(dto.getDescription());

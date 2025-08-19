@@ -10,6 +10,7 @@ import com.btp.repository.DocumentRepository;
 import com.btp.repository.EmployeRepository;
 import com.btp.repository.ProjetRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,7 +19,13 @@ import org.springframework.transaction.annotation.Transactional;
 import com.btp.entity.User; // 1. Import User
 import com.btp.repository.UserRepository; // 2. Import UserRepository
 
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import jakarta.validation.Valid;
+
+import java.net.MalformedURLException;
 import java.util.Optional;
 
 @Service
@@ -81,7 +88,7 @@ public class DocumentService {
                         existingDocument.setType(Document.TypeDocument.valueOf(documentDTO.getType()));
                     }
                     // FIX: Corrected setter methods to match entity fields
-                    existingDocument.setFichier(documentDTO.getChemin());
+                    existingDocument.setFichier(documentDTO.getFichier());
                     existingDocument.setTailleFichier(documentDTO.getTaille());
                     existingDocument.setDateUpload(documentDTO.getDateUpload());
                     existingDocument.setDescription(documentDTO.getDescription());
@@ -110,6 +117,31 @@ public class DocumentService {
             Employe employe = employeRepository.findById(documentDTO.getEmployeId())
                     .orElseThrow(() -> new ResourceNotFoundException("Employe not found with id: " + documentDTO.getEmployeId()));
             document.setEmploye(employe);
+        }
+    }
+        public Resource loadAsResource(Long documentId) {
+        // 1. Find the document metadata in the database
+        Optional<Document> documentOptional = documentRepository.findById(documentId);
+        if (documentOptional.isEmpty()) {
+            throw new RuntimeException("Document not found with ID: " + documentId);
+        }
+        Document document = documentOptional.get();
+
+        try {
+            // 2. Resolve the absolute file path from the stored chemin
+            Path filePath = Paths.get(document.getFichier()).toAbsolutePath().normalize();
+            
+            // 3. Create a URL resource from the file path
+            Resource resource = new UrlResource(filePath.toUri());
+
+            // 4. Check if the resource exists and is readable
+            if (resource.exists() && resource.isReadable()) {
+                return resource;
+            } else {
+                throw new RuntimeException("File not found or is not readable: " + document.getFichier());
+            }
+        } catch (MalformedURLException e) {
+            throw new RuntimeException("Error resolving file path: " + document.getFichier(), e);
         }
     }
 }
