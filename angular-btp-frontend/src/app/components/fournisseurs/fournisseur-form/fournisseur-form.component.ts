@@ -14,6 +14,7 @@ import { FournisseurService } from '../../../core/services/fournisseur.service';
 export class FournisseurFormComponent implements OnInit {
   fournisseurForm!: FormGroup;
   isEditMode = false;
+  isDetailsMode = false;
   fournisseurId: number | null = null;
   error: string | null = null;
   isLoading = false;
@@ -27,7 +28,7 @@ export class FournisseurFormComponent implements OnInit {
 
   ngOnInit(): void {
     this.initForm();
-    this.checkEditMode();
+    this.checkMode();
   }
 
   private initForm(): void {
@@ -45,27 +46,44 @@ export class FournisseurFormComponent implements OnInit {
     });
   }
 
-  private checkEditMode(): void {
-    this.route.params.subscribe(params => {
-      const id = params['id'];
-      if (id) {
-        this.isEditMode = true;
-        this.fournisseurId = +id;
-        this.isLoading = true;
-        this.fournisseurService.getFournisseurById(this.fournisseurId).subscribe({
-          next: (fournisseur) => {
-            const formData = {
-              ...fournisseur,
-              specialites: fournisseur.specialites ? fournisseur.specialites.join(', ') : ''
-            };
-            this.fournisseurForm.patchValue(formData);
-            this.isLoading = false;
-          },
-          error: () => this.handleError('Erreur lors du chargement du fournisseur.')
-        });
-      }
+private checkMode(): void {
+  const id = this.route.snapshot.paramMap.get('id');
+  const url = this.route.snapshot.url.map(segment => segment.path);
+
+  if (id && !isNaN(+id)) {
+    this.fournisseurId = +id;
+    this.isLoading = true;
+
+    if (url.includes('edit')) {
+      this.isEditMode = true;
+    } else if (url.includes('details')) {
+      this.isDetailsMode = true;
+    }
+
+    this.fournisseurService.getFournisseurById(this.fournisseurId).subscribe({
+      next: (fournisseur) => {
+        const formData = {
+          ...fournisseur,
+          specialites: fournisseur.specialites ? fournisseur.specialites.join(', ') : ''
+        };
+
+        this.fournisseurForm.patchValue(formData);
+        this.isLoading = false;
+
+        if (this.isDetailsMode) {
+          this.fournisseurForm.disable(); // lock all fields in details mode
+        }
+      },
+      error: () => this.handleError("Erreur lors du chargement du fournisseur.")
     });
+
+  } else {
+    // --- CREATE MODE ---
+    this.isEditMode = false;
+    this.isDetailsMode = false;
+    this.isLoading = false;
   }
+}
 
   onSubmit(): void {
     if (this.fournisseurForm.invalid) return;

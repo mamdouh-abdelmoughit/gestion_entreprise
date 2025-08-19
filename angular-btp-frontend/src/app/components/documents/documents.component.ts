@@ -56,5 +56,19 @@ export class DocumentsComponent implements OnInit {
       });
     }
   }
+    viewDocument(id: number): void {
+    this.documentService.viewDocument(id).subscribe({
+      next: (blob) => {
+        // Create a URL for the blob
+        const fileURL = URL.createObjectURL(blob);
+        // Open the URL in a new browser tab
+        window.open(fileURL, '_blank');
+      },
+      error: (err) => {
+        console.error('Error viewing document:', err);
+        alert('Failed to view the document.');
+      }
+    });
+  }
 }
 

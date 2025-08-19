@@ -29,6 +29,7 @@
               </span>
           </td>
           <td class="py-2 px-4 flex gap-4">
+            <button [routerLink]="['/users/details', user.id]" class="text-blue-600 hover:underline">Détails</button>
             <button [routerLink]="['/users/edit', user.id]" class="text-blue-600 hover:underline">Modifier</button>
             <button (click)="deleteUser(user.id)" class="text-red-600 hover:underline">Supprimer</button>
           </td>

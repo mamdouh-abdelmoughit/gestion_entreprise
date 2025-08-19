@@ -19,6 +19,7 @@ interface UserRef { id: number; username: string; }
 export class ProjetFormComponent implements OnInit {
   projetForm!: FormGroup;
   isEditMode = false;
+  isDetailsMode = false;
   projetId: number | null = null;
   error: string | null = null;
   isLoading = false;
@@ -39,7 +40,7 @@ export class ProjetFormComponent implements OnInit {
   ngOnInit(): void {
     this.initForm();
     this.loadDropdownData();
-    this.checkEditMode();
+    this.checkMode();
   }
 
   private initForm(data?: Projet): void {
@@ -67,32 +68,50 @@ export class ProjetFormComponent implements OnInit {
     ];
   }
 
-  private checkEditMode(): void {
-    this.route.params.subscribe(params => {
-      const id = params['id'];
-      if (id) {
-        this.isEditMode = true;
-        this.projetId = +id;
-        this.isLoading = true;
-        this.projetService.getProjetById(this.projetId).subscribe({
-          next: (projet) => {
-            // Dates need to be formatted for the date input field (YYYY-MM-DD)
-            const formattedProjet = {
-              ...projet,
-              dateDebut: projet.dateDebut ? new Date(projet.dateDebut).toISOString().split('T')[0] : '',
-              dateFin: projet.dateFin ? new Date(projet.dateFin).toISOString().split('T')[0] : ''
-            };
-            this.projetForm.patchValue(formattedProjet);
-            this.isLoading = false;
-          },
-          error: (err) => {
-            this.error = 'Erreur lors du chargement du projet.';
-            this.isLoading = false;
-          }
-        });
+private checkMode(): void {
+  const id = this.route.snapshot.paramMap.get('id');
+  const url = this.route.snapshot.url.map(segment => segment.path);
+
+  if (id && !isNaN(+id)) {
+    this.projetId = +id;
+    this.isLoading = true;
+
+    if (url.includes('edit')) {
+      this.isEditMode = true;
+    } else if (url.includes('details')) {
+      this.isDetailsMode = true;
+    }
+
+    this.projetService.getProjetById(this.projetId).subscribe({
+      next: (projet) => {
+        const formattedProjet = {
+          ...projet,
+          dateDebut: projet.dateDebut ? new Date(projet.dateDebut).toISOString().split('T')[0] : '',
+          dateFin: projet.dateFin ? new Date(projet.dateFin).toISOString().split('T')[0] : ''
+        };
+
+        this.projetForm.patchValue(formattedProjet);
+        this.isLoading = false;
+
+        // Disable form if in details mode
+        if (this.isDetailsMode) {
+          this.projetForm.disable();
+        }
+      },
+      error: (err) => {
+        this.error = 'Erreur lors du chargement du projet.';
+        this.isLoading = false;
       }
     });
+
+  } else {
+    // --- CREATE MODE ---
+    this.isEditMode = false;
+    this.isDetailsMode = false;
+    this.isLoading = false;
   }
+}
+
 
   onSubmit(): void {
     if (this.projetForm.invalid) {
@@ -109,6 +128,24 @@ export class ProjetFormComponent implements OnInit {
       next: () => this.router.navigate(['/projets']),
       error: (err) => {
         this.error = 'Erreur lors de la sauvegarde du projet.';
+        this.isLoading = false;
+      }
+    });
+  }
+  loadProjetDetails(id: number): void {
+    this.isLoading = true;
+    this.isDetailsMode = true; // Assuming this is set to true for details view
+    this.error = null;
+    this.projetService.getProjetById(id).subscribe({
+      next: (projet) => {
+        this.initForm(projet);
+        this.isLoading = false;
+        if (this.isDetailsMode) {
+          this.projetForm.disable();
+        }
+      },
+      error: (err) => {
+        this.error = 'Erreur lors du chargement du projet.';
         this.isLoading = false;
       }
     });

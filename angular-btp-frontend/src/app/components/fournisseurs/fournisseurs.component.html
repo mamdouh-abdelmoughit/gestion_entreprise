@@ -35,11 +35,13 @@
               </span>
             </td>
             <td>
-              <button class="btn btn-link">Détails</button>
+              <td class="py-2 px-4">
+              <button [routerLink]="['/fournisseurs/details', fournisseur.id]" class="btn btn-link">Détails</button>
+              
               <button [routerLink]="['/fournisseurs/edit', fournisseur.id]" class="text-blue-600 hover:underline">Modifier</button>
-              <button (click)="deleteFournisseur(fournisseur.id)" class="text-red-600 hover:underline">Supprimer</button>
+              <button (click)="deleteFournisseur(fournisseur.id)" class="text-red-600 hover:underline">Supprimer</button></td>
 
-            </td>
+            
           </tr>
         </tbody>
       </table>

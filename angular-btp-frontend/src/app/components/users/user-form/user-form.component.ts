@@ -14,6 +14,8 @@ export class UserFormComponent implements OnInit {
   form!: FormGroup;
   userId: number | null = null;
   error: string | null = null;
+  isEditMode = false;
+  isDetailsMode = false;
   isLoading = true; // Start as true to load user data
 
   constructor(
@@ -25,7 +27,7 @@ export class UserFormComponent implements OnInit {
 
   ngOnInit(): void {
     this.initForm();
-    this.checkEditMode();
+    this.checkMode();
   }
 
   private initForm(): void {
@@ -40,25 +42,39 @@ export class UserFormComponent implements OnInit {
     });
   }
 
-  private checkEditMode(): void {
-    this.route.params.subscribe(params => {
-      this.userId = +params['id'];
-      if (!this.userId) {
-        // Should not happen as we don't have a 'new' user route
-        this.router.navigate(['/users']);
-        return;
-      }
+private checkMode(): void {
+  const id = this.route.snapshot.paramMap.get('id');
+  const url = this.route.snapshot.url.map(segment => segment.path);
 
-      this.userService.getById(this.userId).subscribe({
-        next: (user) => {
-          const formData = { ...user, roles: user.roles.join(', ') };
-          this.form.patchValue(formData);
-          this.isLoading = false;
-        },
-        error: () => this.handleError('Erreur de chargement de l\'utilisateur.')
-      });
-    });
+  if (!id || isNaN(+id)) {
+    // No ID → go back to users list
+    this.router.navigate(['/users']);
+    return;
   }
+
+  this.userId = +id;
+  this.isLoading = true;
+
+  if (url.includes('edit')) {
+    this.isEditMode = true;
+  } else if (url.includes('details')) {
+    this.isDetailsMode = true;
+  }
+
+  this.userService.getById(this.userId).subscribe({
+    next: (user) => {
+      const formData = { ...user, roles: user.roles.join(', ') };
+      this.form.patchValue(formData);
+      this.isLoading = false;
+
+      if (this.isDetailsMode) {
+        this.form.disable(); // lock all fields in details mode
+      }
+    },
+    error: () => this.handleError("Erreur de chargement de l'utilisateur.")
+  });
+}
+
 
   onSubmit(): void {
     if (this.form.invalid) return;

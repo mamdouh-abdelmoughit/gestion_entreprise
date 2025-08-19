@@ -26,6 +26,7 @@ export class ClientsComponent implements OnInit {
   }
 
   loadClients(page = 0, size = 10, sort = 'nom,asc'): void {
+    console.log(`Loading clients: page=${page}, size=${size}, sort=${sort}`);
     this.isLoading = true;
     this.error = null;
     this.clientService.getAllClients(page, size, sort).subscribe({
@@ -65,5 +66,6 @@ export class ClientsComponent implements OnInit {
       });
     }
   }
-  // --- END OF NEW CODE ---
+  
+  // Add this method to your ClientFormComponent class
 }

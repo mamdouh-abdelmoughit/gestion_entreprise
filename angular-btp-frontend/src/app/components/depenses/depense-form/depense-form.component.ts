@@ -20,6 +20,7 @@ import { Employe } from '../../../core/models/employe.model';
 export class DepenseFormComponent implements OnInit {
   depenseForm!: FormGroup;
   isEditMode = false;
+  isDetailsMode = false;
   depenseId: number | null = null;
   error: string | null = null;
   isLoading = false;
@@ -39,7 +40,7 @@ export class DepenseFormComponent implements OnInit {
   ngOnInit(): void {
     this.initForm();
     this.loadDropdownData();
-    this.checkEditMode();
+    this.checkMode();
   }
 
   private initForm(): void {
@@ -59,27 +60,48 @@ export class DepenseFormComponent implements OnInit {
     this.employeService.getAllEmployes(0, 100, 'nom,asc').subscribe(page => this.employes = page.content);
   }
 
-  private checkEditMode(): void {
-    this.route.params.subscribe(params => {
-      const id = params['id'];
-      if (id) {
-        this.isEditMode = true;
-        this.depenseId = +id;
-        this.isLoading = true;
-        this.depenseService.getDepenseById(this.depenseId).subscribe({
-          next: (depense) => {
-            const formData = {
-              ...depense,
-              dateDepense: depense.dateDepense ? new Date(depense.dateDepense).toISOString().split('T')[0] : ''
-            };
-            this.depenseForm.patchValue(formData);
-            this.isLoading = false;
-          },
-          error: () => this.handleError('Erreur lors du chargement de la dépense.')
-        });
-      }
+private checkMode(): void {
+  const id = this.route.snapshot.paramMap.get('id');
+  const url = this.route.snapshot.url.map(segment => segment.path);
+
+  if (id && !isNaN(+id)) {
+    this.depenseId = +id;
+    this.isLoading = true;
+
+    if (url.includes('edit')) {
+      this.isEditMode = true;
+    } else if (url.includes('details')) {
+      this.isDetailsMode = true;
+    }
+
+    this.depenseService.getDepenseById(this.depenseId).subscribe({
+      next: (depense) => {
+        const formData = {
+          ...depense,
+          dateDepense: depense.dateDepense
+            ? new Date(depense.dateDepense).toISOString().split('T')[0]
+            : ''
+        };
+
+        this.depenseForm.patchValue(formData);
+        this.isLoading = false;
+
+        // Disable form fields if we are in details mode
+        if (this.isDetailsMode) {
+          this.depenseForm.disable();
+        }
+      },
+      error: () => this.handleError('Erreur lors du chargement de la dépense.')
     });
+
+  } else {
+    // --- CREATE MODE ---
+    this.isEditMode = false;
+    this.isDetailsMode = false;
+    this.isLoading = false;
   }
+}
+
 
   onSubmit(): void {
     if (this.depenseForm.invalid) return;

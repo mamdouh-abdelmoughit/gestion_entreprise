@@ -1,7 +1,7 @@
 <div class="container mx-auto p-6">
   <div class="max-w-2xl mx-auto">
     <div class="bg-white rounded-lg shadow-sm p-6">
-      <h2 class="text-2xl font-bold text-gray-800 mb-6">{{ isEditMode ? 'Modifier la Dépense' : 'Nouvelle Dépense' }}</h2>
+      <h2 class="text-2xl font-bold text-gray-800 mb-6">{{ isEditMode ? 'Modifier la Dépense' : (isDetailsMode ? 'Détails de la Dépense' : 'Ajouter une Dépense') }}</h2>
       <div *ngIf="isLoading" class="text-center">Chargement...</div>
       <form [formGroup]="depenseForm" (ngSubmit)="onSubmit()" *ngIf="!isLoading">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -53,7 +53,9 @@
         <div *ngIf="error" class="mt-4 text-red-500">{{ error }}</div>
         <div class="mt-6 flex justify-end gap-4">
           <button type="button" (click)="router.navigate(['/depenses'])" class="btn-secondary">Annuler</button>
-          <button type="submit" [disabled]="depenseForm.invalid || isLoading" class="btn-primary">{{ isEditMode ? 'Mettre à jour' : 'Sauvegarder' }}</button>
+          <button
+          *ngIf="!isDetailsMode"
+          type="submit" [disabled]="depenseForm.invalid || isLoading" class="btn-primary">{{ isEditMode ? 'Mettre à jour' : 'Sauvegarder' }}</button>
         </div>
       </form>
     </div>

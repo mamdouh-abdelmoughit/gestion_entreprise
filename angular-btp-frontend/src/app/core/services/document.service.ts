@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Page } from '../models/page.model';
 import { Document } from '../models/document.model';
@@ -36,5 +36,15 @@ export class DocumentService {
 
   deleteDocument(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+    viewDocument(id: number): Observable<Blob> {
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/pdf', // Or the appropriate MIME type
+      // Set 'Accept' header if your backend requires it
+    });
+    return this.http.get(`${this.apiUrl}/${id}/download`, {
+      headers: headers,
+      responseType: 'blob' // This is essential for handling file data
+    });
   }
 }

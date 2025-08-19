@@ -19,6 +19,7 @@ import {AppelOffre} from "../../../core/models/appel-offre.model";
 export class AppelOffreFormComponent implements OnInit {
   appelOffreForm!: FormGroup| undefined;
   isEditMode = false;
+  isDetailsMode = false;
   appelOffreId: number | null = null;
   error: string | null = null;
   isLoading = false;
@@ -35,36 +36,50 @@ export class AppelOffreFormComponent implements OnInit {
   ngOnInit(): void {
     // We will now call checkEditMode directly.
     // It will handle initializing the form at the correct time.
-    this.checkEditMode();
+    this.checkMode();
   }
 
   // This is the new, combined logic
-  private checkEditMode(): void {
-    const id = this.route.snapshot.paramMap.get('id');
+  private checkMode(): void {
+  const id = this.route.snapshot.paramMap.get('id');
+  const url = this.route.snapshot.url.map(segment => segment.path);
 
-    if (id && !isNaN(+id)) {
-      // --- EDIT MODE ---
+  if (id && !isNaN(+id)) {
+    this.appelOffreId = +id;
+    this.isLoading = true;
+
+    // Detect mode from the URL path
+    if (url.includes('edit')) {
       this.isEditMode = true;
-      this.appelOffreId = +id;
-      this.isLoading = true;
-
-      this.appelOffreService.getAppelOffreById(this.appelOffreId).subscribe({
-        next: (appelOffre) => {
-          // 1. We receive the data from the backend.
-          // 2. NOW we create the form, pre-filled with the correct data.
-          this.initForm(appelOffre);
-          this.isLoading = false;
-        },
-        error: () => this.handleError('Erreur lors du chargement de l\'appel d\'offres.')
-      });
-    } else {
-      // --- CREATE MODE ---
-      this.isEditMode = false;
-      // In create mode, we just create an empty form immediately.
-      this.initForm();
-      this.isLoading = false;
+    } else if (url.includes('details')) {
+      this.isDetailsMode = true;
     }
+
+    this.appelOffreService.getAppelOffreById(this.appelOffreId).subscribe({
+      next: (appelOffre) => {
+        // Pre-fill form
+        this.initForm(appelOffre);
+        this.isLoading = false;
+
+        // Disable form if details mode
+        if (this.isDetailsMode) {
+          if (this.appelOffreForm) {
+            this.appelOffreForm.disable();
+          }
+        }
+      },
+      error: () => this.handleError("Erreur lors du chargement de l'appel d'offres.")
+    });
+
+  } else {
+    // --- CREATE MODE ---
+    this.isEditMode = false;
+    this.isDetailsMode = false;
+    this.initForm();  // empty form
+    this.isLoading = false;
   }
+}
+
 
   // The initForm method now accepts optional data to pre-fill the form
   private initForm(data?: AppelOffre): void {

@@ -16,6 +16,7 @@ import { Projet } from '../../../core/models/projet.model';
 export class DecompteFormComponent implements OnInit {
   decompteForm!: FormGroup;
   isEditMode = false;
+  isDetailsMode = false;
   decompteId: number | null = null;
   error: string | null = null;
   isLoading = false;
@@ -33,7 +34,7 @@ export class DecompteFormComponent implements OnInit {
   ngOnInit(): void {
     this.initForm();
     this.loadProjets();
-    this.checkEditMode();
+    this.checkMode();
   }
 
   private initForm(): void {
@@ -52,27 +53,48 @@ export class DecompteFormComponent implements OnInit {
     this.projetService.getAllProjets(0, 100, 'nom,asc').subscribe(page => this.projets = page.content);
   }
 
-  private checkEditMode(): void {
-    this.route.params.subscribe(params => {
-      const id = params['id'];
-      if (id) {
-        this.isEditMode = true;
-        this.decompteId = +id;
-        this.isLoading = true;
-        this.decompteService.getDecompteById(this.decompteId).subscribe({
-          next: (decompte) => {
-            const formData = {
-              ...decompte,
-              dateDecompte: decompte.dateDecompte ? new Date(decompte.dateDecompte).toISOString().split('T')[0] : ''
-            };
-            this.decompteForm.patchValue(formData);
-            this.isLoading = false;
-          },
-          error: () => this.handleError('Erreur lors du chargement du décompte.')
-        });
-      }
+private checkMode(): void {
+  const id = this.route.snapshot.paramMap.get('id');
+  const url = this.route.snapshot.url.map(segment => segment.path);
+
+  if (id && !isNaN(+id)) {
+    this.decompteId = +id;
+    this.isLoading = true;
+
+    if (url.includes('edit')) {
+      this.isEditMode = true;
+    } else if (url.includes('details')) {
+      this.isDetailsMode = true;
+    }
+
+    this.decompteService.getDecompteById(this.decompteId).subscribe({
+      next: (decompte) => {
+        const formData = {
+          ...decompte,
+          dateDecompte: decompte.dateDecompte
+            ? new Date(decompte.dateDecompte).toISOString().split('T')[0]
+            : ''
+        };
+
+        this.decompteForm.patchValue(formData);
+        this.isLoading = false;
+
+        // disable form in details mode
+        if (this.isDetailsMode) {
+          this.decompteForm.disable();
+        }
+      },
+      error: () => this.handleError('Erreur lors du chargement du décompte.')
     });
+
+  } else {
+    // --- CREATE MODE ---
+    this.isEditMode = false;
+    this.isDetailsMode = false;
+    this.isLoading = false;
   }
+}
+
 
   onSubmit(): void {
     if (this.decompteForm.invalid) return;

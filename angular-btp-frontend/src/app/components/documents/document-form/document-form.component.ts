@@ -16,6 +16,7 @@ import { DocumentService } from '../../../core/services/document.service';
 export class DocumentFormComponent implements OnInit {
   documentForm!: FormGroup;
   selectedFile: File | null = null;
+  isDetailsMode = false;
   error: string | null = null;
   isLoading = false;
 

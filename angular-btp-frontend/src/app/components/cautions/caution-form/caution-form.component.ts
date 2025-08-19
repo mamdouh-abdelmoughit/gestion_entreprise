@@ -16,6 +16,7 @@ import { Projet } from '../../../core/models/projet.model';
 export class CautionFormComponent implements OnInit {
   cautionForm!: FormGroup;
   isEditMode = false;
+  isDetailsMode = false;
   cautionId: number | null = null;
   error: string | null = null;
   isLoading = false;
@@ -33,7 +34,8 @@ export class CautionFormComponent implements OnInit {
   ngOnInit(): void {
     this.initForm();
     this.loadProjets();
-    this.checkEditMode();
+    this.checkMode();
+   
   }
 
   private initForm(): void {
@@ -54,28 +56,47 @@ export class CautionFormComponent implements OnInit {
     this.projetService.getAllProjets(0, 100, 'nom,asc').subscribe(page => this.projets = page.content);
   }
 
-  private checkEditMode(): void {
-    this.route.params.subscribe(params => {
-      const id = params['id'];
-      if (id) {
-        this.isEditMode = true;
-        this.cautionId = +id;
-        this.isLoading = true;
-        this.cautionService.getCautionById(this.cautionId).subscribe({
-          next: (caution) => {
-            const formData = {
-              ...caution,
-              dateEmission: caution.dateEmission ? new Date(caution.dateEmission).toISOString().split('T')[0] : '',
-              dateEcheance: caution.dateEcheance ? new Date(caution.dateEcheance).toISOString().split('T')[0] : ''
-            };
-            this.cautionForm.patchValue(formData);
-            this.isLoading = false;
-          },
-          error: () => this.handleError('Erreur lors du chargement de la caution.')
-        });
-      }
+private checkMode(): void {
+  const id = this.route.snapshot.paramMap.get('id');
+  const url = this.route.snapshot.url.map(segment => segment.path);
+
+  if (id && !isNaN(+id)) {
+    this.cautionId = +id;
+    this.isLoading = true;
+
+    if (url.includes('edit')) {
+      this.isEditMode = true;
+    } else if (url.includes('details')) {
+      this.isDetailsMode = true;
+    }
+
+    this.cautionService.getCautionById(this.cautionId).subscribe({
+      next: (caution) => {
+        const formData = {
+          ...caution,
+          dateEmission: caution.dateEmission ? new Date(caution.dateEmission).toISOString().split('T')[0] : '',
+          dateEcheance: caution.dateEcheance ? new Date(caution.dateEcheance).toISOString().split('T')[0] : ''
+        };
+
+        this.cautionForm.patchValue(formData);
+        this.isLoading = false;
+
+        // disable form fields if in details mode
+        if (this.isDetailsMode) {
+          this.cautionForm.disable();
+        }
+      },
+      error: () => this.handleError('Erreur lors du chargement de la caution.')
     });
+
+  } else {
+    // --- CREATE MODE ---
+    this.isEditMode = false;
+    this.isDetailsMode = false;
+    this.isLoading = false;
   }
+}
+
 
   onSubmit(): void {
     if (this.cautionForm.invalid) return;

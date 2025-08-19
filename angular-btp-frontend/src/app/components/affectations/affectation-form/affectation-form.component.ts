@@ -16,11 +16,13 @@ import { Employe } from '../../../core/models/employe.model';
 export class AffectationFormComponent implements OnInit {
   form!: FormGroup;
   isEditMode = false;
+  isDetailsMode = false;
   affectationId: number | null = null;
   error: string | null = null;
   isLoading = false;
   projets: Projet[] = [];
   employes: Employe[] = [];
+
   constructor(
     private fb: FormBuilder,
     private affectationService: AffectationEmployeService,
@@ -32,7 +34,7 @@ export class AffectationFormComponent implements OnInit {
   ngOnInit(): void {
     this.initForm();
     this.loadDropdownData();
-    this.checkEditMode();
+    this.checkMode();
   }
   private initForm(): void {
     this.form = this.fb.group({
@@ -48,28 +50,47 @@ export class AffectationFormComponent implements OnInit {
     this.projetService.getAllProjets(0, 100, 'nom,asc').subscribe(page => this.projets = page.content);
     this.employeService.getAllEmployes(0, 100, 'nom,asc').subscribe(page => this.employes = page.content);
   }
-  private checkEditMode(): void {
-    this.route.params.subscribe(params => {
-      const id = params['id'];
-      if (id) {
-        this.isEditMode = true;
-        this.affectationId = +id;
-        this.isLoading = true;
-        this.affectationService.getById(this.affectationId).subscribe({
-          next: (data) => {
-            const formData = {
-              ...data,
-              dateDebut: data.dateDebut ? new Date(data.dateDebut).toISOString().split('T')[0] : '',
-              dateFin: data.dateFin ? new Date(data.dateFin).toISOString().split('T')[0] : ''
-            };
-            this.form.patchValue(formData);
-            this.isLoading = false;
-          },
-          error: () => this.handleError('Erreur de chargement.')
-        });
-      }
+private checkMode(): void {
+  const id = this.route.snapshot.paramMap.get('id');
+  const url = this.route.snapshot.url.map(segment => segment.path);
+
+  if (id && !isNaN(+id)) {
+    this.affectationId = +id;
+    this.isLoading = true;
+
+    if (url.includes('edit')) {
+      this.isEditMode = true;
+    } else if (url.includes('details')) {
+      this.isDetailsMode = true;
+    }
+
+    this.affectationService.getById(this.affectationId).subscribe({
+      next: (data) => {
+        const formData = {
+          ...data,
+          dateDebut: data.dateDebut ? new Date(data.dateDebut).toISOString().split('T')[0] : '',
+          dateFin: data.dateFin ? new Date(data.dateFin).toISOString().split('T')[0] : ''
+        };
+
+        this.form.patchValue(formData);
+        this.isLoading = false;
+
+        // Disable form fields if in details mode
+        if (this.isDetailsMode) {
+          this.form.disable();
+        }
+      },
+      error: () => this.handleError('Erreur de chargement.')
     });
+
+  } else {
+    // --- CREATE MODE ---
+    this.isEditMode = false;
+    this.isDetailsMode = false;
+    this.isLoading = false;
   }
+}
+
   onSubmit(): void {
     if (this.form.invalid) return;
     this.isLoading = true;

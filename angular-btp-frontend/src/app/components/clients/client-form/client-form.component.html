@@ -3,7 +3,7 @@
     <div class="bg-white rounded-lg shadow-sm p-6">
       <!-- Dynamic Title -->
       <h2 class="text-2xl font-bold text-gray-800 mb-6">
-        {{ isEditMode ? 'Modifier le Client' : 'Créer un Nouveau Client' }}
+        {{ isEditMode ? 'Modifier le Client' : (isDetailsMode ? 'Détails du Client' : 'Créer un Nouveau Client') }}
       </h2>
       <div *ngIf="isLoading" class="text-center">Chargement...</div>
 
@@ -48,7 +48,9 @@
           <button type="button" (click)="router.navigate(['/clients'])" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">
             Annuler
           </button>
-          <button type="submit" [disabled]="clientForm.invalid || isLoading" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-300">
+          <button 
+          *ngIf="!isDetailsMode"
+          type="submit" [disabled]="clientForm.invalid || isLoading" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-300">
             {{ isEditMode ? 'Mettre à jour' : 'Sauvegarder' }}
           </button>
         </div>

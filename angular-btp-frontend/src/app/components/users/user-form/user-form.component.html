@@ -15,7 +15,9 @@
         <div *ngIf="error" class="mt-4 text-red-500">{{ error }}</div>
         <div class="mt-6 flex justify-end gap-4">
           <button type="button" (click)="router.navigate(['/users'])" class="btn-secondary">Annuler</button>
-          <button type="submit" [disabled]="form.invalid || isLoading" class="btn-primary">Mettre à jour</button>
+          <button 
+          *ngIf="!isDetailsMode"
+          type="submit" [disabled]="form.invalid || isLoading" class="btn-primary">Mettre à jour</button>
         </div>
       </form>
     </div>

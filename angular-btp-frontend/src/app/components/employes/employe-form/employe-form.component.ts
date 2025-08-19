@@ -14,6 +14,7 @@ import { EmployeService } from '../../../core/services/employe.service';
 export class EmployeFormComponent implements OnInit {
   employeForm!: FormGroup;
   isEditMode = false;
+  isDetailsMode = false;
   employeId: number | null = null;
   error: string | null = null;
   isLoading = false;
@@ -27,7 +28,7 @@ export class EmployeFormComponent implements OnInit {
 
   ngOnInit(): void {
     this.initForm();
-    this.checkEditMode();
+    this.checkMode();
   }
 
   private initForm(): void {
@@ -45,27 +46,47 @@ export class EmployeFormComponent implements OnInit {
     });
   }
 
-  private checkEditMode(): void {
-    this.route.params.subscribe(params => {
-      const id = params['id'];
-      if (id) {
-        this.isEditMode = true;
-        this.employeId = +id;
-        this.isLoading = true;
-        this.employeService.getEmployeById(this.employeId).subscribe({
-          next: (employe) => {
-            const formData = {
-              ...employe,
-              dateEmbauche: employe.dateEmbauche ? new Date(employe.dateEmbauche).toISOString().split('T')[0] : ''
-            };
-            this.employeForm.patchValue(formData);
-            this.isLoading = false;
-          },
-          error: () => this.handleError('Erreur lors du chargement de l\'employé.')
-        });
-      }
+private checkMode(): void {
+  const id = this.route.snapshot.paramMap.get('id');
+  const url = this.route.snapshot.url.map(segment => segment.path);
+
+  if (id && !isNaN(+id)) {
+    this.employeId = +id;
+    this.isLoading = true;
+
+    if (url.includes('edit')) {
+      this.isEditMode = true;
+    } else if (url.includes('details')) {
+      this.isDetailsMode = true;
+    }
+
+    this.employeService.getEmployeById(this.employeId).subscribe({
+      next: (employe) => {
+        const formData = {
+          ...employe,
+          dateEmbauche: employe.dateEmbauche
+            ? new Date(employe.dateEmbauche).toISOString().split('T')[0]
+            : ''
+        };
+
+        this.employeForm.patchValue(formData);
+        this.isLoading = false;
+
+        if (this.isDetailsMode) {
+          this.employeForm.disable(); // lock all fields in details mode
+        }
+      },
+      error: () => this.handleError("Erreur lors du chargement de l'employé.")
     });
+
+  } else {
+    // --- CREATE MODE ---
+    this.isEditMode = false;
+    this.isDetailsMode = false;
+    this.isLoading = false;
   }
+}
+
 
   onSubmit(): void {
     if (this.employeForm.invalid) return;
@@ -86,4 +107,5 @@ export class EmployeFormComponent implements OnInit {
     this.error = message;
     this.isLoading = false;
   }
+
 }

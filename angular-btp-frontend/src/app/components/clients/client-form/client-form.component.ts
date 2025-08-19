@@ -15,6 +15,7 @@ import { Client } from '../../../core/models/client.model';
 export class ClientFormComponent implements OnInit {
   clientForm!: FormGroup;
   isEditMode = false;
+  isDetailsMode = false;
   clientId: number | null = null;
   error: string | null = null;
   isLoading = false;
@@ -28,7 +29,8 @@ export class ClientFormComponent implements OnInit {
 
   ngOnInit(): void {
     this.initForm();
-    this.checkEditMode();
+    this.checkMode();
+  
   }
 
   private initForm(): void {
@@ -40,26 +42,39 @@ export class ClientFormComponent implements OnInit {
     });
   }
 
-  private checkEditMode(): void {
-    this.route.params.subscribe(params => {
-      const id = params['id'];
-      if (id) {
-        this.isEditMode = true;
-        this.clientId = +id; // The '+' converts the string to a number
-        this.isLoading = true;
-        this.clientService.getClientById(this.clientId).subscribe({
-          next: (client) => {
-            this.clientForm.patchValue(client); // Pre-fill the form with existing data
-            this.isLoading = false;
-          },
-          error: (err) => {
-            this.error = 'Erreur lors du chargement du client.';
-            this.isLoading = false;
+private checkMode(): void {
+  this.route.url.subscribe(segments => {
+    if (segments.some(s => s.path === 'edit')) {
+      this.isEditMode = true;
+    } else if (segments.some(s => s.path === 'details')) {
+      this.isDetailsMode = true;
+    }
+  });
+
+  this.route.params.subscribe(params => {
+    const id = params['id'];
+    if (id) {
+      this.clientId = +id;
+      this.isLoading = true;
+      this.clientService.getClientById(this.clientId).subscribe({
+        next: (client) => {
+          this.clientForm.patchValue(client);
+          this.isLoading = false;
+
+          // Disable form in details mode
+          if (this.isDetailsMode) {
+            this.clientForm.disable();
           }
-        });
-      }
-    });
-  }
+        },
+        error: () => {
+          this.error = 'Erreur lors du chargement du client.';
+          this.isLoading = false;
+        }
+      });
+    }
+  });
+}
+
 
   onSubmit(): void {
     if (this.clientForm.invalid) {

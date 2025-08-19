@@ -40,13 +40,9 @@
             </td>
             <td>{{ projet.dateDebut | date:'dd/MM/yyyy' }}</td>
             <td class="budget">{{ projet.montantContrat | currency:'EUR' }}</td>
-            <td>
-              <button class="btn btn-link">Détails</button>
-            <td class="py-2 px-4">
-              <button [routerLink]="['/projets/edit', projet.id]" class="text-blue-600 hover:underline">Modifier</button>
-            <button (click)="deleteProjet(projet.id)" class="text-red-600 hover:underline">Supprimer</button>
-
-          </td>
+            <td class="py-2 px-4"><button [routerLink]="['/projets/details', projet.id]" class="btn btn-link">Détails</button>
+            <button [routerLink]="['/projets/edit', projet.id]" class="text-blue-600 hover:underline">Modifier</button>
+            <button (click)="deleteProjet(projet.id)" class="text-red-600 hover:underline">Supprimer</button></td>
           </tr>
         </tbody>
       </table>
