@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router'; // Re-import Router
 import { User } from '../../../core/models/user.model';
 import { UserService } from '../../../core/services/user.service';
 import { Page } from '../../../core/models/page.model';
@@ -17,7 +17,10 @@ export class UsersListComponent implements OnInit {
   isLoading = true;
   error: string | null = null;
 
-  constructor(private userService: UserService) {}
+  constructor(
+    private userService: UserService,
+    private router: Router // Re-inject Router
+  ) {}
 
   ngOnInit(): void {
     this.loadUsers();
@@ -34,16 +37,23 @@ export class UsersListComponent implements OnInit {
       error: () => this.handleError('Erreur de chargement des utilisateurs.')
     });
   }
+
   onPageChange(newPage:number){
     this.loadUsers(newPage);
   }
+
   deleteUser(id: number): void {
-    if (confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) {
+    if (window.confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) {
       this.userService.delete(id).subscribe({
         next: () => this.loadUsers(),
         error: () => this.handleError('Erreur de suppression.')
       });
     }
+  }
+
+  // New method to navigate to the user creation form
+  createUser(): void {
+    this.router.navigate(['/users/new']);
   }
 
   private handleError(message: string) {

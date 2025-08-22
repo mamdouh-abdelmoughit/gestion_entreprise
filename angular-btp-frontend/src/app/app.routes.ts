@@ -144,6 +144,8 @@ export const routes: Routes = [
       { path: 'users', component: UsersListComponent },
       { path: 'users/edit/:id', component: UserFormComponent },
       { path: 'users/details/:id', component: UserFormComponent },
+      { path: 'users/new', component: UserFormComponent },
+
 
 
       // Role Management

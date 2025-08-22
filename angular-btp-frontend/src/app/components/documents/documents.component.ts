@@ -56,19 +56,37 @@ export class DocumentsComponent implements OnInit {
       });
     }
   }
-    viewDocument(id: number): void {
-    this.documentService.viewDocument(id).subscribe({
-      next: (blob) => {
-        // Create a URL for the blob
-        const fileURL = URL.createObjectURL(blob);
-        // Open the URL in a new browser tab
-        window.open(fileURL, '_blank');
-      },
-      error: (err) => {
-        console.error('Error viewing document:', err);
-        alert('Failed to view the document.');
-      }
-    });
-  }
+viewDocument(id: number): void {
+  this.documentService.viewDocument(id).subscribe({
+    next: (blob) => {
+      const fileURL = URL.createObjectURL(blob);
+      window.open(fileURL, '_blank');
+    },
+    error: (err) => {
+      console.error('Error viewing document:', err);
+      alert('Impossible de visualiser le document.');
+    }
+  });
+}
+
+downloadDocument(id: number, filename: string): void {
+  this.documentService.downloadDocument(id).subscribe({
+    next: (blob) => {
+      const a = document.createElement('a');
+      const url = window.URL.createObjectURL(blob);
+      a.href = url;
+      a.download = filename; // Use document name for download
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    },
+    error: (err) => {
+      console.error('Error downloading document:', err);
+      alert('Impossible de télécharger le document.');
+    }
+  });
+}
+
 }
 

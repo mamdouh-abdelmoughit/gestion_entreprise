@@ -25,7 +25,12 @@ export class UserService {
     return this.http.get<User>(`${this.apiUrl}/${id}`);
   }
 
-  // Note: Creating a user is done through the AuthService.register method.
+  // New: Method to create a new user
+  create(user: Partial<User>): Observable<User> {
+    return this.http.post<User>(this.apiUrl, user);
+  }
+
+  // Note: Creating a user is done through the AuthService.register method, OR by admin via this.create method.
   // This service provides admin-level updates.
   update(id: number, user: Partial<User>): Observable<User> {
     return this.http.put<User>(`${this.apiUrl}/${id}`, user);

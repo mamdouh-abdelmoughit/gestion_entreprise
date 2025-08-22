@@ -43,14 +43,17 @@ export class DocumentService {
   deleteDocument(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
-    viewDocument(id: number): Observable<Blob> {
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/pdf', // Or the appropriate MIME type
-      // Set 'Accept' header if your backend requires it
-    });
+// In document.service.ts
+  viewDocument(id: number): Observable<Blob> {
+      return this.http.get(`${this.apiUrl}/${id}/preview`, { // Changed from /view/:id
+          responseType: 'blob'
+      });
+  }
+
+  downloadDocument(id: number): Observable<Blob> {
     return this.http.get(`${this.apiUrl}/${id}/download`, {
-      headers: headers,
-      responseType: 'blob' // This is essential for handling file data
+      responseType: 'blob' // Force download
     });
   }
+
 }

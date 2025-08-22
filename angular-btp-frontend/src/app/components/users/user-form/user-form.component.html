@@ -1,23 +1,96 @@
 <div class="container mx-auto p-6">
   <div class="max-w-2xl mx-auto">
     <div class="bg-white rounded-lg shadow-sm p-6">
-      <h2 class="text-2xl font-bold text-gray-800 mb-6">Modifier l'Utilisateur</h2>
-      <div *ngIf="isLoading" class="text-center">Chargement...</div>
+      <h2 class="text-2xl font-bold text-gray-800 mb-6">
+        {{ isCreationMode ? 'Créer un Utilisateur' : (isEditMode ? 'Modifier l\'Utilisateur' : 'Détails de l\'Utilisateur') }}
+      </h2>
+      <div *ngIf="isLoading" class="text-center text-blue-500">
+        <svg class="animate-spin h-8 w-8 text-blue-500 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        Chargement...
+      </div>
       <form [formGroup]="form" (ngSubmit)="onSubmit()" *ngIf="!isLoading">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div><label for="firstName" class="form-label">Prénom</label><input id="firstName" type="text" formControlName="firstName" class="input-control"></div>
-          <div><label for="lastName" class="form-label">Nom</label><input id="lastName" type="text" formControlName="lastName" class="input-control"></div>
-          <div><label for="username" class="form-label">Nom d'utilisateur</label><input id="username" type="text" formControlName="username" class="input-control"></div>
-          <div><label for="email" class="form-label">Email</label><input id="email" type="email" formControlName="email" class="input-control"></div>
-          <div class="md:col-span-2"><label for="roles" class="form-label">Rôles (séparés par une virgule)</label><input id="roles" type="text" formControlName="roles" class="input-control"></div>
-          <div class="md:col-span-2 flex items-center"><input id="enabled" type="checkbox" formControlName="enabled" class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"><label for="enabled" class="ml-2 block text-sm text-gray-900">Compte Activé</label></div>
+          <div>
+            <label for="firstName" class="form-label">Prénom</label>
+            <input id="firstName" type="text" formControlName="firstName" class="input-control" [class.border-red-500]="form.get('firstName')?.invalid && form.get('firstName')?.touched">
+            <div *ngIf="form.get('firstName')?.invalid && form.get('firstName')?.touched" class="text-red-500 text-sm mt-1">
+              Le prénom est requis.
+            </div>
+          </div>
+          <div>
+            <label for="lastName" class="form-label">Nom</label>
+            <input id="lastName" type="text" formControlName="lastName" class="input-control" [class.border-red-500]="form.get('lastName')?.invalid && form.get('lastName')?.touched">
+            <div *ngIf="form.get('lastName')?.invalid && form.get('lastName')?.touched" class="text-red-500 text-sm mt-1">
+              Le nom est requis.
+            </div>
+          </div>
+          <div>
+            <label for="username" class="form-label">Nom d'utilisateur</label>
+            <input id="username" type="text" formControlName="username" class="input-control" [class.border-red-500]="form.get('username')?.invalid && form.get('username')?.touched">
+            <div *ngIf="form.get('username')?.invalid && form.get('username')?.touched" class="text-red-500 text-sm mt-1">
+              Le nom d'utilisateur est requis.
+            </div>
+          </div>
+          <div>
+            <label for="email" class="form-label">Email</label>
+            <input id="email" type="email" formControlName="email" class="input-control" [class.border-red-500]="form.get('email')?.invalid && form.get('email')?.touched">
+            <div *ngIf="form.get('email')?.invalid && form.get('email')?.touched" class="text-red-500 text-sm mt-1">
+              <span *ngIf="form.get('email')?.errors?.['required']">L'email est requis.</span>
+              <span *ngIf="form.get('email')?.errors?.['email']">L'email n'est pas valide.</span>
+            </div>
+          </div>
+
+          <!-- Role Selection (Multi-select dropdown) -->
+            <div class="md:col-span-2">
+              <label for="roles" class="form-label">Rôles</label>
+              <select
+                id="roles"
+                formControlName="roles"
+                multiple
+                size="5"
+                class="input-control focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                [disabled]="isDetailsMode"
+              >
+<option *ngFor="let role of availableRoles" [ngValue]="role.nom">
+  {{ role.nom }}
+</option>
+              </select>
+              <select
+                id="roles"
+                formControlName="roles"
+                multiple
+                size="5"
+                class="input-control focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                [disabled]="isDetailsMode"
+              >
+                  <option *ngFor="let role of availableRoles" [value]="role.nom">
+                    {{ role.nom }}
+
+                </option>
+              </select>
+            </div>
+
+          <div class="md:col-span-2 flex items-center">
+            <input id="enabled" type="checkbox" formControlName="enabled" class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+            <label for="enabled" class="ml-2 block text-sm text-gray-900">Compte Activé</label>
+          </div>
         </div>
-        <div *ngIf="error" class="mt-4 text-red-500">{{ error }}</div>
+        <div *ngIf="error" class="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-md" role="alert">
+          {{ error }}
+        </div>
         <div class="mt-6 flex justify-end gap-4">
           <button type="button" (click)="router.navigate(['/users'])" class="btn-secondary">Annuler</button>
-          <button 
-          *ngIf="!isDetailsMode"
-          type="submit" [disabled]="form.invalid || isLoading" class="btn-primary">Mettre à jour</button>
+          <button
+            *ngIf="!isDetailsMode"
+            type="submit"
+            [disabled]="form.invalid || isLoading"
+            class="btn-primary"
+          >
+            {{ isCreationMode ? 'Créer' : 'Mettre à jour' }}
+          </button>
         </div>
       </form>
     </div>
