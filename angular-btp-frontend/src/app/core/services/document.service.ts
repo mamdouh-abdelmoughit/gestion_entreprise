@@ -26,9 +26,15 @@ export class DocumentService {
     return this.http.get<Document>(`${this.apiUrl}/${id}`);
   }
 
-  createDocument(document: Partial<Document>): Observable<Document> {
-    return this.http.post<Document>(this.apiUrl, document);
+  createDocument(formData: FormData): Observable<any> {
+    return this.http.post(`${this.apiUrl}/upload`, formData, {
+      headers: {
+        // 🚨 DO NOT set Content-Type manually!
+        // Let the browser set `multipart/form-data` with boundary
+      }
+    });
   }
+
 
   updateDocument(id: number, document: Partial<Document>): Observable<Document> {
     return this.http.put<Document>(`${this.apiUrl}/${id}`, document);

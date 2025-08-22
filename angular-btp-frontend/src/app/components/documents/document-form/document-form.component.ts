@@ -48,21 +48,17 @@ export class DocumentFormComponent implements OnInit {
       this.error = "Veuillez remplir tous les champs et sélectionner un fichier.";
       return;
     }
+
     this.isLoading = true;
     this.error = null;
 
-    // In a real app, you would use a dedicated service to upload the file to your backend.
-    // The backend would return the file path/URL. Then you would save the document metadata.
-    // For now, we'll simulate this by creating a mock document object.
+    const formData = new FormData();
+    formData.append('file', this.selectedFile); // must match @RequestParam("file")
+    formData.append('nom', this.documentForm.get('nom')?.value);
+    formData.append('type', this.documentForm.get('type')?.value);
+    formData.append('description', this.documentForm.get('description')?.value);
 
-    const documentMetadata = {
-      ...this.documentForm.value,
-      chemin: `uploads/${this.selectedFile.name}`,
-      taille: this.selectedFile.size,
-      dateUpload: new Date().toISOString()
-    };
-
-    this.documentService.createDocument(documentMetadata).subscribe({
+    this.documentService.createDocument(formData).subscribe({
       next: () => this.router.navigate(['/documents']),
       error: () => this.handleError('Erreur lors de la sauvegarde du document.')
     });
