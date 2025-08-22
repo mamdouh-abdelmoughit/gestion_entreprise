@@ -19,4 +19,6 @@ public class DocumentDTO {
     private String description;
     private Long projetId;
     private Long employeId;
+    private Long appelOffreId; // Add the missing field
+
 }

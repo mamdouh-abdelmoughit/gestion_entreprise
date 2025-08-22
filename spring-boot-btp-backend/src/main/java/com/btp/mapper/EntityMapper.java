@@ -246,7 +246,9 @@ public class EntityMapper {
 
         // FIX: Map the new employe relationship to its ID
         dto.setEmployeId(entity.getEmploye() != null ? entity.getEmploye().getId() : null);
-
+        if (entity.getAppelOffre() != null) {
+            dto.setAppelOffreId(entity.getAppelOffre().getId()); // Map the new field
+        }
         return dto;
     }
 
