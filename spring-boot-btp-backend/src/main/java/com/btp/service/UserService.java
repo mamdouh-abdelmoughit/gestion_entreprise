@@ -1,3 +1,4 @@
+// src/main/java/com/btp/service/UserService.java
 package com.btp.service;
 
 import com.btp.dto.RegisterRequest;
@@ -21,6 +22,8 @@ import java.util.List;
 import java.util.Set;
 import jakarta.validation.Valid;
 
+import java.security.SecureRandom; // For secure random password generation
+import java.util.Base64; // For encoding random bytes
 
 @Service
 @Transactional
@@ -55,6 +58,24 @@ public class UserService {
     @Transactional
     public UserDTO save(@Valid UserDTO userDTO) {
         User user = entityMapper.toEntity(userDTO);
+
+        // --- NEW LOGIC FOR PASSWORD GENERATION ON ADMIN CREATION ---
+        if (user.getId() == null) { // This is a new user being created by an admin
+            // Generate a random, temporary password
+            SecureRandom secureRandom = new SecureRandom();
+            byte[] bytes = new byte[16]; // 16 bytes = 128 bits
+            secureRandom.nextBytes(bytes);
+            String tempPassword = Base64.getUrlEncoder().withoutPadding().encodeToString(bytes); // Base64 encode for a human-readable string
+
+            // Log the generated password (for development/testing - remove in production)
+            // In a real scenario, this would be part of the email sending feature.
+            System.out.println("Generated temporary password for " + user.getUsername() + ": " + tempPassword);
+
+            // Encode and set the generated password
+            user.setPassword(passwordEncoder.encode(tempPassword));
+        }
+        // --- END NEW LOGIC ---
+
         if (userDTO.getRoles() != null) {
             List<Role> roles = roleRepository.findByNomIn(userDTO.getRoles());
             user.setRoles(new HashSet<>(roles));
@@ -105,7 +126,6 @@ public class UserService {
         user.setUsername(registerRequest.getUsername());
         user.setEmail(registerRequest.getEmail());
         user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
-        // Set the first and last name from the request
         user.setFirstName(registerRequest.getFirstName());
         user.setLastName(registerRequest.getLastName());
         user.setEnabled(true);
@@ -120,8 +140,8 @@ public class UserService {
         List<Role> roles = roleRepository.findByNomIn(strRoles);
         user.setRoles(new HashSet<>(roles));
 
-        User savedUser = userRepository.save(user); // FIX: capture the saved entity
-        return entityMapper.toDTO(savedUser); // FIX: map the saved entity to DTO
+        User savedUser = userRepository.save(user);
+        return entityMapper.toDTO(savedUser);
     }
 
     @Transactional(readOnly = true)
@@ -136,5 +156,4 @@ public class UserService {
     public boolean existsByEmail(String email) {
         return userRepository.existsByEmail(email);
     }
-
 }
