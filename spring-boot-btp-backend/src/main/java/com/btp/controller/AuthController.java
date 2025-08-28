@@ -1,75 +1,133 @@
+
 package com.btp.controller;
 
 import com.btp.dto.LoginRequest;
 import com.btp.dto.LoginResponse;
-import com.btp.dto.RegisterRequest;
-import com.btp.dto.RegisterResponse;
 import com.btp.dto.UserDTO;
 import com.btp.security.JwtService;
 import com.btp.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.validation.Valid;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/auth")
+@RequiredArgsConstructor
 public class AuthController {
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
+    private final UserService userService;
+    private final AuthenticationManager authenticationManager;
+    private final JwtService jwtService;
 
-    @Autowired
-    private UserService userService;
+    // Admin invites a user (creates account in PENDING state and sends activation link)
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/invite")
+    public ResponseEntity<UserDTO> invite(@RequestBody InviteRequest req) {
+        UserDTO dto = userService.inviteUser(req.getEmail(), req.getUsername(), req.getRoles());
+        return ResponseEntity.ok(dto);
+    }
 
-    @Autowired
-    private UserDetailsService userDetailsService;
+    // User activates account by setting a password
+    @PostMapping("/activate")
+    public ResponseEntity<Void> activate(@RequestBody ActivateRequest req) {
+        userService.activateAccount(req.getToken(), req.getPassword());
+        return ResponseEntity.ok().build();
+    }
 
-    @Autowired
-    private JwtService jwtService;
+    // Public: request password reset (response is always 200 to avoid user enumeration)
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Void> forgot(@RequestBody ForgotRequest req) {
+        userService.requestPasswordReset(req.getEmail());
+        return ResponseEntity.ok().build();
+    }
 
+    // Public: reset password with token
+    @PostMapping("/reset-password")
+    public ResponseEntity<Void> reset(@RequestBody ResetRequest req) {
+        userService.resetPassword(req.getToken(), req.getPassword());
+        return ResponseEntity.ok().build();
+    }
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        loginRequest.getUsername(),
-                        loginRequest.getPassword()
-                )
+                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword())
         );
-
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        String jwt = jwtService.generateToken(userDetails);
-        
-        return ResponseEntity.ok(new LoginResponse(jwt, "Bearer"));
+        String jwt = jwtService.generateToken((UserDetails) authentication.getPrincipal());
+        return ResponseEntity.ok(new LoginResponse(jwt));
     }
-
     @PostMapping("/register")
-    public ResponseEntity<RegisterResponse> register(@Valid @RequestBody RegisterRequest registerRequest) {
-        UserDTO registeredUser = userService.register(registerRequest);
-        UserDetails userDetails = userDetailsService.loadUserByUsername(registeredUser.getUsername());
-        String jwt = jwtService.generateToken(userDetails);
-        
-        return new ResponseEntity<>(new RegisterResponse(jwt, "Bearer"), HttpStatus.CREATED);
+    public ResponseEntity<LoginResponse> register(@Valid @RequestBody RegisterRequest req) {
+        // We will need a new method in UserService for this public registration
+        UserDTO newUser = userService.registerNewUser(req);
+
+        // After registration, we immediately log them in.
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(req.getUsername(), req.getPassword())
+        );
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String jwt = jwtService.generateToken((UserDetails) authentication.getPrincipal());
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(new LoginResponse(jwt));
     }
 
-    @PostMapping("/refresh")
-    public ResponseEntity<LoginResponse> refresh(@RequestHeader("Authorization") String token) {
-        String jwt = token.substring(7);
-        String username = jwtService.extractUsername(jwt);
-        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-        if (jwtService.isTokenValid(jwt, userDetails)) {
-            String newToken = jwtService.generateRefreshToken(userDetails);
-            return ResponseEntity.ok(new LoginResponse(newToken, "Bearer"));
-        }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    // You will need a DTO for this request
+    @Data
+    public static class RegisterRequest {
+        @NotBlank private String username;
+        @NotBlank private String email;
+        @NotBlank private String password;
+        @NotBlank private String firstName;
+        @NotBlank
+        private String lastName;
+    }
+    // --- END OF THE FINAL FIX ---
+
+    @Data
+    public static class InviteRequest {
+        private String email;
+        private String username;
+        private Set<String> roles;
+    }
+
+    @Data
+    public static class ActivateRequest {
+        private String token;
+        private String password;
+    }
+
+    @Data
+    public static class ForgotRequest {
+        private String email;
+    }
+
+    @Data
+    public static class ResetRequest {
+        private String token;
+        private String password;
+    }
+
+    // Add the DTOs
+    @Data
+    public static class LoginRequest {
+        private String username;
+        private String password;
+    }
+    @Data @AllArgsConstructor
+    public static class LoginResponse {
+        private String token;
     }
 }

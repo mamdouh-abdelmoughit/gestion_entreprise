@@ -1,86 +1,68 @@
 package com.btp.controller;
 
 import com.btp.dto.UserDTO;
-import com.btp.entity.User;
-import com.btp.exception.ResourceNotFoundException;
-import com.btp.mapper.EntityMapper;
-import com.btp.repository.UserRepository;
 import com.btp.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-
-
-import jakarta.validation.Valid;
-
 @RestController
 @RequestMapping("/users")
+@RequiredArgsConstructor // Use this for clean constructor injection
+
 public class UserController {
+    private final UserService userService;
 
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private EntityMapper entityMapper;
-
+    /**
+     * [ADMIN] Retrieves a paginated list of all users.
+     */
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Page<UserDTO>> getAllUsers(Pageable pageable) {
         return ResponseEntity.ok(userService.findAll(pageable));
     }
 
+    /**
+     * Retrieves the details of the currently authenticated user.
+     * This is used by the frontend on startup to verify a token.
+     */
+    @GetMapping("/me")
+    public ResponseEntity<UserDTO> getCurrentUser() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        UserDTO userDTO = userService.findByUsername(username); // Delegate to service
+        return ResponseEntity.ok(userDTO);
+    }
+
+    /**
+     * [ADMIN] Retrieves a single user by their ID.
+     */
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
         return ResponseEntity.ok(userService.findById(id));
     }
 
-    @PostMapping
-    public ResponseEntity<UserDTO> createUser(@Valid @RequestBody UserDTO userDTO) {
-        UserDTO created = userService.save(userDTO);
-        return new ResponseEntity<>(created, HttpStatus.CREATED);
-    }
-
+    /**
+     * [ADMIN] Updates an existing user's profile information and roles.
+     * Note: User creation is handled via the /auth/invite endpoint.
+     */
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserDTO> updateUser(@PathVariable Long id, @Valid @RequestBody UserDTO userDTO) {
-        return ResponseEntity.ok(userService.update(id, userDTO));
+        return ResponseEntity.ok(userService.updateUser(id, userDTO));
     }
 
+    /**
+     * [ADMIN] Deletes a user by their ID.
+     */
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         userService.deleteById(id);
         return ResponseEntity.noContent().build();
-    }
-
-    @GetMapping("/exists/id/{id}")
-    public ResponseEntity<Boolean> checkUserExistsById(@PathVariable Long id) {
-        return ResponseEntity.ok(userService.existsById(id));
-    }
-
-    @GetMapping("/exists/username/{username}")
-    public ResponseEntity<Boolean> checkUserExistsByUsername(@PathVariable String username) {
-        return ResponseEntity.ok(userService.existsByUsername(username));
-    }
-
-    @GetMapping("/exists/email/{email}")
-    public ResponseEntity<Boolean> checkUserExistsByEmail(@PathVariable String email) {
-        return ResponseEntity.ok(userService.existsByEmail(email));
-    }
-    @GetMapping("/me")
-    public ResponseEntity<UserDTO> getCurrentUser() {
-        // Get the username (principal) from the Spring Security context
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        // Find the user entity in the database
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("Currently authenticated user not found in database: " + username));
-
-        // Convert the entity to a DTO and return it
-        return ResponseEntity.ok(entityMapper.toDTO(user));
     }
 }

@@ -1,74 +1,64 @@
+
 package com.btp.entity;
 
 import jakarta.persistence.*;
-import lombok.*; // Import specific annotations
-
+import lombok.*;
+import java.time.Instant;
 import java.time.LocalDate;
-import java.util.Objects; // Import Objects for equals/hashCode
+import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
 @Table(name = "users")
-// FIX: Replace @Data with more specific, safer annotations for JPA
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+@Getter @Setter
+@NoArgsConstructor @AllArgsConstructor @Builder
 public class User {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(unique = true, nullable = false, length = 100)
     private String username;
 
-    @Column(nullable = false, unique = true)
+    @Column(unique = true, nullable = false, length = 150)
     private String email;
 
-    @Column(nullable = false)
-    private String password;
+    @Column(nullable = true)
+    private String password; // null until activation
 
-    @Column(nullable = false)
-    private String firstName;
-
-    @Column(nullable =false)
-    private String lastName;
-
-    private String telephone;
-
-    @Column(nullable = false)
-    private Boolean enabled = true;
-
-    private LocalDate lastLogin;
-
-    @Column(nullable = false)
-    private LocalDate createdAt;
-
-    @Column(nullable = false)
-    private LocalDate updatedAt;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private Status status = Status.PENDING;
 
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "user_roles",
+    @JoinTable(name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
-    // FIX: Exclude collections from toString() to prevent StackOverflowError
-    @ToString.Exclude
-    private Set<Role> roles;
+            inverseJoinColumns = @JoinColumn(name = "role_id"))
+    private Set<Role> roles = new HashSet<>();
 
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDate.now();
-        updatedAt = LocalDate.now();
+    // Optional profile fields
+    private String firstName;
+    private String lastName;
+    private LocalDate lastLogin;
+
+    // Activation token (first-time password setup)
+    @Column(length = 100, unique = true)
+    private String activationToken;
+
+    private Instant activationTokenExpiry;
+
+    // Password reset token
+    @Column(length = 100, unique = true)
+    private String resetToken;
+
+    private Instant resetTokenExpiry;
+
+    public enum Status {
+        PENDING, ACTIVE, SUSPENDED
     }
 
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDate.now();
-    }
-
-    // FIX: Implement equals() and hashCode() based ONLY on the ID.
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -78,7 +68,5 @@ public class User {
     }
 
     @Override
-    public int hashCode() {
-        return getClass().hashCode();
-    }
+    public int hashCode() { return getClass().hashCode(); }
 }

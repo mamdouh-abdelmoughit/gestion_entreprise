@@ -1,54 +1,45 @@
+
 // src/main/java/com/btp/service/UserService.java
 package com.btp.service;
 
-import com.btp.dto.RegisterRequest;
+import com.btp.controller.AuthController;
 import com.btp.dto.UserDTO;
+import com.btp.entity.Role;
 import com.btp.entity.User;
+import com.btp.entity.User.Status;
 import com.btp.exception.BadRequestException;
 import com.btp.exception.ResourceNotFoundException;
-import com.btp.entity.Role;
 import com.btp.mapper.EntityMapper;
 import com.btp.repository.RoleRepository;
 import com.btp.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import jakarta.validation.Valid;
 
-import java.security.SecureRandom; // For secure random password generation
-import java.util.Base64; // For encoding random bytes
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
-@Transactional
+@RequiredArgsConstructor
 public class UserService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final EntityMapper entityMapper;
+    private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
+    private final TokenService tokenService;
 
-    @Autowired
-    private RoleRepository roleRepository;
+    @Value("${app.frontend.base-url}")
+    private String frontendBaseUrl;
 
-    @Autowired
-    @Lazy
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private EntityMapper entityMapper;
-
-    @Transactional(readOnly = true)
-    public Page<UserDTO> findAll(Pageable pageable) {
-        return userRepository.findAll(pageable)
-                .map(entityMapper::toDTO);
-    }
-
-    @Transactional(readOnly = true)
     public UserDTO findById(Long id) {
         return userRepository.findById(id)
                 .map(entityMapper::toDTO)
@@ -56,104 +47,158 @@ public class UserService {
     }
 
     @Transactional
-    public UserDTO save(@Valid UserDTO userDTO) {
-        User user = entityMapper.toEntity(userDTO);
-
-        // --- NEW LOGIC FOR PASSWORD GENERATION ON ADMIN CREATION ---
-        if (user.getId() == null) { // This is a new user being created by an admin
-            // Generate a random, temporary password
-            SecureRandom secureRandom = new SecureRandom();
-            byte[] bytes = new byte[16]; // 16 bytes = 128 bits
-            secureRandom.nextBytes(bytes);
-            String tempPassword = Base64.getUrlEncoder().withoutPadding().encodeToString(bytes); // Base64 encode for a human-readable string
-
-            // Log the generated password (for development/testing - remove in production)
-            // In a real scenario, this would be part of the email sending feature.
-            System.out.println("Generated temporary password for " + user.getUsername() + ": " + tempPassword);
-
-            // Encode and set the generated password
-            user.setPassword(passwordEncoder.encode(tempPassword));
+    public UserDTO inviteUser(String email, String username, Set<String> roles) {
+        if (userRepository.existsByEmail(email)) {
+            throw new BadRequestException("Email already exists");
         }
-        // --- END NEW LOGIC ---
-
-        if (userDTO.getRoles() != null) {
-            List<Role> roles = roleRepository.findByNomIn(userDTO.getRoles());
-            user.setRoles(new HashSet<>(roles));
+        if (userRepository.existsByUsername(username)) {
+            throw new BadRequestException("Username already exists");
         }
-        User savedUser = userRepository.save(user);
-        return entityMapper.toDTO(savedUser);
+
+        var roleEntities = roleRepository.findByNomIn(roles);
+        if (roleEntities.isEmpty()) {
+            throw new BadRequestException("At least one valid role is required");
+        }
+
+        User user = User.builder()
+                .email(email)
+                .username(username)
+                .status(Status.PENDING)
+                .roles(roleEntities.stream().collect(Collectors.toSet()))
+                .build();
+
+        String token = tokenService.generateToken();
+        user.setActivationToken(token);
+        user.setActivationTokenExpiry(Instant.now().plus(24, ChronoUnit.HOURS));
+
+        userRepository.save(user);
+
+        String activationLink = frontendBaseUrl + "/activate?token=" + token;
+        emailService.sendInvitationEmail(email, activationLink);
+
+        return entityMapper.toDTO(user);
     }
 
     @Transactional
-    public UserDTO update(Long id, @Valid UserDTO userDTO) {
-        return userRepository.findById(id)
-                .map(existingUser -> {
-                    existingUser.setUsername(userDTO.getUsername());
-                    existingUser.setEmail(userDTO.getEmail());
-                    existingUser.setFirstName(userDTO.getFirstName());
-                    existingUser.setLastName(userDTO.getLastName());
-                    existingUser.setTelephone(userDTO.getTelephone());
-                    existingUser.setEnabled(userDTO.isEnabled());
-                    existingUser.setLastLogin(userDTO.getLastLogin());
+    public void activateAccount(String token, String rawPassword) {
+        User user = userRepository.findByActivationToken(token)
+                .orElseThrow(() -> new BadRequestException("Invalid activation token"));
 
-                    if (userDTO.getRoles() != null) {
-                        List<Role> roles = roleRepository.findByNomIn(userDTO.getRoles());
-                        existingUser.setRoles(new HashSet<>(roles));
-                    }
+        if (user.getActivationTokenExpiry() == null || user.getActivationTokenExpiry().isBefore(Instant.now())) {
+            throw new BadRequestException("Activation token expired");
+        }
 
-                    User updatedUser = userRepository.save(existingUser);
-                    return entityMapper.toDTO(updatedUser);
-                })
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+        user.setPassword(passwordEncoder.encode(rawPassword));
+        user.setStatus(Status.ACTIVE);
+        user.setActivationToken(null);
+        user.setActivationTokenExpiry(null);
+
+        userRepository.save(user);
     }
 
+    @Transactional
+    public void requestPasswordReset(String email) {
+        Optional<User> userOpt = userRepository.findByEmail(email);
+        if (userOpt.isEmpty()) {
+            // Do not reveal: ignore silently
+            return;
+        }
+        User user = userOpt.get();
+        String token = tokenService.generateToken();
+        user.setResetToken(token);
+        user.setResetTokenExpiry(Instant.now().plus(1, ChronoUnit.HOURS));
+        userRepository.save(user);
+
+        String resetLink = frontendBaseUrl + "/activate?token=" + token;
+        emailService.sendPasswordResetEmail(user.getEmail(), resetLink);
+    }
+
+    @Transactional
+    public void resetPassword(String token, String newPassword) {
+        User user = userRepository.findByResetToken(token)
+                .orElseThrow(() -> new BadRequestException("Invalid reset token"));
+
+        if (user.getResetTokenExpiry() == null || user.getResetTokenExpiry().isBefore(Instant.now())) {
+            throw new BadRequestException("Reset token expired");
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setResetToken(null);
+        user.setResetTokenExpiry(null);
+        if (user.getStatus() == Status.PENDING) {
+            user.setStatus(Status.ACTIVE);
+        }
+        userRepository.save(user);
+    }
+    public Page<UserDTO> findAll(Pageable pageable) {
+        return userRepository.findAll(pageable).map(entityMapper::toDTO);
+    }
+
+    // This method is required by the GET /users/me endpoint
+    public UserDTO findByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .map(entityMapper::toDTO)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with username: " + username));
+    }
+
+    // This method is required by the PUT /users/{id} endpoint
+    @Transactional
+    public UserDTO updateUser(Long id, UserDTO userDTO) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+
+        // Update basic fields
+        user.setFirstName(userDTO.getFirstName());
+        user.setLastName(userDTO.getLastName());
+
+        // Update roles
+        if (userDTO.getRoles() != null) {
+            Set<Role> roles = roleRepository.findByNomIn(userDTO.getRoles()).stream().collect(Collectors.toSet());
+            user.setRoles(roles);
+        }
+
+        userRepository.save(user);
+        return entityMapper.toDTO(user);
+    }
+
+    // This method is required by the DELETE /users/{id} endpoint
     @Transactional
     public void deleteById(Long id) {
+        if (!userRepository.existsById(id)) {
+            throw new ResourceNotFoundException("User not found with id: " + id);
+        }
         userRepository.deleteById(id);
     }
-
     @Transactional
-    public UserDTO register(RegisterRequest registerRequest) {
-        if (userRepository.existsByUsername(registerRequest.getUsername())) {
-            throw new BadRequestException("Error: Username is already taken!");
+    public UserDTO registerNewUser(AuthController.RegisterRequest req) {
+        if (userRepository.existsByUsername(req.getUsername())) {
+            throw new BadRequestException("Username already exists");
+        }
+        if (userRepository.existsByEmail(req.getEmail())) {
+            throw new BadRequestException("Email already exists");
         }
 
-        if (userRepository.existsByEmail(registerRequest.getEmail())) {
-            throw new BadRequestException("Error: Email is already in use!");
+        // Find the default role for new users.
+        // This assumes your DataInitializer creates a "ROLE_USER" or "ROLE_ADMIN".
+        // Let's assign ROLE_ADMIN to the first user who registers.
+        Set<Role> roles = roleRepository.findByNomIn(Set.of("ROLE_ADMIN")).stream().collect(Collectors.toSet());
+        if (roles.isEmpty()) {
+            // This is a safeguard in case the roles haven't been created yet.
+            throw new IllegalStateException("Default role ROLE_ADMIN not found in database.");
         }
 
-        User user = new User();
-        user.setUsername(registerRequest.getUsername());
-        user.setEmail(registerRequest.getEmail());
-        user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
-        user.setFirstName(registerRequest.getFirstName());
-        user.setLastName(registerRequest.getLastName());
-        user.setEnabled(true);
+        User user = User.builder()
+                .username(req.getUsername())
+                .email(req.getEmail())
+                .password(passwordEncoder.encode(req.getPassword()))
+                .firstName(req.getFirstName())
+                .lastName(req.getLastName())
+                .status(User.Status.ACTIVE) // The user is active immediately
+                .roles(roles)
+                .build();
 
-        Set<String> strRoles = new HashSet<>();
-        String role = registerRequest.getRole();
-        if (role == null || role.isEmpty()) {
-            strRoles.add("ROLE_USER"); // Default role
-        } else {
-            strRoles.add(role);
-        }
-        List<Role> roles = roleRepository.findByNomIn(strRoles);
-        user.setRoles(new HashSet<>(roles));
+        userRepository.save(user);
 
-        User savedUser = userRepository.save(user);
-        return entityMapper.toDTO(savedUser);
-    }
-
-    @Transactional(readOnly = true)
-    public boolean existsById(Long id) {
-        return userRepository.existsById(id);
-    }
-    @Transactional(readOnly = true)
-    public boolean existsByUsername(String username) {
-        return userRepository.existsByUsername(username);
-    }
-    @Transactional(readOnly = true)
-    public boolean existsByEmail(String email) {
-        return userRepository.existsByEmail(email);
+        return entityMapper.toDTO(user);
     }
 }

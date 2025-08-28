@@ -483,7 +483,6 @@ public class EntityMapper {
         dto.setFirstName(entity.getFirstName());
         dto.setLastName(entity.getLastName());
         dto.setTelephone(null); // No telephone in User entity
-        dto.setEnabled(entity.getEnabled());
         dto.setLastLogin(null); // No lastLogin in User entity
         if(entity.getRoles() != null){
             dto.setRoles(entity.getRoles().stream().map(Role::getNom).collect(Collectors.toSet()));
@@ -501,7 +500,6 @@ public class EntityMapper {
         entity.setEmail(dto.getEmail());
         entity.setFirstName(dto.getFirstName());
         entity.setLastName(dto.getLastName());
-        entity.setEnabled(dto.isEnabled());
         // Do not map password here for security reasons
         // Do not map roles here, as it's typically handled in the service
 
