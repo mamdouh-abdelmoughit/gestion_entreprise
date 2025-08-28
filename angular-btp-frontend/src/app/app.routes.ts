@@ -1,4 +1,6 @@
 import { Routes } from '@angular/router';
+import { ActivateAccountComponent } from './components/activate-account.component';
+import { ResetPasswordComponent } from './components/reset-password.component';
 
 // Layouts and Guards
 import { MainLayoutComponent } from './layouts/main-layout/main-layout.component';
@@ -156,7 +158,11 @@ export const routes: Routes = [
     ]
   },
 
+  // Public routes for activation/reset
+  { path: 'activate', component: ActivateAccountComponent },
+  { path: 'reset-password', component: ResetPasswordComponent },
+
   // --- WILDCARD ROUTE ---
   // This will catch any route that doesn't match the ones above.
-  { path: '**', redirectTo: 'login', pathMatch: 'full' }
+  { path: '**', redirectTo: '', pathMatch: 'full' }
 ];

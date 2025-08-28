@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
+import { HttpErrorResponse } from '@angular/common/http'; // Import HttpErrorResponse
+
 @Component({
   selector: 'app-register',
   standalone: true,
@@ -39,7 +41,7 @@ export class RegisterComponent implements OnInit {
         // On successful registration, automatically navigate to the dashboard
         this.router.navigate(['/dashboard']);
       },
-      error: (err) => {
+      error: (err: HttpErrorResponse) => {
         this.isLoading = false;
         // Try to get a more specific error message from the backend if available
         this.errorMessage = err.error?.message || 'Une erreur est survenue lors de l\'inscription.';

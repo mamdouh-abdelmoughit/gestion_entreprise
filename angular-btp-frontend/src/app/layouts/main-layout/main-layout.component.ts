@@ -4,6 +4,8 @@ import {Router, RouterOutlet, NavigationEnd, GuardsCheckEnd} from '@angular/rout
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 import { HeaderComponent } from '../../components/header/header.component';
 import { AuthService } from '../../core/services/auth.service'; // Import AuthService
+import { User } from '../../core/models/user.model';
+
 import { filter } from 'rxjs/operators'; // Import filter
 
 @Component({
@@ -22,8 +24,8 @@ export class MainLayoutComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Get the current user's email to display in the header
-    this.authService.currentUser$.subscribe(user => {
+    // FIX: Add the 'User | null' type
+    this.authService.currentUser$.subscribe((user: User | null) => {
       this.userEmail = user ? user.email : 'Utilisateur';
     });
 
