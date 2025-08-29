@@ -62,7 +62,33 @@ public class RealEmailService implements EmailService {
     @Async
     @Override
     public void sendPasswordResetEmail(String toEmail, String resetLink) {
-        // ... similar logic to the method above, but using a different template ...
-        System.out.println("Password reset email sending is not implemented yet.");
+        try {
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(
+                    mimeMessage,
+                    MimeMessageHelper.MULTIPART_MODE_MIXED,
+                    StandardCharsets.UTF_8.name()
+            );
+
+            Map<String, Object> properties = new HashMap<>();
+            properties.put("reset_link", resetLink);
+
+            Context context = new Context();
+            context.setVariables(properties);
+
+            helper.setFrom("mamadouabdo29@gmail.com"); // Your "from" address
+            helper.setTo(toEmail);
+            helper.setSubject("Réinitialisation de votre mot de passe GestionBTP");
+
+            // You will need to create a template file for the reset email, e.g., reset-password-email.html
+            String htmlTemplate = templateEngine.process("reset-password.html", context);
+            helper.setText(htmlTemplate, true);
+
+            mailSender.send(mimeMessage);
+
+        } catch (MessagingException e) {
+            // Log the error for debugging purposes in a production environment
+            throw new RuntimeException("Failed to send password reset email", e);
+        }
     }
 }

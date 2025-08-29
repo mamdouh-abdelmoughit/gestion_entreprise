@@ -96,22 +96,24 @@ public class UserService {
         userRepository.save(user);
     }
 
-    @Transactional
-    public void requestPasswordReset(String email) {
-        Optional<User> userOpt = userRepository.findByEmail(email);
-        if (userOpt.isEmpty()) {
-            // Do not reveal: ignore silently
-            return;
-        }
-        User user = userOpt.get();
-        String token = tokenService.generateToken();
-        user.setResetToken(token);
-        user.setResetTokenExpiry(Instant.now().plus(1, ChronoUnit.HOURS));
-        userRepository.save(user);
-
-        String resetLink = frontendBaseUrl + "/activate?token=" + token;
-        emailService.sendPasswordResetEmail(user.getEmail(), resetLink);
+// UserService.java
+// Corrected logic for the requestPasswordReset method
+@Transactional
+public void requestPasswordReset(String email) {
+    Optional<User> userOpt = userRepository.findByEmail(email);
+    if (userOpt.isEmpty()) {
+        return;
     }
+    User user = userOpt.get();
+    String token = tokenService.generateToken();
+    user.setResetToken(token);
+    user.setResetTokenExpiry(Instant.now().plus(1, ChronoUnit.HOURS));
+    userRepository.save(user);
+
+    // Change the link to use the correct reset-password endpoint
+    String resetLink = frontendBaseUrl + "/reset-password?token=" + token;
+    emailService.sendPasswordResetEmail(user.getEmail(), resetLink);
+}
 
     @Transactional
     public void resetPassword(String token, String newPassword) {

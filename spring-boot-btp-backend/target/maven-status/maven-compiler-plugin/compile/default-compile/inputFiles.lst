@@ -23,8 +23,10 @@ C:\Users\abmamdouh\Desktop\BTP\spring-boot-btp-backend\src\main\java\com\btp\rep
 C:\Users\abmamdouh\Desktop\BTP\spring-boot-btp-backend\src\main\java\com\btp\dto\LoginResponse.java
 C:\Users\abmamdouh\Desktop\BTP\spring-boot-btp-backend\src\main\java\com\btp\entity\User.java
 C:\Users\abmamdouh\Desktop\BTP\spring-boot-btp-backend\src\main\java\com\btp\dto\AppelOffreDTO.java
+C:\Users\abmamdouh\Desktop\BTP\spring-boot-btp-backend\src\main\java\com\btp\service\EmailService.java
 C:\Users\abmamdouh\Desktop\BTP\spring-boot-btp-backend\src\main\java\com\btp\config\SecurityConfig.java
 C:\Users\abmamdouh\Desktop\BTP\spring-boot-btp-backend\src\main\java\com\btp\service\FileStorageService.java
+C:\Users\abmamdouh\Desktop\BTP\spring-boot-btp-backend\src\main\java\com\btp\service\LoggingEmailService.java
 C:\Users\abmamdouh\Desktop\BTP\spring-boot-btp-backend\src\main\java\com\btp\service\AffectationEmployeService.java
 C:\Users\abmamdouh\Desktop\BTP\spring-boot-btp-backend\src\main\java\com\btp\controller\DecompteController.java
 C:\Users\abmamdouh\Desktop\BTP\spring-boot-btp-backend\src\main\java\com\btp\repository\UserRepository.java
@@ -42,6 +44,7 @@ C:\Users\abmamdouh\Desktop\BTP\spring-boot-btp-backend\src\main\java\com\btp\exc
 C:\Users\abmamdouh\Desktop\BTP\spring-boot-btp-backend\src\main\java\com\btp\repository\ClientRepository.java
 C:\Users\abmamdouh\Desktop\BTP\spring-boot-btp-backend\src\main\java\com\btp\service\AppelOffreService.java
 C:\Users\abmamdouh\Desktop\BTP\spring-boot-btp-backend\src\main\java\com\btp\controller\ProjetController.java
+C:\Users\abmamdouh\Desktop\BTP\spring-boot-btp-backend\src\main\java\com\btp\service\TokenService.java
 C:\Users\abmamdouh\Desktop\BTP\spring-boot-btp-backend\src\main\java\com\btp\entity\Caution.java
 C:\Users\abmamdouh\Desktop\BTP\spring-boot-btp-backend\src\main\java\com\btp\mapper\EntityMapper.java
 C:\Users\abmamdouh\Desktop\BTP\spring-boot-btp-backend\src\main\java\com\btp\entity\Projet.java
@@ -70,6 +73,7 @@ C:\Users\abmamdouh\Desktop\BTP\spring-boot-btp-backend\src\main\java\com\btp\con
 C:\Users\abmamdouh\Desktop\BTP\spring-boot-btp-backend\src\main\java\com\btp\security\JwtAuthenticationFilter.java
 C:\Users\abmamdouh\Desktop\BTP\spring-boot-btp-backend\src\main\java\com\btp\dto\EmployeDTO.java
 C:\Users\abmamdouh\Desktop\BTP\spring-boot-btp-backend\src\main\java\com\btp\repository\CautionRepository.java
+C:\Users\abmamdouh\Desktop\BTP\spring-boot-btp-backend\src\main\java\com\btp\service\RealEmailService.java
 C:\Users\abmamdouh\Desktop\BTP\spring-boot-btp-backend\src\main\java\com\btp\entity\AffectationEmploye.java
 C:\Users\abmamdouh\Desktop\BTP\spring-boot-btp-backend\src\main\java\com\btp\repository\ProjetRepository.java
 C:\Users\abmamdouh\Desktop\BTP\spring-boot-btp-backend\src\main\java\com\btp\service\FournisseurService.java
