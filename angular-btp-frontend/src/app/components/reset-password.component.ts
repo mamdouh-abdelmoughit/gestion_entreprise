@@ -1,35 +1,21 @@
-
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, Validators, FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../core/services/auth.service';
 
 @Component({
   selector: 'app-reset-password',
   standalone: true,
-  imports: [CommonModule, FormsModule],
-  template: `
-    <div class="container">
-      <h2>Reset your password</h2>
-      <form (ngSubmit)="submit()">
-        <label>New password</label>
-        <input type="password" [(ngModel)]="password" name="password" required />
-        <label>Confirm password</label>
-        <input type="password" [(ngModel)]="confirm" name="confirm" required />
-        <button type="submit">Reset Password</button>
-      </form>
-      <p *ngIf="error" style="color:red">{{error}}</p>
-      <p *ngIf="success" style="color:green">Password changed. You can now log in.</p>
-    </div>
-  `
+  imports: [CommonModule, FormsModule],  // ✅ required for ngModel
+  templateUrl: './reset-password.component.html'
 })
 export class ResetPasswordComponent {
-  password = '';
-  confirm = '';
-  token = '';
-  error = '';
-  success = false;
+  password: string = '';
+  confirm: string = '';
+  token: string = '';
+  error: string = '';
+  success: boolean = false;
 
   constructor(private route: ActivatedRoute, private auth: AuthService, private router: Router) {
     this.token = this.route.snapshot.queryParamMap.get('token') || '';

@@ -127,9 +127,6 @@ export class AuthService {
   activateAccount(token: string, password: string): Observable<void> {
     return this.http.post<void>(`${this.apiUrl}/activate`, { token, password });
   }
-
-  // ===== Password Reset API Methods =====
-
   requestPasswordReset(email: string): Observable<void> {
     return this.http.post<void>(`${this.apiUrl}/forgot-password`, { email });
   }

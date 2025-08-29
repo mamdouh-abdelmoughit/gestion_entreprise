@@ -1,0 +1,27 @@
+<div class="min-h-screen flex items-center justify-center bg-gray-100">
+  <div class="bg-white shadow-lg rounded-xl p-8 w-full max-w-md">
+    <h2 class="text-2xl font-bold text-gray-800 mb-6">Activate Account</h2>
+
+    <form (ngSubmit)="submit()" class="space-y-4">
+      <div>
+        <label class="block text-gray-600 text-sm mb-1">Set Password</label>
+        <input [(ngModel)]="password" name="password" type="password"
+               class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-400 focus:outline-none" required>
+      </div>
+
+      <div>
+        <label class="block text-gray-600 text-sm mb-1">Confirm Password</label>
+        <input [(ngModel)]="confirm" name="confirm" type="password"
+               class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-400 focus:outline-none" required>
+      </div>
+
+      <button type="submit"
+              class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-lg transition">
+        Activate Account
+      </button>
+    </form>
+
+    <p *ngIf="error" class="text-red-500 text-sm mt-3">{{ error }}</p>
+    <p *ngIf="success" class="text-green-600 text-sm mt-3">Account activated! Redirecting...</p>
+  </div>
+</div>

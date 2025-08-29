@@ -1,4 +1,3 @@
-
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -8,28 +7,15 @@ import { AuthService } from '../core/services/auth.service';
 @Component({
   selector: 'app-activate-account',
   standalone: true,
-  imports: [CommonModule, FormsModule],
-  template: `
-    <div class="container">
-      <h2>Activate your account</h2>
-      <form (ngSubmit)="submit()">
-        <label>New password</label>
-        <input type="password" [(ngModel)]="password" name="password" required />
-        <label>Confirm password</label>
-        <input type="password" [(ngModel)]="confirm" name="confirm" required />
-        <button type="submit">Set Password</button>
-      </form>
-      <p *ngIf="error" style="color:red">{{error}}</p>
-      <p *ngIf="success" style="color:green">Activation successful. You can now log in.</p>
-    </div>
-  `
+  imports: [CommonModule, FormsModule],   // ✅ needed for [(ngModel)]
+  templateUrl: './activate-account.component.html'
 })
 export class ActivateAccountComponent {
-  password = '';
-  confirm = '';
-  token = '';
-  error = '';
-  success = false;
+  password: string = '';
+  confirm: string = '';
+  token: string = '';
+  error: string = '';
+  success: boolean = false;
 
   constructor(private route: ActivatedRoute, private auth: AuthService, private router: Router) {
     this.token = this.route.snapshot.queryParamMap.get('token') || '';
@@ -46,7 +32,7 @@ export class ActivateAccountComponent {
         this.success = true;
         setTimeout(() => this.router.navigate(['/login']), 1200);
       },
-      error: (e) => this.error = 'Activation failed. Token may be invalid or expired.'
+      error: () => this.error = 'Activation failed. Token may be invalid or expired.'
     });
   }
 }
