@@ -36,7 +36,6 @@ public class AppelOffreController {
         AppelOffreDTO created = appelOffreService.save(appelOffreDTO);
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
-
     @PutMapping("/{id}")
     public ResponseEntity<AppelOffreDTO> updateAppelOffre(@PathVariable Long id, @Valid @RequestBody AppelOffreDTO appelOffreDTO) {
         return ResponseEntity.ok(appelOffreService.update(id, appelOffreDTO));
