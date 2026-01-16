@@ -13,13 +13,17 @@
     <!-- Right side: User Info and Logout Button -->
     <div class="flex items-center gap-4">
       <div class="text-right">
+        <!-- --- START CHANGE --- -->
         <p class="text-sm font-medium text-gray-700">
-          {{ userEmail || 'Utilisateur' }}
+          {{ user?.email || 'Utilisateur' }}
         </p>
-        <p class="text-xs text-gray-500">Administrateur</p>
+        <p class="text-xs text-gray-500 capitalize">
+          {{ user?.roles?.[0] || 'Role' }}
+        </p>
+
+        <!-- --- END CHANGE --- -->
       </div>
 
-      <!-- This is the button we wired up to the logout() method -->
       <button (click)="logout()" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
         Déconnexion
       </button>

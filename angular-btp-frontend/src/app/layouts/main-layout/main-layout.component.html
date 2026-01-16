@@ -1,13 +1,12 @@
 <div class="min-h-screen flex bg-gray-50">
-  <!-- The sidebar is now correctly placed here -->
   <app-sidebar [activeModule]="activeModule" (moduleChange)="onModuleChange($event)"></app-sidebar>
 
   <div class="flex-1 flex flex-col">
-    <!-- The header is now correctly placed here -->
-    <app-header [userEmail]="userEmail || ''"></app-header>
+    <!-- --- START CHANGE --- -->
+    <app-header [user]="currentUser"></app-header>
+    <!-- --- END CHANGE --- -->
 
     <main class="flex-1 p-6 overflow-auto">
-      <!-- The router outlet will render the dashboard, clients list, etc., inside this layout -->
       <router-outlet></router-outlet>
     </main>
   </div>
