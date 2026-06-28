@@ -43,7 +43,14 @@ export class LoginComponent implements OnInit {
     this.errorMessage = null;
     this.isLoading = true;
     this.authService.login(this.loginForm.value).subscribe({
-      next: () => this.router.navigate(['/dashboard']),
+      next: (user) => {
+        this.isLoading = false;
+        if (user) {
+          this.router.navigate(['/dashboard']);
+        } else {
+          this.errorMessage = "Erreur d'authentification. Veuillez réessayer.";
+        }
+      },
       error: () => {
         this.isLoading = false;
         this.errorMessage = "Nom d'utilisateur ou mot de passe incorrect.";

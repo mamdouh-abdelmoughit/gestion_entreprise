@@ -42,27 +42,24 @@ export class AuthService {
     const token = this.getToken();
 
     if (isPlatformBrowser(this.platformId) && token) {
-      // If a token exists, try to fetch the current user to validate it.
       return this.http.get<User>(`${this.userApiUrl}/me`).pipe(
         tap(user => {
           if (user) {
-            // Token is valid: update state.
             this._currentUser$.next(user);
             this._isLoggedIn$.next(true);
           } else {
-            // Should not happen, but as a safeguard:
-            this.logout();
+            this.clearSession();
           }
         }),
         catchError(() => {
-          // If the /me endpoint fails (e.g., 401 Unauthorized), the token is invalid.
-          this.logout();
-          return of(null); // Return an empty observable to complete the startup process.
+          // Token is invalid or /me failed — clear state but do NOT navigate.
+          // Callers (login, register, initializeApp) decide where to go next.
+          this.clearSession();
+          return of(null);
         })
       );
     }
 
-    // If no token exists, ensure the state is logged out and complete the startup.
     this._isLoggedIn$.next(false);
     this._currentUser$.next(null);
     return of(null);
@@ -92,13 +89,14 @@ export class AuthService {
   /**
    * Handles public registration for new Admins.
    */
-  register(userData: { username: string; password: string; firstName: string; lastName: string; email: string }): Observable<any> {
+  register(userData: { username: string; password: string; firstName: string; lastName: string; email: string }): Observable<User | null> {
     return this.http.post<any>(`${this.apiUrl}/register`, userData).pipe(
-      tap(response => {
+      switchMap(response => {
         if (response && response.token) {
           this.setToken(response.token);
-          this.verifyTokenAndFetchUser().subscribe();
+          return this.verifyTokenAndFetchUser();
         }
+        return of(null);
       })
     );
   }

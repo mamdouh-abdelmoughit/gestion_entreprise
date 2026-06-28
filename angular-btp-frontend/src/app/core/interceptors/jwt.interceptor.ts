@@ -44,12 +44,16 @@ export class JwtInterceptor implements HttpInterceptor {
 
         // Provide more specific messages based on the error status.
         if (error.error && typeof error.error.message === 'string') {
-          // Use the specific error message from our backend's GlobalExceptionHandler if available.
           errorMessage = error.error.message;
         } else if (error.status === 401) {
-          errorMessage = 'Session expirée. Veuillez vous reconnecter.';
-          // Optional: handle automatic logout for expired tokens.
-          this.authService.logout();
+          const isAuthEndpoint = request.url.includes('/auth/');
+          if (isAuthEndpoint) {
+            // Wrong credentials — let the component handle the message.
+            errorMessage = '';
+          } else {
+            errorMessage = 'Session expirée. Veuillez vous reconnecter.';
+            this.authService.logout();
+          }
         } else if (error.status === 403) {
           errorMessage = 'Accès refusé. Vous n\'avez pas les permissions nécessaires.';
         } else if (error.status === 404) {
@@ -57,7 +61,9 @@ export class JwtInterceptor implements HttpInterceptor {
         }
 
         // Display the final error message in a user-friendly toast notification.
-        this.notificationService.show(errorMessage, 'error');
+        if (errorMessage) {
+          this.notificationService.show(errorMessage, 'error');
+        }
 
         // Rethrow the error so that any component-level error handling can still catch it.
         return throwError(() => error);

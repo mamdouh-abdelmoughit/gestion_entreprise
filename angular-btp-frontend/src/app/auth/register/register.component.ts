@@ -39,13 +39,16 @@ export class RegisterComponent implements OnInit {
     this.errorMessage = null;
     this.isLoading = true;
     this.authService.register(this.registerForm.value).subscribe({
-      next: () => {
-        // On successful registration, automatically navigate to the dashboard
-        this.router.navigate(['/dashboard']);
+      next: (user) => {
+        this.isLoading = false;
+        if (user) {
+          this.router.navigate(['/dashboard']);
+        } else {
+          this.errorMessage = 'Compte créé mais erreur lors de la connexion automatique. Veuillez vous connecter.';
+        }
       },
       error: (err: HttpErrorResponse) => {
         this.isLoading = false;
-        // Try to get a more specific error message from the backend if available
         this.errorMessage = err.error?.message || 'Une erreur est survenue lors de l\'inscription.';
         console.error('Registration failed', err);
       }
