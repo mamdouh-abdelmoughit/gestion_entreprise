@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Optional } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { Observable } from 'rxjs';
@@ -19,12 +19,15 @@ export class AppComponent implements OnInit {
   userEmail = 'admin@btp.com';
   activeModule = 'dashboard';
 
-  constructor(private authService: AuthService, private swUpdate: SwUpdate) {
+  constructor(
+    private authService: AuthService,
+    @Optional() private swUpdate: SwUpdate
+  ) {
     this.isLoggedIn$ = this.authService.isLoggedIn$;
   }
 
   ngOnInit() {
-    if (this.swUpdate.isEnabled) {
+    if (this.swUpdate?.isEnabled) {
       this.swUpdate.versionUpdates.pipe(
         filter((evt): evt is VersionReadyEvent => evt.type === 'VERSION_READY')
       ).subscribe(() => {
