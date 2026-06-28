@@ -32,10 +32,12 @@ export class RegisterComponent implements OnInit {
   }
   onSubmit() {
     if (this.registerForm.invalid) {
+      this.registerForm.markAllAsTouched();
+      this.errorMessage = 'Veuillez remplir tous les champs correctement. Le mot de passe doit contenir au moins 6 caractères.';
       return;
     }
-    this.isLoading = true;
     this.errorMessage = null;
+    this.isLoading = true;
     this.authService.register(this.registerForm.value).subscribe({
       next: () => {
         // On successful registration, automatically navigate to the dashboard

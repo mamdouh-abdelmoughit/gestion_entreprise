@@ -96,7 +96,7 @@
 
         <button
           type="submit"
-          [disabled]="registerForm.invalid || isLoading"
+          [disabled]="isLoading"
           class="btn-primary w-full justify-center"
         >
           <span *ngIf="isLoading" class="spinner mr-2"></span>
