@@ -1,6 +1,6 @@
 import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, tap, catchError, of } from 'rxjs';
+import { BehaviorSubject, Observable, tap, catchError, of, switchMap  } from 'rxjs';
 import { isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
@@ -73,14 +73,18 @@ export class AuthService {
   /**
    * Logs in a user and, on success, stores the token and fetches user details.
    */
-  login(credentials: { username: string; password: string }): Observable<any> {
+  login(credentials: { username: string; password: string }): Observable<User | null> {
     return this.http.post<any>(`${this.apiUrl}/login`, credentials).pipe(
-      tap(response => {
+      // We use switchMap to chain the next async operation.
+      switchMap(response => {
         if (response && response.token) {
           this.setToken(response.token);
-          // After a successful login, we must verify the token and get user data.
-          this.verifyTokenAndFetchUser().subscribe();
+          // The result of this inner observable will become the result of the entire chain.
+          return this.verifyTokenAndFetchUser();
         }
+        // If no token, log out and return null.
+        this.logout();
+        return of(null);
       })
     );
   }

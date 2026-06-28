@@ -1,12 +1,11 @@
-import { Component, OnInit } from '@angular/core'; // Import OnInit
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {Router, RouterOutlet, NavigationEnd, GuardsCheckEnd} from '@angular/router'; // Import Router and NavigationEnd
+import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 import { HeaderComponent } from '../../components/header/header.component';
-import { AuthService } from '../../core/services/auth.service'; // Import AuthService
+import { AuthService } from '../../core/services/auth.service';
 import { User } from '../../core/models/user.model';
-
-import { filter } from 'rxjs/operators'; // Import filter
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-main-layout',
@@ -15,7 +14,10 @@ import { filter } from 'rxjs/operators'; // Import filter
   templateUrl: './main-layout.component.html'
 })
 export class MainLayoutComponent implements OnInit {
-  userEmail: string | null = null;
+  // --- START CHANGE ---
+  // userEmail: string | null = null; // DELETE THIS LINE
+  currentUser: User | null = null; // ADD THIS LINE
+  // --- END CHANGE ---
   activeModule: string = 'dashboard';
 
   constructor(
@@ -24,23 +26,21 @@ export class MainLayoutComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // FIX: Add the 'User | null' type
+    // --- START CHANGE ---
     this.authService.currentUser$.subscribe((user: User | null) => {
-      this.userEmail = user ? user.email : 'Utilisateur';
+      // this.userEmail = user ? user.email : 'Utilisateur'; // DELETE THIS LINE
+      this.currentUser = user; // ADD THIS LINE
     });
+    // --- END CHANGE ---
 
-    // Listen to route changes to update the active module in the sidebar
     this.router.events.pipe(
       filter((event): event is NavigationEnd => event instanceof NavigationEnd)
     ).subscribe((event: NavigationEnd) => {
-      // Because of the filter above, we can now be 100% sure that 'event' is a NavigationEnd event.
-      // The compiler will no longer complain.
       const currentModule = event.urlAfterRedirects.split('/')[1] || 'dashboard';
       this.activeModule = currentModule;
     });
   }
 
-  // This method will handle navigation when a sidebar item is clicked
   onModuleChange(moduleId: string): void {
     this.router.navigate([`/${moduleId}`]);
   }
