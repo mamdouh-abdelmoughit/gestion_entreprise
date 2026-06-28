@@ -1,8 +1,7 @@
-import { ApplicationConfig, APP_INITIALIZER, isDevMode } from '@angular/core';
+import { ApplicationConfig, APP_INITIALIZER } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withFetch, withInterceptorsFromDi } from '@angular/common/http';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
-import { provideServiceWorker } from '@angular/service-worker';
 import { JwtInterceptor } from './core/interceptors/jwt.interceptor';
 import { routes } from './app.routes';
 import { AuthService } from './core/services/auth.service';
@@ -21,10 +20,6 @@ export const appConfig: ApplicationConfig = {
       useFactory: initializeApp,
       deps: [AuthService],
       multi: true
-    },
-    provideServiceWorker('ngsw-worker.js', {
-      enabled: !isDevMode(),
-      registrationStrategy: 'registerWhenStable:30000'
-    })
+    }
   ]
 };
