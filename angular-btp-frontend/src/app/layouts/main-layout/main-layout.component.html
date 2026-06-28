@@ -2,9 +2,7 @@
   <app-sidebar [activeModule]="activeModule" (moduleChange)="onModuleChange($event)"></app-sidebar>
 
   <div class="flex-1 flex flex-col">
-    <!-- --- START CHANGE --- -->
-    <app-header [user]="currentUser"></app-header>
-    <!-- --- END CHANGE --- -->
+    <app-header></app-header>
 
     <main class="flex-1 p-6 overflow-auto">
       <router-outlet></router-outlet>
