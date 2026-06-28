@@ -12,11 +12,14 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.net.URI;
 import java.nio.file.Files;
 import java.time.LocalDate;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/documents")
@@ -28,140 +31,103 @@ public class DocumentController {
     @Autowired
     private FileStorageService fileStorageService;
 
-    /**
-     * Upload a document (file + metadata)
-     */
     @PostMapping("/upload")
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
     public ResponseEntity<DocumentDTO> uploadDocument(
             @RequestParam("file") MultipartFile file,
             @RequestParam("nom") String nom,
             @RequestParam("type") String type,
-            @RequestParam("description") String description) {
+            @RequestParam("description") String description) throws Exception {
 
-        // 1. Save the file to disk
-        String filename = fileStorageService.save(file);
+        String fileRef = fileStorageService.save(file);
 
-        // 2. Create DTO with metadata
-        DocumentDTO documentDTO = new DocumentDTO();
-        documentDTO.setNom(nom);
-        documentDTO.setType(type);
-        documentDTO.setDescription(description);
-        documentDTO.setFichier(filename);
-        documentDTO.setTaille(file.getSize());
-        documentDTO.setDateUpload(LocalDate.now());
+        DocumentDTO dto = new DocumentDTO();
+        dto.setNom(nom);
+        dto.setType(type);
+        dto.setDescription(description);
+        dto.setFichier(fileRef);
+        dto.setTaille(file.getSize());
+        dto.setDateUpload(LocalDate.now());
 
-        // 3. Save metadata in DB
-        DocumentDTO savedDocument = documentService.save(documentDTO);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedDocument);
+        return ResponseEntity.status(HttpStatus.CREATED).body(documentService.save(dto));
     }
 
-    /**
-     * Get all documents (metadata only)
-     */
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE', 'CLIENT', 'FOURNISSEUR')")
     public ResponseEntity<Page<DocumentDTO>> getAllDocuments(Pageable pageable) {
         return ResponseEntity.ok(documentService.findAll(pageable));
     }
 
-    /**
-     * Get metadata for a single document
-     */
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE', 'CLIENT', 'FOURNISSEUR')")
     public ResponseEntity<DocumentDTO> getDocumentById(@PathVariable Long id) {
         return ResponseEntity.ok(documentService.findById(id));
     }
 
-    /**
-     * Update metadata (not file itself)
-     */
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<DocumentDTO> updateDocument(
             @PathVariable Long id,
             @Valid @RequestBody DocumentDTO documentDTO) {
-
         return ResponseEntity.ok(documentService.update(id, documentDTO));
     }
 
-    /**
-     * Delete a document (both metadata + file on disk)
-     */
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteDocument(@PathVariable Long id) {
         DocumentDTO doc = documentService.findById(id);
         if (doc.getFichier() != null) {
-            try {
-                Files.deleteIfExists(fileStorageService.getRoot().resolve(doc.getFichier()));
-            } catch (Exception ignored) {}
+            fileStorageService.delete(doc.getFichier());
         }
         documentService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 
-    /**
-     * Download a document (force download)
-     */
-// In DocumentController.java
-// Find this method:
-// In your DocumentController.java
-
-@GetMapping("/{id}/download")
-public ResponseEntity<Resource> downloadDocument(@PathVariable Long id) {
-    try {
-        DocumentDTO doc = documentService.findById(id);
-        Resource resource = fileStorageService.load(doc.getFichier());
-
-        // Get the file's MIME type based on its content or extension.
-        String mimeType = Files.probeContentType(resource.getFile().toPath());
-        if (mimeType == null) {
-            mimeType = "application/octet-stream"; // Fallback to generic binary stream
-        }
-
-        // Get the user-friendly name and append the extension.
-        String originalFilename = resource.getFilename();
-        String filename = doc.getNom();
-        String extension = "";
-        if (originalFilename != null) {
-            int dotIndex = originalFilename.lastIndexOf('.');
-            if (dotIndex > 0) {
-                extension = originalFilename.substring(dotIndex);
-            }
-        }
-        if (!filename.toLowerCase().endsWith(extension.toLowerCase())) {
-            filename += extension;
-        }
-
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(mimeType)) // Sets the correct MIME type
-                .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=\"" + filename + "\"")
-                .body(resource);
-
-    } catch (Exception e) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    @GetMapping("/{id}/download")
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE', 'CLIENT', 'FOURNISSEUR')")
+    public ResponseEntity<?> downloadDocument(@PathVariable Long id) {
+        return serveFile(documentService.findById(id), "attachment");
     }
-}
 
-    /**
-     * Preview a document in browser (if supported by MIME type)
-     */
     @GetMapping("/{id}/preview")
-    public ResponseEntity<Resource> previewDocument(@PathVariable Long id) {
-        try {
-            DocumentDTO doc = documentService.findById(id);
-            Resource resource = fileStorageService.load(doc.getFichier());
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE', 'CLIENT', 'FOURNISSEUR')")
+    public ResponseEntity<?> previewDocument(@PathVariable Long id) {
+        return serveFile(documentService.findById(id), "inline");
+    }
 
-            String mimeType = Files.probeContentType(resource.getFile().toPath());
-            if (mimeType == null) {
-                mimeType = "application/octet-stream";
-            }
+    private ResponseEntity<?> serveFile(DocumentDTO doc, String disposition) {
+        String fileRef = doc.getFichier();
+        if (fileRef == null) return ResponseEntity.notFound().build();
 
-            return ResponseEntity.ok()
+        Optional<Resource> maybeResource = fileStorageService.loadAsResource(fileRef);
+
+        if (maybeResource.isPresent()) {
+            try {
+                Resource r = maybeResource.get();
+                String mimeType = Files.probeContentType(r.getFile().toPath());
+                if (mimeType == null) mimeType = "application/octet-stream";
+
+                String ext = "";
+                String orig = r.getFilename();
+                if (orig != null) {
+                    int dot = orig.lastIndexOf('.');
+                    if (dot > 0) ext = orig.substring(dot);
+                }
+                String name = doc.getNom();
+                if (!name.toLowerCase().endsWith(ext.toLowerCase())) name += ext;
+
+                return ResponseEntity.ok()
                     .contentType(MediaType.parseMediaType(mimeType))
-                    .body(resource);
-
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+                    .header(HttpHeaders.CONTENT_DISPOSITION, disposition + "; filename=\"" + name + "\"")
+                    .body(r);
+            } catch (Exception e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            }
         }
+
+        // External storage (Supabase) — redirect to public URL.
+        return ResponseEntity.status(HttpStatus.FOUND)
+            .location(URI.create(fileStorageService.getPublicUrl(fileRef)))
+            .build();
     }
 }

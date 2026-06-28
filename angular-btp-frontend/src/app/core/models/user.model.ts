@@ -6,4 +6,9 @@ export interface User {
   lastName: string;
   enabled: boolean;
   roles: string[];
+  createdByAdminId?: number;
+  createdByAdminUsername?: string;
+  // Multi-tenancy: organization info
+  organizationId?: number;
+  organizationName?: string;
 }

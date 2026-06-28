@@ -51,8 +51,11 @@ export class FournisseursComponent implements OnInit {
           this.loadFournisseurs(); // Refresh the list
         },
         error: (err) => {
-          this.error = 'Erreur lors de la suppression du fournisseur.';
+          const message = err?.error?.message || 'Erreur lors de la suppression du fournisseur.';
+          this.error = message;
           console.error(err);
+          // Clear error after 5 seconds
+          setTimeout(() => this.error = null, 5000);
         }
       });
     }

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, Router, ActivatedRouteSnapshot, RouterStateSnapshot, UrlTree } from '@angular/router';
-import { Observable } from 'rxjs';
-import { map, take } from 'rxjs/operators';
+import { Observable, combineLatest } from 'rxjs';
+import { map, filter, take } from 'rxjs/operators';
 import { AuthService } from '../services/auth.service';
 
 @Injectable({
@@ -15,15 +15,26 @@ export class AuthGuard implements CanActivate {
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot): Observable<boolean | UrlTree> {
 
-    // Use the isLoggedIn$ observable from your AuthService
-    return this.authService.isLoggedIn$.pipe(
-      take(1), // Take the latest value and complete
-      map(isLoggedIn => {
-        if (isLoggedIn) {
-          // If the user is logged in, allow access to the route
+    // Wait for the auth service to have a definitive state
+    // Either we have a logged in user, or we've confirmed no user is logged in
+    return combineLatest([
+      this.authService.isLoggedIn$,
+      this.authService.currentUser$
+    ]).pipe(
+      // Wait until we have a consistent state: either logged in with user, or logged out with no user
+      filter(([isLoggedIn, user]) => {
+        // Logged in with user loaded
+        if (isLoggedIn && user !== null) return true;
+        // Not logged in and no token in storage
+        if (!isLoggedIn && !this.authService.getToken()) return true;
+        // Still loading...
+        return false;
+      }),
+      take(1),
+      map(([isLoggedIn, user]) => {
+        if (isLoggedIn && user) {
           return true;
         } else {
-          // If the user is not logged in, redirect to the login page
           return this.router.createUrlTree(['/login']);
         }
       })

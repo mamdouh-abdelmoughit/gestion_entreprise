@@ -27,12 +27,17 @@ export class AuthService {
     // The constructor is now empty. All startup logic is handled by the APP_INITIALIZER.
   }
 
-  // ===== Startup Verification =====
-  /**
-   * This method is called by APP_INITIALIZER once before the application starts.
-   * It checks for a token in localStorage and validates it with the backend.
-   * Based on the result, it sets the initial authentication state.
-   */
+  // ===== Startup =====
+  initializeApp(): Observable<User | null> {
+    if (!isPlatformBrowser(this.platformId)) return of(null);
+    // Warm up the backend so the first login/register request is instant.
+    // Fires-and-forgets the health ping; errors are silently ignored.
+    this.http.get(`${environment.apiUrl.replace('/api', '')}/api/health`)
+      .pipe(catchError(() => of(null)))
+      .subscribe();
+    return this.verifyTokenAndFetchUser();
+  }
+
   verifyTokenAndFetchUser(): Observable<User | null> {
     const token = this.getToken();
 
@@ -98,12 +103,20 @@ export class AuthService {
    * Logs the user out by clearing all stored data and state.
    */
   logout() {
+    this.clearSession();
+    this.router.navigate(['/login']);
+  }
+  
+  /**
+   * Clears the current session without navigating.
+   * Used when switching accounts or during activation.
+   */
+  clearSession(): void {
     if (isPlatformBrowser(this.platformId)) {
       localStorage.removeItem(this.TOKEN_KEY);
     }
     this._isLoggedIn$.next(false);
     this._currentUser$.next(null);
-    this.router.navigate(['/login']);
   }
 
   // ===== Token Helpers =====
@@ -112,7 +125,7 @@ export class AuthService {
     return isPlatformBrowser(this.platformId) ? localStorage.getItem(this.TOKEN_KEY) : null;
   }
 
-  private setToken(token: string): void {
+  setToken(token: string): void {
     if (isPlatformBrowser(this.platformId)) {
       localStorage.setItem(this.TOKEN_KEY, token);
     }
@@ -124,9 +137,29 @@ export class AuthService {
     return this.http.post(`${this.apiUrl}/invite`, { email, username, roles });
   }
 
-  activateAccount(token: string, password: string): Observable<void> {
+  /**
+   * Activate account only - NO auto-login.
+   * User must login manually after activation.
+   * This does NOT touch any existing session (admin can stay logged in).
+   */
+  activateAccountOnly(token: string, password: string): Observable<void> {
     return this.http.post<void>(`${this.apiUrl}/activate`, { token, password });
   }
+  
+  // Determine the dashboard path based on user role
+  getDashboardPathForRoles(roles: string[]): string {
+    if (roles.includes('ROLE_ADMIN')) {
+      return '/dashboard';
+    } else if (roles.includes('ROLE_EMPLOYEE')) {
+      return '/dashboard'; // Employees see employee dashboard
+    } else if (roles.includes('ROLE_CLIENT')) {
+      return '/projets'; // Clients see their projects
+    } else if (roles.includes('ROLE_FOURNISSEUR')) {
+      return '/appel-offres'; // Fournisseurs see appel d'offres
+    }
+    return '/dashboard'; // Default
+  }
+
   requestPasswordReset(email: string): Observable<void> {
     return this.http.post<void>(`${this.apiUrl}/forgot-password`, { email });
   }

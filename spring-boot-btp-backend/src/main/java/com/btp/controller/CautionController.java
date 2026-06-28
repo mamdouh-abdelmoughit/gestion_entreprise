@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
@@ -21,27 +22,32 @@ public class CautionController {
     private CautionService cautionService;
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'FOURNISSEUR')")
     public ResponseEntity<Page<CautionDTO>> getAllCautions(Pageable pageable) {
         return ResponseEntity.ok(cautionService.findAll(pageable));
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'FOURNISSEUR')")
     public ResponseEntity<CautionDTO> getCautionById(@PathVariable Long id) {
         return ResponseEntity.ok(cautionService.findById(id));
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CautionDTO> createCaution(@Valid @RequestBody CautionDTO cautionDTO) {
         CautionDTO created = cautionService.save(cautionDTO);
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CautionDTO> updateCaution(@PathVariable Long id, @Valid @RequestBody CautionDTO cautionDTO) {
         return ResponseEntity.ok(cautionService.update(id, cautionDTO));
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteCaution(@PathVariable Long id) {
         cautionService.deleteById(id);
         return ResponseEntity.noContent().build();

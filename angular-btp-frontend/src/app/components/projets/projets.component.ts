@@ -2,7 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Projet } from '../../core/models/projet.model';
 import { ProjetService } from '../../core/services/projet.service';
+import { AuthService } from '../../core/services/auth.service';
 import { Page } from '../../core/models/page.model';
+import { User } from '../../core/models/user.model';
 import {RouterLink} from "@angular/router";
 import {PaginationComponent} from "../../shared/pagination/pagination.component";
 
@@ -17,11 +19,22 @@ export class ProjetsComponent implements OnInit {
   projetsPage: Page<Projet> | null = null;
   isLoading = true;
   error: string | null = null;
+  currentUser: User | null = null;
 
-  constructor(private projetService: ProjetService) {}
+  constructor(
+    private projetService: ProjetService,
+    private authService: AuthService
+  ) {}
 
   ngOnInit(): void {
+    this.authService.currentUser$.subscribe(user => {
+      this.currentUser = user;
+    });
     this.loadProjets();
+  }
+
+  isAdmin(): boolean {
+    return this.currentUser?.roles?.includes('ROLE_ADMIN') ?? false;
   }
 
   loadProjets(page = 0, size = 10, sort = 'dateDebut,desc'): void {
@@ -43,15 +56,18 @@ export class ProjetsComponent implements OnInit {
    this.loadProjets(newPage);
   }
   deleteProjet(id: number): void {
-    if (confirm('Êtes-vous sûr de vouloir supprimer ce projet ? Cette action est irréversible.')) {
+    if (confirm('Êtes-vous sûr de vouloir supprimer ce projet ? Cette action supprimera également toutes les données associées (cautions, documents, décomptes, dépenses, affectations).')) {
       this.projetService.deleteProjet(id).subscribe({
         next: () => {
           console.log('Projet supprimé');
           this.loadProjets(); // Refresh the list
         },
         error: (err) => {
-          this.error = 'Erreur lors de la suppression du projet.';
+          const message = err?.error?.message || 'Erreur lors de la suppression du projet.';
+          this.error = message;
           console.error(err);
+          // Clear error after 5 seconds
+          setTimeout(() => this.error = null, 5000);
         }
       });
     }

@@ -38,6 +38,14 @@ public class AppelOffre {
 
     private Double montantEstime;
 
+    // URL to the BPDE ZIP file on marchespublics.gov.ma
+    @Column(name = "bpde_url", columnDefinition = "TEXT")
+    private String bpdeUrl;
+
+    private String categorie; // TRAVAUX, FOURNITURES, SERVICES
+
+    private String lieuExecution;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private StatutAppelOffre statut;
@@ -52,6 +60,11 @@ public class AppelOffre {
     @ManyToOne
     @JoinColumn(name = "created_by", nullable = false)
     private User createdBy;
+
+    // Multi-tenancy: Link to the organization this appel d'offre belongs to
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "organization_id", nullable = true)
+    private Organization organization;
 
     @OneToMany(mappedBy = "appelOffre")
     @JsonIgnoreProperties("appelOffre")

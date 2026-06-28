@@ -27,4 +27,14 @@ public class Client {
     @ManyToOne
     @JoinColumn(name = "created_by", nullable = false)
     private User createdBy;
+
+    // Multi-tenancy: Link to the organization this client belongs to
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "organization_id", nullable = true)
+    private Organization organization;
+
+    // Link to User account (for clients who have login access)
+    @OneToOne
+    @JoinColumn(name = "user_account_id", unique = true)
+    private User userAccount;
 }

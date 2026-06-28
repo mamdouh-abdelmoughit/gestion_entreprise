@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -73,6 +74,11 @@ public class Projet {
     @JoinColumn(name = "created_by", nullable = false)
     private User createdBy;
 
+    // Multi-tenancy: Link to the organization this project belongs to
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "organization_id", nullable = true)
+    private Organization organization;
+
     @OneToMany(mappedBy = "projet")
     @JsonIgnoreProperties("projet")
     private List<Caution> cautions;
@@ -83,7 +89,11 @@ public class Projet {
 
     @OneToMany(mappedBy = "projet")
     @JsonIgnoreProperties("projet")
-    private List<Decompte> decomptes;
+    private List<Attachement> attachements;
+
+    @OneToMany(mappedBy = "projet")
+    @JsonIgnoreProperties("projet")
+    private List<BpdeLigne> bpdeLignes;
 
     @OneToMany(mappedBy = "projet")
     @JsonIgnoreProperties("projet")

@@ -1,8 +1,6 @@
 
 package com.btp.controller;
 
-import com.btp.dto.LoginRequest;
-import com.btp.dto.LoginResponse;
 import com.btp.dto.UserDTO;
 import com.btp.security.JwtService;
 import com.btp.service.UserService;
@@ -17,11 +15,14 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/auth")
@@ -35,14 +36,17 @@ public class AuthController {
     // Admin invites a user (creates account in PENDING state and sends activation link)
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/invite")
-    public ResponseEntity<UserDTO> invite(@RequestBody InviteRequest req) {
-        UserDTO dto = userService.inviteUser(req.getEmail(), req.getUsername(), req.getRoles());
+    public ResponseEntity<UserDTO> invite(@RequestBody InviteRequest req, java.security.Principal principal) {
+        // Get the current admin's username from the security context
+        String adminUsername = principal.getName();
+        UserDTO dto = userService.inviteUser(req.getEmail(), req.getUsername(), req.getRoles(), adminUsername);
         return ResponseEntity.ok(dto);
     }
 
-    // User activates account by setting a password
+    // User activates account by setting a password - NO auto-login, user must login manually
     @PostMapping("/activate")
     public ResponseEntity<Void> activate(@RequestBody ActivateRequest req) {
+        // Just activate the account, don't return token
         userService.activateAccount(req.getToken(), req.getPassword());
         return ResponseEntity.ok().build();
     }
@@ -66,22 +70,32 @@ public class AuthController {
                 new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword())
         );
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        String jwt = jwtService.generateToken((UserDetails) authentication.getPrincipal());
-        return ResponseEntity.ok(new LoginResponse(jwt));
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        String jwt = jwtService.generateToken(userDetails);
+        // Extract roles for frontend
+        List<String> roles = userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(new LoginResponse(jwt, roles));
     }
     @PostMapping("/register")
     public ResponseEntity<LoginResponse> register(@Valid @RequestBody RegisterRequest req) {
-        // We will need a new method in UserService for this public registration
-        UserDTO newUser = userService.registerNewUser(req);
+        // Register the new user
+        userService.registerNewUser(req);
 
         // After registration, we immediately log them in.
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(req.getUsername(), req.getPassword())
         );
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        String jwt = jwtService.generateToken((UserDetails) authentication.getPrincipal());
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        String jwt = jwtService.generateToken(userDetails);
+        // Extract roles for frontend
+        List<String> roles = userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList());
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(new LoginResponse(jwt));
+        return ResponseEntity.status(HttpStatus.CREATED).body(new LoginResponse(jwt, roles));
     }
 
     // You will need a DTO for this request
@@ -126,8 +140,16 @@ public class AuthController {
         private String username;
         private String password;
     }
+    
     @Data @AllArgsConstructor
     public static class LoginResponse {
         private String token;
+        private List<String> roles;
+    }
+    
+    @Data @AllArgsConstructor
+    public static class ActivationResponse {
+        private String token;
+        private List<String> roles;
     }
 }

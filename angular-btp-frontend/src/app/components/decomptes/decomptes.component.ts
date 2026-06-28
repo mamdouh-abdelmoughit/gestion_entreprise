@@ -2,7 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Decompte } from '../../core/models/decompte.model';
 import { DecompteService } from '../../core/services/decompte.service';
+import { AuthService } from '../../core/services/auth.service';
 import { Page } from '../../core/models/page.model';
+import { User } from '../../core/models/user.model';
 import {RouterLink} from "@angular/router";
 import {PaginationComponent} from "../../shared/pagination/pagination.component";
 
@@ -17,11 +19,22 @@ export class DecomptesComponent implements OnInit {
   decomptesPage: Page<Decompte> | null = null;
   isLoading = true;
   error: string | null = null;
+  currentUser: User | null = null;
 
-  constructor(private decompteService: DecompteService) {}
+  constructor(
+    private decompteService: DecompteService,
+    private authService: AuthService
+  ) {}
 
   ngOnInit(): void {
+    this.authService.currentUser$.subscribe(user => {
+      this.currentUser = user;
+    });
     this.loadDecomptes();
+  }
+
+  isAdmin(): boolean {
+    return this.currentUser?.roles?.includes('ROLE_ADMIN') ?? false;
   }
 
   loadDecomptes(page = 0, size = 10, sort = 'dateDecompte,desc'): void {

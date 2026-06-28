@@ -41,6 +41,11 @@ public class AffectationEmploye {
     @JoinColumn(name = "created_by", nullable = false)
     private User createdBy;
 
+    // Multi-tenancy: Link to the organization this affectation belongs to
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "organization_id", nullable = true)
+    private Organization organization;
+
     public enum StatutAffectation {
         ACTIF, TERMINE
     }

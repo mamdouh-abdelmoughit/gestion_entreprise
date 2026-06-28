@@ -2,7 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AppelOffre } from '../../core/models/appel-offre.model';
 import { AppelOffreService } from '../../core/services/appel-offre.service';
+import { AuthService } from '../../core/services/auth.service';
 import { Page } from '../../core/models/page.model';
+import { User } from '../../core/models/user.model';
 import {RouterLink} from "@angular/router";
 import {PaginationComponent} from "../../shared/pagination/pagination.component";
 
@@ -17,11 +19,22 @@ export class AppelOffresComponent implements OnInit {
   appelOffresPage: Page<AppelOffre> | null = null;
   isLoading = true;
   error: string | null = null;
+  currentUser: User | null = null;
 
-  constructor(private appelOffreService: AppelOffreService) {}
+  constructor(
+    private appelOffreService: AppelOffreService,
+    private authService: AuthService
+  ) {}
 
   ngOnInit(): void {
+    this.authService.currentUser$.subscribe(user => {
+      this.currentUser = user;
+    });
     this.loadAppelOffres();
+  }
+
+  isAdmin(): boolean {
+    return this.currentUser?.roles?.includes('ROLE_ADMIN') ?? false;
   }
 
   loadAppelOffres(page = 0, size = 10, sort = 'dateLimite,desc'): void {

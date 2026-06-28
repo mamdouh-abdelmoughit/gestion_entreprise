@@ -11,7 +11,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Repository
 public interface CautionRepository extends JpaRepository<Caution, Long> {
@@ -33,4 +32,10 @@ public interface CautionRepository extends JpaRepository<Caution, Long> {
     
     @Query("SELECT c FROM Caution c WHERE c.banque LIKE %:banque%")
     Page<Caution> findByBanque(@Param("banque") String banque, Pageable pageable);
+    
+    long countByProjet(Projet projet);
+    
+    void deleteByProjet(Projet projet);
+    
+    long countByFournisseur(com.btp.entity.Fournisseur fournisseur);
 }

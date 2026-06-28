@@ -59,9 +59,12 @@ export class ClientsComponent implements OnInit {
           this.loadClients(); // Refresh the list
         },
         error: (err) => {
-          // 3. On failure, display an error message.
-          this.error = 'Erreur lors de la suppression du client.';
+          // 3. On failure, display the error message from backend if available.
+          const message = err?.error?.message || 'Erreur lors de la suppression du client.';
+          this.error = message;
           console.error(err);
+          // Clear error after 5 seconds
+          setTimeout(() => this.error = null, 5000);
         }
       });
     }

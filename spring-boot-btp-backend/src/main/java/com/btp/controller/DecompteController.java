@@ -8,6 +8,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
@@ -21,27 +22,32 @@ public class DecompteController {
     private DecompteService decompteService;
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'CLIENT')")
     public ResponseEntity<Page<DecompteDTO>> getAllDecomptes(Pageable pageable) {
         return ResponseEntity.ok(decompteService.findAll(pageable));
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CLIENT')")
     public ResponseEntity<DecompteDTO> getDecompteById(@PathVariable Long id) {
         return ResponseEntity.ok(decompteService.findById(id));
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<DecompteDTO> createDecompte(@Valid @RequestBody DecompteDTO decompteDTO) {
         DecompteDTO created = decompteService.save(decompteDTO);
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<DecompteDTO> updateDecompte(@PathVariable Long id, @Valid @RequestBody DecompteDTO decompteDTO) {
         return ResponseEntity.ok(decompteService.update(id, decompteDTO));
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteDecompte(@PathVariable Long id) {
         decompteService.deleteById(id);
         return ResponseEntity.noContent().build();

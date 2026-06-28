@@ -15,7 +15,6 @@ import com.btp.repository.ProjetRepository;
 import com.btp.repository.UserRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -40,9 +39,6 @@ public class DocumentService {
 
     @Autowired
     private UserRepository userRepository;
-
-    @Autowired
-    private FileStorageService fileStorageService;
 
     @Autowired
     private EntityMapper entityMapper;
@@ -92,17 +88,6 @@ public class DocumentService {
     @Transactional
     public void deleteById(Long id) {
         documentRepository.deleteById(id);
-    }
-
-    // --- START OF THE FINAL FIX ---
-    // This is the single, correct version of the method.
-    // It uses the FileStorageService to cleanly separate concerns.
-    @Transactional(readOnly = true)
-    public Resource loadAsResource(Long id) {
-        Document document = documentRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Document not found with id: " + id));
-
-        return fileStorageService.load(document.getFichier());
     }
 
     // This private helper method is now updated to handle all possible relationships.

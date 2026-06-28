@@ -51,6 +51,16 @@ public class Fournisseur {
     @JoinColumn(name = "created_by", nullable = false)
     private User createdBy;
 
+    // Multi-tenancy: Link to the organization this fournisseur belongs to
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "organization_id", nullable = true)
+    private Organization organization;
+
+    // Link to User account (for fournisseurs who have login access)
+    @OneToOne
+    @JoinColumn(name = "user_account_id", unique = true)
+    private User userAccount;
+
     @OneToMany(mappedBy = "fournisseur")
     @JsonIgnoreProperties("fournisseur")
     private List<Depense> depenses;

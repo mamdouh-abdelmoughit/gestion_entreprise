@@ -2,7 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Caution } from '../../core/models/caution.model';
 import { CautionService } from '../../core/services/caution.service';
+import { AuthService } from '../../core/services/auth.service';
 import { Page } from '../../core/models/page.model';
+import { User } from '../../core/models/user.model';
 import {RouterLink} from "@angular/router";
 import {PaginationComponent} from "../../shared/pagination/pagination.component";
 
@@ -18,11 +20,22 @@ export class CautionsComponent implements OnInit {
   cautionsPage: Page<Caution> | null = null;
   isLoading = true;
   error: string | null = null;
+  currentUser: User | null = null;
 
-  constructor(private cautionService: CautionService) {}
+  constructor(
+    private cautionService: CautionService,
+    private authService: AuthService
+  ) {}
 
   ngOnInit(): void {
+    this.authService.currentUser$.subscribe(user => {
+      this.currentUser = user;
+    });
     this.loadCautions();
+  }
+
+  isAdmin(): boolean {
+    return this.currentUser?.roles?.includes('ROLE_ADMIN') ?? false;
   }
 
   loadCautions(page = 0, size = 10, sort = 'dateExpiration,asc'): void {

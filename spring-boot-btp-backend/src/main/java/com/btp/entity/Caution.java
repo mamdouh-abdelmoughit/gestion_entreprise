@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.time.LocalDate;
 
@@ -63,6 +62,11 @@ public class Caution {
     @ManyToOne
     @JoinColumn(name = "created_by", nullable = false)
     private User createdBy;
+
+    // Multi-tenancy: Link to the organization this caution belongs to
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "organization_id", nullable = true)
+    private Organization organization;
 
     public enum TypeCaution {
         PROVISOIRE, DEFINITIVE, BONNE_EXECUTION, RETENUE_GARANTIE

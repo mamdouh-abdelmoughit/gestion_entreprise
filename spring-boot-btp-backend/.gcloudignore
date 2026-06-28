@@ -1,0 +1,7 @@
+.gcloudignore
+.git
+target/
+uploads/
+*.log
+.env
+**/application-local.properties

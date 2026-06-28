@@ -1,6 +1,9 @@
 package com.btp.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Primary;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -15,80 +18,80 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Real SMTP email service — only active when spring.mail.password is set.
+ * Falls back to LoggingEmailService when no mail credentials are configured.
+ *
+ * Both send methods are @Async (fire-and-forget) so email failures never block
+ * the calling request. If sending fails, the link is logged so an admin can
+ * share it manually.
+ */
+@Slf4j
 @Service
-@RequiredArgsConstructor
 @Primary
+@RequiredArgsConstructor
+@ConditionalOnProperty(name = "app.email.enabled", havingValue = "true")
 public class RealEmailService implements EmailService {
 
     private final JavaMailSender mailSender;
     private final SpringTemplateEngine templateEngine;
 
-    // By making this method @Async, it will run in a background thread
-    // so the user doesn't have to wait for the email to send.
+    @Value("${spring.mail.username}")
+    private String fromAddress;
+
     @Async
     @Override
     public void sendInvitationEmail(String toEmail, String activationLink) {
         try {
-            MimeMessage mimeMessage = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(
-                    mimeMessage,
-                    MimeMessageHelper.MULTIPART_MODE_MIXED,
-                    StandardCharsets.UTF_8.name()
+            MimeMessage message = buildMessage(
+                toEmail,
+                "Invitation à rejoindre la plateforme GestionBTP",
+                buildHtml("invitation-email.html", "activation_link", activationLink)
             );
-
-            Map<String, Object> properties = new HashMap<>();
-            properties.put("activation_link", activationLink);
-
-            Context context = new Context();
-            context.setVariables(properties);
-
-            helper.setFrom("mamadouabdo29@gmail.com"); // Your "from" address
-            helper.setTo(toEmail);
-            helper.setSubject("Invitation à rejoindre la plateforme GestionBTP");
-
-            // You will need to create an HTML template for this email
-            String htmlTemplate = templateEngine.process("invitation-email.html", context);
-            helper.setText(htmlTemplate, true);
-
-            mailSender.send(mimeMessage);
-
-        } catch (MessagingException e) {
-            // In a real app, you'd have more robust error logging here
-            throw new RuntimeException("Failed to send invitation email", e);
+            mailSender.send(message);
+            log.info("Invitation email sent to {}", toEmail);
+        } catch (Exception e) {
+            // Never crash user creation because of an email failure.
+            // Log the link so an admin can share it manually if needed.
+            log.warn("Failed to send invitation email to {} — activation link: {} | error: {}",
+                toEmail, activationLink, e.getMessage());
         }
     }
 
-    // You would create a similar method for sendPasswordResetEmail
     @Async
     @Override
     public void sendPasswordResetEmail(String toEmail, String resetLink) {
         try {
-            MimeMessage mimeMessage = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(
-                    mimeMessage,
-                    MimeMessageHelper.MULTIPART_MODE_MIXED,
-                    StandardCharsets.UTF_8.name()
+            MimeMessage message = buildMessage(
+                toEmail,
+                "Réinitialisation de votre mot de passe GestionBTP",
+                buildHtml("reset-password.html", "reset_link", resetLink)
             );
-
-            Map<String, Object> properties = new HashMap<>();
-            properties.put("reset_link", resetLink);
-
-            Context context = new Context();
-            context.setVariables(properties);
-
-            helper.setFrom("mamadouabdo29@gmail.com"); // Your "from" address
-            helper.setTo(toEmail);
-            helper.setSubject("Réinitialisation de votre mot de passe GestionBTP");
-
-            // You will need to create a template file for the reset email, e.g., reset-password-email.html
-            String htmlTemplate = templateEngine.process("reset-password.html", context);
-            helper.setText(htmlTemplate, true);
-
-            mailSender.send(mimeMessage);
-
-        } catch (MessagingException e) {
-            // Log the error for debugging purposes in a production environment
-            throw new RuntimeException("Failed to send password reset email", e);
+            mailSender.send(message);
+            log.info("Password reset email sent to {}", toEmail);
+        } catch (Exception e) {
+            log.warn("Failed to send password reset email to {} — reset link: {} | error: {}",
+                toEmail, resetLink, e.getMessage());
         }
+    }
+
+    private MimeMessage buildMessage(String to, String subject, String html) throws MessagingException {
+        MimeMessage msg = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(
+            msg, MimeMessageHelper.MULTIPART_MODE_MIXED, StandardCharsets.UTF_8.name()
+        );
+        helper.setFrom(fromAddress);
+        helper.setTo(to);
+        helper.setSubject(subject);
+        helper.setText(html, true);
+        return msg;
+    }
+
+    private String buildHtml(String template, String varKey, String varValue) {
+        Map<String, Object> vars = new HashMap<>();
+        vars.put(varKey, varValue);
+        Context ctx = new Context();
+        ctx.setVariables(vars);
+        return templateEngine.process(template, ctx);
     }
 }

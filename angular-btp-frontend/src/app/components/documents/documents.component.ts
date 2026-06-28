@@ -5,6 +5,8 @@ import { DocumentService } from '../../core/services/document.service';
 import { Page } from '../../core/models/page.model';
 import {RouterLink} from "@angular/router";
 import {PaginationComponent} from "../../shared/pagination/pagination.component";
+import { AuthService } from '../../core/services/auth.service';
+import { User } from '../../core/models/user.model';
 
 @Component({
   selector: 'app-documents',
@@ -17,11 +19,20 @@ export class DocumentsComponent implements OnInit {
   documentsPage: Page<Document> | null = null;
   isLoading = true;
   error: string | null = null;
+  currentUser: User | null = null;
 
-  constructor(private documentService: DocumentService) {}
+  constructor(
+    private documentService: DocumentService,
+    private authService: AuthService
+  ) {}
 
   ngOnInit(): void {
+    this.authService.currentUser$.subscribe(user => this.currentUser = user);
     this.loadDocuments();
+  }
+
+  isAdmin(): boolean {
+    return this.currentUser?.roles?.includes('ROLE_ADMIN') ?? false;
   }
 
   loadDocuments(page = 0, size = 10, sort = 'dateUpload,desc'): void {

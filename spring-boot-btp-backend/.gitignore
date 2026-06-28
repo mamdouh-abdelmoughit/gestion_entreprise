@@ -1,0 +1,13 @@
+# Maven
+target/
+
+# Local credentials — never commit these
+.env
+**/application-local.properties
+
+# Uploads (local dev)
+uploads/
+
+# IDE
+.idea/
+*.iml

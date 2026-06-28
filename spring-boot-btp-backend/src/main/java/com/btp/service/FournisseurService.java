@@ -2,9 +2,14 @@ package com.btp.service;
 
 import com.btp.dto.FournisseurDTO;
 import com.btp.entity.Fournisseur;
+import com.btp.entity.Organization;
 import com.btp.entity.User;
+import com.btp.exception.BadRequestException;
 import com.btp.exception.ResourceNotFoundException;
+import com.btp.exception.UnauthorizedException;
 import com.btp.mapper.EntityMapper;
+import com.btp.repository.CautionRepository;
+import com.btp.repository.DepenseRepository;
 import com.btp.repository.FournisseurRepository;
 import com.btp.repository.UserRepository;
 import org.springframework.data.domain.Page;
@@ -29,54 +34,103 @@ public class FournisseurService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private CautionRepository cautionRepository;
+
+    @Autowired
+    private DepenseRepository depenseRepository;
+
+    @Autowired
+    private TenantAwareService tenantAwareService;
+
+    /**
+     * Find all fournisseurs - filtered by organization for multi-tenancy.
+     */
     @Transactional(readOnly = true)
     public Page<FournisseurDTO> findAll(Pageable pageable) {
+        Long orgId = tenantAwareService.getCurrentOrganizationId();
+        if (orgId != null) {
+            return fournisseurRepository.findByOrganizationId(orgId, pageable).map(entityMapper::toDTO);
+        }
         return fournisseurRepository.findAll(pageable).map(entityMapper::toDTO);
     }
 
     @Transactional(readOnly = true)
     public FournisseurDTO findById(Long id) {
-        return fournisseurRepository.findById(id)
-                .map(entityMapper::toDTO)
+        Fournisseur fournisseur = fournisseurRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Fournisseur not found with id: " + id));
+        
+        // Verify organization access
+        Long orgId = tenantAwareService.getCurrentOrganizationId();
+        if (orgId != null && fournisseur.getOrganization() != null 
+                && !orgId.equals(fournisseur.getOrganization().getId())) {
+            throw new UnauthorizedException("Access denied: This fournisseur belongs to another organization");
+        }
+        
+        return entityMapper.toDTO(fournisseur);
     }
 
     public FournisseurDTO save(@Valid FournisseurDTO fournisseurDTO) {
         Fournisseur fournisseur = entityMapper.toEntity(fournisseurDTO);
 
-        // --- START OF FIX ---
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        User currentUser = userRepository.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("Authenticated user not found"));
+        User currentUser = tenantAwareService.getCurrentUser();
+        Organization organization = tenantAwareService.getCurrentOrganization();
+        
         fournisseur.setCreatedBy(currentUser);
-        // --- END OF FIX ---
+        fournisseur.setOrganization(organization);
 
         Fournisseur savedFournisseur = fournisseurRepository.save(fournisseur);
         return entityMapper.toDTO(savedFournisseur);
     }
-// INSIDE FournisseurService.java
 
     public FournisseurDTO update(Long id, @Valid FournisseurDTO fournisseurDTO) {
-        return fournisseurRepository.findById(id)
-                .map(existing -> {
-                    existing.setNom(fournisseurDTO.getNom());
-                    existing.setTelephone(fournisseurDTO.getTelephone());
-                    existing.setEmail(fournisseurDTO.getEmail());
-                    existing.setAdresse(fournisseurDTO.getAdresse());
-                    // FIX: Convert Set from DTO to List for the entity
-                    if (fournisseurDTO.getSpecialites() != null) {
-                        existing.setSpecialites(new java.util.ArrayList<>(fournisseurDTO.getSpecialites()));
-                    }
-                    if (fournisseurDTO.getStatut() != null) {
-                        existing.setStatut(Fournisseur.StatutFournisseur.valueOf(fournisseurDTO.getStatut()));
-                    }
-                    Fournisseur updatedFournisseur = fournisseurRepository.save(existing);
-                    return entityMapper.toDTO(updatedFournisseur);
-                }).orElseThrow(() -> new ResourceNotFoundException("Fournisseur not found with id: " + id));
+        Fournisseur existing = fournisseurRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Fournisseur not found with id: " + id));
+        
+        // Verify organization access
+        Long orgId = tenantAwareService.getCurrentOrganizationId();
+        if (orgId != null && existing.getOrganization() != null 
+                && !orgId.equals(existing.getOrganization().getId())) {
+            throw new UnauthorizedException("Access denied: This fournisseur belongs to another organization");
+        }
+        
+        existing.setNom(fournisseurDTO.getNom());
+        existing.setTelephone(fournisseurDTO.getTelephone());
+        existing.setEmail(fournisseurDTO.getEmail());
+        existing.setAdresse(fournisseurDTO.getAdresse());
+        if (fournisseurDTO.getSpecialites() != null) {
+            existing.setSpecialites(new java.util.ArrayList<>(fournisseurDTO.getSpecialites()));
+        }
+        if (fournisseurDTO.getStatut() != null) {
+            existing.setStatut(Fournisseur.StatutFournisseur.valueOf(fournisseurDTO.getStatut()));
+        }
+        Fournisseur updatedFournisseur = fournisseurRepository.save(existing);
+        return entityMapper.toDTO(updatedFournisseur);
     }
 
     public void deleteById(Long id) {
-        fournisseurRepository.deleteById(id);
+        Fournisseur fournisseur = fournisseurRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Fournisseur not found with id: " + id));
+        
+        // Verify organization access
+        Long orgId = tenantAwareService.getCurrentOrganizationId();
+        if (orgId != null && fournisseur.getOrganization() != null 
+                && !orgId.equals(fournisseur.getOrganization().getId())) {
+            throw new UnauthorizedException("Access denied: This fournisseur belongs to another organization");
+        }
+        
+        // Check for dependencies
+        long cautionCount = cautionRepository.countByFournisseur(fournisseur);
+        long depenseCount = depenseRepository.countByFournisseur(fournisseur);
+        
+        if (cautionCount > 0 || depenseCount > 0) {
+            StringBuilder message = new StringBuilder("Impossible de supprimer ce fournisseur car il est référencé par: ");
+            if (cautionCount > 0) message.append(cautionCount).append(" caution(s), ");
+            if (depenseCount > 0) message.append(depenseCount).append(" dépense(s)");
+            throw new BadRequestException(message.toString().replaceAll(", $", ""));
+        }
+        
+        fournisseurRepository.delete(fournisseur);
     }
 
     @Transactional(readOnly = true)

@@ -1,64 +1,33 @@
 package com.btp.service;
 
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.UUID;
+import java.util.Optional;
 
-@Service
-public class FileStorageService {
+public interface FileStorageService {
 
-    private final Path root = Paths.get("uploads");
+    /**
+     * Saves the file and returns a reference stored in the DB.
+     * Local impl returns a UUID filename; Supabase impl returns the full public URL.
+     */
+    String save(MultipartFile file) throws IOException;
 
-    public FileStorageService() {
-    try {
-    Files.createDirectories(root);
-    } catch (IOException e) {
-    throw new RuntimeException("Could not initialize folder for upload!", e);
-    }
-    }
+    /**
+     * Returns the file as a streamable Resource.
+     * Returns empty when the file lives externally (redirect via getPublicUrl instead).
+     */
+    Optional<Resource> loadAsResource(String fileRef);
 
-    public String save(MultipartFile file) {
-    try {
-    String originalFilename = file.getOriginalFilename();
-    String extension = "";
-    if (originalFilename != null) {
-    int dotIndex = originalFilename.lastIndexOf('.');
-    if (dotIndex > 0) {
-    extension = originalFilename.substring(dotIndex);
-    }
-    }
-    // Create a new unique filename with the extension.
-    String uniqueFilename = UUID.randomUUID().toString() + extension;
-    Files.copy(file.getInputStream(), this.root.resolve(uniqueFilename));
-    return uniqueFilename;
-    } catch (Exception e) {
-    throw new RuntimeException("Could not store the file. Error: " + e.getMessage());
-    }
-    }
+    /**
+     * Returns a direct URL for the file reference.
+     * Used for download/preview redirects when loadAsResource() is empty.
+     */
+    String getPublicUrl(String fileRef);
 
-    public Resource load(String filename) {
-    try {
-    Path file = root.resolve(filename);
-    Resource resource = new UrlResource(file.toUri());
-    if (resource.exists() || resource.isReadable()) {
-    return resource;
-    } else {
-    throw new RuntimeException("Could not read the file!");
-    }
-    } catch (MalformedURLException e) {
-    throw new RuntimeException("Error: " + e.getMessage());
-    }
-    }
-
-    public Path getRoot() {
-    return root;
-    }
-    }
+    /**
+     * Deletes the file from storage. Silent on missing files.
+     */
+    void delete(String fileRef);
+}

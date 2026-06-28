@@ -19,7 +19,6 @@ import com.btp.entity.User; // 1. Import User
 import com.btp.repository.UserRepository;
 
 import jakarta.validation.Valid;
-import java.util.Optional;
 
 @Service
 @Transactional

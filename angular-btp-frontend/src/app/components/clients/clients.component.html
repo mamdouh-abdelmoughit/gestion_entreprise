@@ -1,61 +1,119 @@
-<div class="container mx-auto p-6">
+<div class="page-container">
   <!-- Component Header -->
-  <div class="flex justify-between items-center mb-6">
-    <h2 class="text-2xl font-bold text-gray-800">👤 Clients</h2>
-    <button routerLink="/clients/new" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+  <div class="page-header flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+    <div>
+      <h2 class="page-title">
+        <div class="w-10 h-10 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+          </svg>
+        </div>
+        Gestion des Clients
+      </h2>
+      <p class="page-subtitle">Gérez vos clients et leurs informations</p>
+    </div>
+    <button routerLink="/clients/new" class="btn bg-purple-600 text-white hover:bg-purple-700 focus:ring-purple-500">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+      </svg>
       Nouveau Client
     </button>
   </div>
 
   <!-- Client List Card -->
-  <div class="bg-white rounded-lg shadow-sm p-6">
-    <h3 class="text-lg font-semibold mb-4">Liste des Clients</h3>
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <h3 class="card-title">Liste des Clients</h3>
+        <p class="text-sm text-secondary-500" *ngIf="clientsPage">{{ clientsPage.totalElements }} client(s) trouvé(s)</p>
+      </div>
+    </div>
 
-    <!-- Loading and Error States -->
-    <div *ngIf="isLoading" class="text-center">Chargement...</div>
-    <div *ngIf="error" class="text-center text-red-500">{{ error }}</div>
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="flex flex-col items-center justify-center py-16">
+      <div class="spinner-lg mb-4"></div>
+      <p class="text-secondary-500">Chargement des clients...</p>
+    </div>
+    
+    <!-- Error State -->
+    <div *ngIf="error" class="text-center py-12 px-6">
+      <div class="alert-danger inline-block">
+        {{ error }}
+      </div>
+    </div>
 
     <!-- Client Table -->
     <div *ngIf="!isLoading && !error && clientsPage" class="overflow-x-auto">
-      <table class="min-w-full bg-white">
-        <thead class="bg-gray-100">
-        <tr>
-          <th class="py-2 px-4 text-left">Nom</th>
-          <th class="py-2 px-4 text-left">Email</th>
-          <th class="py-2 px-4 text-left">Téléphone</th>
-          <th class="py-2 px-4 text-left"></th>
-        </tr>
+      <table class="table-auto">
+        <thead class="table-header">
+          <tr>
+            <th class="table-th">Nom</th>
+            <th class="table-th">Email</th>
+            <th class="table-th">Téléphone</th>
+            <th class="table-th text-center">Actions</th>
+          </tr>
         </thead>
-        <tbody>
-        <tr *ngFor="let client of clientsPage.content" class="border-b">
-          <td class="py-2 px-4 font-medium">{{ client.nom }}</td>
-          <td class="py-2 px-4">{{ client.email }}</td>
-          <td class="py-2 px-4">{{ client.telephone }}</td>
-          <td class="py-2 px-4">
-        <button [routerLink]="['/clients/edit', client.id]" class="text-blue-600 hover:underline mr-4">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6h4.75" />
-        </svg>
-    </button>
-        <button (click)="deleteClient(client.id)" class="text-red-600 hover:underline mr-4">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.945a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m-1.022.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.945a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m-1.022.165L5.26 19.673a2.25 2.25 0 002.244 2.077h8.945a2.25 2.25 0 002.244-2.077L19.5 5.79m-14.456 0c.34-.059.68-.114 1.022-.165M16.5 6V4.75A2.25 2.25 0 0014.25 2.5h-4.5A2.25 2.25 0 007.5 4.75V6M8.25 10.5h.008v.008H8.25v-.008zM12 10.5h.008v.008H12v-.008zM15.75 10.5h.008v.008H15.75v-.008zM14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.945a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165M16.5 6V4.75A2.25 2.25 0 0014.25 2.5h-4.5A2.25 2.25 0 007.5 4.75V6M8.25 10.5h.008v.008H8.25v-.008zM12 10.5h.008v.008H12v-.008zM15.75 10.5h.008v.008H15.75v-.008z" />
-        </svg>
-    </button>
-     <button [routerLink]="['/clients/details', client.id]" class="text-gray-600 hover:underline mr-4">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.575 3.01 9.963 7.823a1.012 1.012 0 010 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.575-3.01-9.963-7.823z" />
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-        </svg>
-    </button>
-          </td>
-        </tr>
+        <tbody class="divide-y divide-secondary-100">
+          <tr *ngFor="let client of clientsPage.content" class="table-row">
+            <td class="table-td">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center font-semibold">
+                  {{ client.nom.charAt(0).toUpperCase() }}
+                </div>
+                <span class="font-medium text-secondary-900">{{ client.nom }}</span>
+              </div>
+            </td>
+            <td class="table-td text-secondary-600">
+              {{ client.email || 'Non renseigné' }}
+            </td>
+            <td class="table-td text-secondary-600">
+              {{ client.telephone || 'Non renseigné' }}
+            </td>
+            <td class="table-td">
+              <div class="flex items-center justify-center gap-2">
+                <button [routerLink]="['/clients/details', client.id]" 
+                        class="btn-icon" title="Voir">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.575 3.01 9.963 7.823a1.012 1.012 0 010 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.575-3.01-9.963-7.823z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                  </svg>
+                </button>
+                <button [routerLink]="['/clients/edit', client.id]" 
+                        class="btn-icon-primary" title="Modifier">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6h4.75"/>
+                  </svg>
+                </button>
+                <button (click)="deleteClient(client.id)" 
+                        class="btn-icon-danger" title="Supprimer">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/>
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
         </tbody>
       </table>
-      <app-pagination
-        [page]="clientsPage"
-        (pageChange)="onPageChange($event)">
-      </app-pagination>
+      
+      <!-- Empty State -->
+      <div *ngIf="clientsPage.content.length === 0" class="empty-state">
+        <div class="w-16 h-16 mx-auto mb-4 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+          </svg>
+        </div>
+        <h3 class="empty-state-title">Aucun client trouvé</h3>
+        <p class="empty-state-text">Commencez par ajouter votre premier client</p>
+        <button routerLink="/clients/new" class="btn bg-purple-600 text-white hover:bg-purple-700 mt-4">
+          Ajouter un client
+        </button>
+      </div>
+      
+      <!-- Pagination -->
+      <div class="p-4 border-t border-secondary-100">
+        <app-pagination [page]="clientsPage" (pageChange)="onPageChange($event)"></app-pagination>
+      </div>
     </div>
   </div>
 </div>

@@ -5,6 +5,8 @@ import { AffectationEmploye } from '../../../core/models/affectation-employe.mod
 import { AffectationEmployeService } from '../../../core/services/affectation-employe.service';
 import { Page } from '../../../core/models/page.model';
 import {PaginationComponent} from "../../../shared/pagination/pagination.component";
+import { AuthService } from '../../../core/services/auth.service';
+import { User } from '../../../core/models/user.model';
 
 @Component({
   selector: 'app-affectations-list',
@@ -16,11 +18,20 @@ export class AffectationsListComponent implements OnInit {
   affectationsPage: Page<AffectationEmploye> | null = null;
   isLoading = true;
   error: string | null = null;
+  currentUser: User | null = null;
 
-  constructor(private affectationService: AffectationEmployeService) {}
+  constructor(
+    private affectationService: AffectationEmployeService,
+    private authService: AuthService
+  ) {}
 
   ngOnInit(): void {
+    this.authService.currentUser$.subscribe(user => this.currentUser = user);
     this.loadAffectations();
+  }
+
+  isAdmin(): boolean {
+    return this.currentUser?.roles?.includes('ROLE_ADMIN') ?? false;
   }
 
   loadAffectations(page = 0, size = 10, sort = 'dateDebut,desc'): void {

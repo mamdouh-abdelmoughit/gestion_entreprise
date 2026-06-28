@@ -483,9 +483,22 @@ public class EntityMapper {
         dto.setFirstName(entity.getFirstName());
         dto.setLastName(entity.getLastName());
         dto.setTelephone(null); // No telephone in User entity
-        dto.setLastLogin(null); // No lastLogin in User entity
+        dto.setLastLogin(entity.getLastLogin());
+        dto.setEnabled(entity.getStatus() == User.Status.ACTIVE);
         if(entity.getRoles() != null){
             dto.setRoles(entity.getRoles().stream().map(Role::getNom).collect(Collectors.toSet()));
+        }
+        
+        // Map parent admin reference for sub-accounts
+        if (entity.getCreatedByAdmin() != null) {
+            dto.setCreatedByAdminId(entity.getCreatedByAdmin().getId());
+            dto.setCreatedByAdminUsername(entity.getCreatedByAdmin().getUsername());
+        }
+        
+        // Map organization for multi-tenancy
+        if (entity.getOrganization() != null) {
+            dto.setOrganizationId(entity.getOrganization().getId());
+            dto.setOrganizationName(entity.getOrganization().getName());
         }
 
         return dto;

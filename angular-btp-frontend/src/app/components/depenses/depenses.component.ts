@@ -5,6 +5,8 @@ import { DepenseService } from '../../core/services/depense.service';
 import { Page } from '../../core/models/page.model';
 import {RouterLink} from "@angular/router";
 import {PaginationComponent} from "../../shared/pagination/pagination.component";
+import { AuthService } from '../../core/services/auth.service';
+import { User } from '../../core/models/user.model';
 
 @Component({
   selector: 'app-depenses',
@@ -17,11 +19,20 @@ export class DepensesComponent implements OnInit {
   depensesPage: Page<Depense> | null = null;
   isLoading = true;
   error: string | null = null;
+  currentUser: User | null = null;
 
-  constructor(private depenseService: DepenseService) {}
+  constructor(
+    private depenseService: DepenseService,
+    private authService: AuthService
+  ) {}
 
   ngOnInit(): void {
+    this.authService.currentUser$.subscribe(user => this.currentUser = user);
     this.loadDepenses();
+  }
+
+  isAdmin(): boolean {
+    return this.currentUser?.roles?.includes('ROLE_ADMIN') ?? false;
   }
 
   loadDepenses(page = 0, size = 10, sort = 'dateDepense,desc'): void {

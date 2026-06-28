@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
@@ -19,27 +20,32 @@ public class DepenseController {
     private DepenseService depenseService;
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
     public ResponseEntity<Page<DepenseDTO>> getAllDepenses(Pageable pageable) {
         return ResponseEntity.ok(depenseService.findAll(pageable));
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
     public ResponseEntity<DepenseDTO> getDepenseById(@PathVariable Long id) {
         return ResponseEntity.ok(depenseService.findById(id));
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
     public ResponseEntity<DepenseDTO> createDepense(@Valid @RequestBody DepenseDTO depenseDTO) {
         DepenseDTO created = depenseService.save(depenseDTO);
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<DepenseDTO> updateDepense(@PathVariable Long id, @Valid @RequestBody DepenseDTO depenseDTO) {
         return ResponseEntity.ok(depenseService.update(id, depenseDTO));
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteDepense(@PathVariable Long id) {
         depenseService.deleteById(id);
         return ResponseEntity.noContent().build();

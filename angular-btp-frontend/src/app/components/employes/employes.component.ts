@@ -50,8 +50,11 @@ export class EmployesComponent implements OnInit {
           this.loadEmployes(); // Refresh the list
         },
         error: (err) => {
-          this.error = 'Erreur lors de la suppression de l\'employé.';
+          const message = err?.error?.message || 'Erreur lors de la suppression de l\'employé.';
+          this.error = message;
           console.error(err);
+          // Clear error after 5 seconds
+          setTimeout(() => this.error = null, 5000);
         }
       });
     }

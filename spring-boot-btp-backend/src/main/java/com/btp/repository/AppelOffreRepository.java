@@ -8,8 +8,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
 @Repository
 public interface AppelOffreRepository extends JpaRepository<AppelOffre, Long> {
     Page<AppelOffre> findByStatut(AppelOffre.StatutAppelOffre statut, Pageable pageable);

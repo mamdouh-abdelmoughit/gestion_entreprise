@@ -10,7 +10,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Repository
 public interface DecompteRepository extends JpaRepository<Decompte, Long> {
@@ -31,4 +30,8 @@ public interface DecompteRepository extends JpaRepository<Decompte, Long> {
     @Query("SELECT d FROM Decompte d WHERE d.montantTTC > :amount")
     // --- END OF FIX ---
     Page<Decompte> findByAmountGreaterThan(@Param("amount") Double amount, Pageable pageable);
+    
+    long countByProjet(Projet projet);
+    
+    void deleteByProjet(Projet projet);
 }

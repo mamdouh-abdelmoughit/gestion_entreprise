@@ -1,0 +1,27 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist/angular-frontend-btp/browser",
+  "installCommand": "npm install",
+  "framework": null,
+  "rewrites": [
+    { "source": "/((?!assets|favicon\\.ico|manifest\\.webmanifest|ngsw.*|.*\\.[a-z]+$).*)", "destination": "/index.html" }
+  ],
+  "headers": [
+    {
+      "source": "/ngsw.json",
+      "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+    },
+    {
+      "source": "/ngsw-worker.js",
+      "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+      ]
+    }
+  ]
+}

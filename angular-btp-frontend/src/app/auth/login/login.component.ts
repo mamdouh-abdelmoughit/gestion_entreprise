@@ -13,9 +13,11 @@ import { AuthService } from '../../core/services/auth.service';
 })
 export class LoginComponent implements OnInit {
   loginForm!: FormGroup;
+  forgotForm!: FormGroup;
   errorMessage: string | null = null;
-  showForgotPassword = false; // Add this state variable
+  showForgotPassword = false;
   isLoading = false;
+  forgotSuccess = false;
 
   constructor(
     private fb: FormBuilder,
@@ -25,65 +27,56 @@ export class LoginComponent implements OnInit {
 
   ngOnInit(): void {
     this.loginForm = this.fb.group({
-      username: ['', [Validators.required, Validators.email]], // Added email validator for the login/forgot password flow
+      username: ['', [Validators.required]],
       password: ['', [Validators.required]]
+    });
+    this.forgotForm = this.fb.group({
+      email: ['', [Validators.required, Validators.email]]
     });
   }
 
   onSubmit() {
     if (this.loginForm.invalid) {
-      this.errorMessage = 'Veuillez saisir des informations valides.';
+      this.loginForm.markAllAsTouched();
       return;
     }
     this.errorMessage = null;
+    this.isLoading = true;
     this.authService.login(this.loginForm.value).subscribe({
       next: () => this.router.navigate(['/dashboard']),
-      error: (err) => {
-        this.errorMessage = 'Nom d\'utilisateur ou mot de passe incorrect.';
-        console.error('Login failed', err);
+      error: () => {
+        this.isLoading = false;
+        this.errorMessage = "Nom d'utilisateur ou mot de passe incorrect.";
       }
     });
   }
 
-onForgotPassword() {
-  const emailControl = this.loginForm.get('username');
-
-  // Check if the control exists and is valid before proceeding
-  if (emailControl?.invalid) {
-    this.errorMessage = "Veuillez entrer une adresse email valide.";
-    return;
-  }
-  
-  // Safely access the value using optional chaining
-  const email = emailControl?.value;
-
-  if (!email) {
-    // This case should not be reached due to the invalid check above, but it's a good safeguard.
-    this.errorMessage = "Veuillez entrer votre email pour réinitialiser.";
-    return;
-  }
-
-  this.errorMessage = null; // Clear previous errors
-  this.isLoading = true; // Start loading spinner
-
-
-  this.authService.requestPasswordReset(email).subscribe({
-    next: () => {
-      this.isLoading = false; // Stop loading spinner on success
-      alert("Un lien de réinitialisation a été envoyé à votre email.");
-      this.showForgotPassword = false; // Go back to login form after success
-      this.loginForm.reset();
-    },
-    error: (err) => {
-      this.isLoading = false; // Stop loading spinner on error
-      this.errorMessage = "Impossible d’envoyer l’email. Vérifiez l'adresse ou réessayez plus tard.";
-      console.error('Forgot password failed', err);
+  onForgotPassword() {
+    if (this.forgotForm.invalid) {
+      this.forgotForm.markAllAsTouched();
+      this.errorMessage = "Veuillez entrer une adresse email valide.";
+      return;
     }
-  });
-}
+    this.errorMessage = null;
+    this.isLoading = true;
+    const email = this.forgotForm.get('email')!.value;
+    this.authService.requestPasswordReset(email).subscribe({
+      next: () => {
+        this.isLoading = false;
+        this.forgotSuccess = true;
+      },
+      error: () => {
+        this.isLoading = false;
+        this.errorMessage = "Impossible d'envoyer l'email. Verifiez l'adresse ou reessayez plus tard.";
+      }
+    });
+  }
 
   toggleForgotPassword() {
     this.showForgotPassword = !this.showForgotPassword;
     this.errorMessage = null;
+    this.forgotSuccess = false;
+    this.forgotForm.reset();
+    this.isLoading = false;
   }
 }
